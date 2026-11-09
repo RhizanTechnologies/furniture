@@ -427,3 +427,89 @@ export interface FinancialSummaryDto {
   netMarginPercentage: number;
   branchBreakdown: BranchFinancialContribution[];
 }
+
+export interface ProductPerformanceDto {
+  productId?: string | null;
+  sku: string;
+  productName: string;
+  category: string;
+  unitsSold: number;
+  ordersCount: number;
+  totalRevenue: number;
+  estimatedMaterialCost: number;
+  grossProfit: number;
+  grossMarginPercentage: number;
+  revenueRank?: number;
+  profitRank?: number;
+}
+
+export interface CustomerCategoryPreference {
+  category: string;
+  ordersCount: number;
+  totalSpent: number;
+  percentageOfOrders: number;
+}
+
+export interface TopCustomerMetric {
+  customerId: string;
+  fullName: string;
+  phone: string;
+  ordersCount: number;
+  totalSpent: number;
+}
+
+export interface CustomerPreferenceMetricsDto {
+  categoryPreferences: CustomerCategoryPreference[];
+  repeatCustomerRate: number;
+  totalUniqueCustomers: number;
+  averageOrderValue: number;
+  topLoyalCustomers: TopCustomerMetric[];
+}
+
+export interface PeriodicSalesTrendDto {
+  date: string;
+  label: string;
+  ordersCount: number;
+  contractedRevenue: number;
+  cashCollected: number;
+  expenses: number;
+}
+
+export interface ExecutiveDashboardAnalyticsDto {
+  period: string;
+  dateRange: {
+    startDate?: string;
+    endDate?: string;
+  };
+  financialOverview: {
+    contractedRevenue: number;
+    earnedRevenue: number;
+    cashCollected: number;
+    outstandingReceivables: number;
+    totalMaterialCosts: number;
+    totalExpenses: number;
+    grossProfit: number;
+    grossMarginPercentage: number;
+    netProfit: number;
+    netMarginPercentage: number;
+  };
+  stockOverview: {
+    totalStockValue: number;
+    activeMaterialsCount: number;
+    lowStockAlertsCount: number;
+  };
+  branchComparisons: Array<{
+    branchId: string;
+    branchName: string;
+    ordersCount: number;
+    totalRevenue: number;
+    cashCollected: number;
+    expenses: number;
+    netProfitContribution: number;
+  }>;
+  salesTrends: PeriodicSalesTrendDto[];
+  topProductsByRevenue: ProductPerformanceDto[];
+  topProductsByProfit: ProductPerformanceDto[];
+  lowPerformingProducts: ProductPerformanceDto[];
+  customerPreferences: CustomerPreferenceMetricsDto;
+}

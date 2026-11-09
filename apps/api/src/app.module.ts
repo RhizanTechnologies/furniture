@@ -11,6 +11,7 @@ import { OrderStagesModule } from './modules/order-stages/order-stages.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { FinancialModule } from './modules/financial/financial.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FinancialModule } from './modules/financial/financial.module';
     OrdersModule,
     InventoryModule,
     FinancialModule,
+    AnalyticsModule,
     HealthModule,
   ],
 })

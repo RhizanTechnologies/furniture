@@ -13,6 +13,7 @@ import {
   Layers,
   Boxes,
   DollarSign,
+  BarChart3,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ export const TopNav: React.FC = () => {
     { to: '/orders', label: 'Orders', icon: ShoppingBag, show: true },
     { to: '/inventory', label: 'Inventory', icon: Boxes, show: true },
     { to: '/finance', label: 'Finance', icon: DollarSign, show: true },
+    { to: '/analytics', label: 'Analytics', icon: BarChart3, show: isOwner },
     { to: '/customers', label: 'Customers', icon: Users, show: true },
     { to: '/order-stages', label: 'Stages', icon: Layers, show: isOwner },
     { to: '/showroom', label: 'Showroom', icon: Store, show: true },
