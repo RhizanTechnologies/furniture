@@ -17,3 +17,22 @@ export const createBranchSchema = z.object({
 });
 
 export type CreateBranchInput = z.infer<typeof createBranchSchema>;
+
+export const updateBranchSchema = z.object({
+  name: z.string().min(2, 'Branch name must be at least 2 characters').optional(),
+  address: z.string().min(3, 'Address is required').optional(),
+  phone: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateBranchInput = z.infer<typeof updateBranchSchema>;
+
+export const assignBranchAdminSchema = z.object({
+  email: z.string().email('Valid email is required'),
+  fullName: z.string().min(2, 'Full name is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  phone: z.string().optional().nullable(),
+});
+
+export type AssignBranchAdminInput = z.infer<typeof assignBranchAdminSchema>;
+

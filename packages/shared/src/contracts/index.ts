@@ -48,6 +48,20 @@ export interface BranchDto {
   createdAt: string;
 }
 
+export interface AssignBranchAdminDto {
+  email: string;
+  fullName: string;
+  password?: string;
+  phone?: string | null;
+}
+
+export interface UpdateBranchDto {
+  name?: string;
+  address?: string;
+  phone?: string | null;
+  isActive?: boolean;
+}
+
 export interface HealthCheckResponse {
   status: 'ok' | 'degraded' | 'down';
   timestamp: string;

@@ -1,17 +1,46 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { BranchesPage } from '@/pages/BranchesPage';
+import { MyBranchPage } from '@/pages/MyBranchPage';
 import { ShowroomPage } from '@/pages/ShowroomPage';
 import { HealthPage } from '@/pages/HealthPage';
+import { LoginPage } from '@/pages/LoginPage';
+import { UserRole } from '@furniture/shared';
 
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
     path: '/',
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'branches',
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.OWNER]}>
+            <BranchesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'my-branch',
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.BRANCH_ADMIN]}>
+            <MyBranchPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'showroom',
