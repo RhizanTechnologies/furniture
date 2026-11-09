@@ -27,6 +27,31 @@ export const updateBranchSchema = z.object({
 
 export type UpdateBranchInput = z.infer<typeof updateBranchSchema>;
 
+export const createProductSchema = z.object({
+  sku: z.string().min(2, 'SKU code must be at least 2 characters').toUpperCase(),
+  name: z.string().min(2, 'Product name is required'),
+  category: z.string().min(2, 'Category is required'),
+  description: z.string().optional().nullable(),
+  dimensions: z.string().optional().nullable(),
+  basePrice: z.coerce.number().positive('Base price must be greater than 0'),
+  estimatedProductionDays: z.coerce.number().int().min(1, 'Lead days must be at least 1 day').optional().nullable(),
+  isActive: z.boolean().default(true),
+});
+
+export type CreateProductInput = z.infer<typeof createProductSchema>;
+
+export const updateProductSchema = z.object({
+  name: z.string().min(2, 'Product name is required').optional(),
+  category: z.string().min(2, 'Category is required').optional(),
+  description: z.string().optional().nullable(),
+  dimensions: z.string().optional().nullable(),
+  basePrice: z.coerce.number().positive('Base price must be greater than 0').optional(),
+  estimatedProductionDays: z.coerce.number().int().min(1).optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+
 export const assignBranchAdminSchema = z.object({
   email: z.string().email('Valid email is required'),
   fullName: z.string().min(2, 'Full name is required'),

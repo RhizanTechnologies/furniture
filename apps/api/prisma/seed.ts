@@ -118,6 +118,83 @@ async function main() {
   });
 
   console.log('Seed completed successfully with Owner, Branches and Branch Administrators.');
+
+  console.log('Seeding initial furniture product catalog...');
+  const initialProducts = [
+    {
+      sku: 'SKU-DIN-001',
+      name: 'Grand Wanza 8-Seater Dining Set',
+      category: 'Dining Room',
+      description: 'Solid Ethiopian Wanza hardwood dining table with 8 matching ergonomic chairs. Natural semi-gloss finish.',
+      dimensions: '240cm x 110cm x 76cm',
+      basePrice: 85000.0,
+      estimatedProductionDays: 10,
+    },
+    {
+      sku: 'SKU-SOF-001',
+      name: 'Chesterfield 3-Seater Velvet Sofa',
+      category: 'Living Room',
+      description: 'Deep button-tufted craftsmanship with high-density polyurethane foam and durable kiln-dried timber frame.',
+      dimensions: '220cm x 95cm x 80cm',
+      basePrice: 68000.0,
+      estimatedProductionDays: 12,
+    },
+    {
+      sku: 'SKU-DSK-001',
+      name: 'Executive Solid Oak Desk',
+      category: 'Office',
+      description: 'Spacious workspace with integrated cable management, soft-close drawers, and scratch-resistant satin top.',
+      dimensions: '180cm x 85cm x 75cm',
+      basePrice: 42000.0,
+      estimatedProductionDays: 7,
+    },
+    {
+      sku: 'SKU-BED-001',
+      name: 'King Upholstered Platform Bed Frame',
+      category: 'Bedroom',
+      description: 'Padded acoustic headboard with reinforced solid wood slats and concealed heavy-duty corner brackets.',
+      dimensions: '200cm x 210cm x 120cm',
+      basePrice: 54000.0,
+      estimatedProductionDays: 8,
+    },
+    {
+      sku: 'SKU-COF-001',
+      name: 'Modern Teak Coffee Table',
+      category: 'Living Room',
+      description: 'Minimalist low-profile centerpiece crafted from reclaimed teak with open lower shelf storage.',
+      dimensions: '120cm x 60cm x 45cm',
+      basePrice: 18500.0,
+      estimatedProductionDays: 4,
+    },
+    {
+      sku: 'SKU-WAR-001',
+      name: 'Modular 4-Door Hardwood Wardrobe',
+      category: 'Bedroom',
+      description: 'Comprehensive storage system featuring full-length hanging rods, modular shelving, and dual lockable drawers.',
+      dimensions: '200cm x 60cm x 220cm',
+      basePrice: 72000.0,
+      estimatedProductionDays: 14,
+    },
+  ];
+
+  for (const prod of initialProducts) {
+    await prisma.product.upsert({
+      where: { sku: prod.sku },
+      update: {
+        name: prod.name,
+        category: prod.category,
+        description: prod.description,
+        dimensions: prod.dimensions,
+        basePrice: prod.basePrice,
+        estimatedProductionDays: prod.estimatedProductionDays,
+      },
+      create: {
+        ...prod,
+        isActive: true,
+      },
+    });
+  }
+  console.log(`Successfully seeded ${initialProducts.length} furniture catalog products.`);
 }
 
 main()

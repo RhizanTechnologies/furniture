@@ -48,6 +48,54 @@ export interface BranchDto {
   createdAt: string;
 }
 
+export interface ProductImageDto {
+  id: string;
+  productId: string;
+  imageUrl: string;
+  thumbnailUrl?: string | null;
+  isPrimary: boolean;
+  fileSizeBytes: number;
+  mimeType: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface ProductDto {
+  id: string;
+  sku: string;
+  name: string;
+  category: string;
+  description?: string | null;
+  dimensions?: string | null;
+  basePrice: number;
+  estimatedProductionDays?: number | null;
+  isActive: boolean;
+  images: ProductImageDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProductDto {
+  sku: string;
+  name: string;
+  category: string;
+  description?: string | null;
+  dimensions?: string | null;
+  basePrice: number;
+  estimatedProductionDays?: number | null;
+  isActive?: boolean;
+}
+
+export interface UpdateProductDto {
+  name?: string;
+  category?: string;
+  description?: string | null;
+  dimensions?: string | null;
+  basePrice?: number;
+  estimatedProductionDays?: number | null;
+  isActive?: boolean;
+}
+
 export interface AssignBranchAdminDto {
   email: string;
   fullName: string;

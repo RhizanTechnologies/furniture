@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, Store, Building2, MapPin } from 'lucide-react';
+import { Activity, Store, Building2, MapPin, Armchair } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export const BottomNav: React.FC = () => {
@@ -9,10 +9,10 @@ export const BottomNav: React.FC = () => {
 
   const links = [
     { to: '/', label: 'Dashboard', icon: Activity, show: true },
-    { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
-    { to: '/my-branch', label: 'My Branch', icon: MapPin, show: !isOwner && isAuthenticated },
     { to: '/showroom', label: 'Showroom', icon: Store, show: true },
-    { to: '/system-health', label: 'Health', icon: Building2, show: true },
+    { to: '/catalog', label: 'Catalog', icon: Armchair, show: isOwner },
+    { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
+    { to: '/my-branch', label: 'Branch', icon: MapPin, show: !isOwner && isAuthenticated },
   ].filter((l) => l.show);
 
   const gridColsClass =

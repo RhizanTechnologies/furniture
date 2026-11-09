@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { BranchesPage } from '@/pages/BranchesPage';
+import { CatalogPage } from '@/pages/CatalogPage';
 import { MyBranchPage } from '@/pages/MyBranchPage';
 import { ShowroomPage } from '@/pages/ShowroomPage';
 import { HealthPage } from '@/pages/HealthPage';
@@ -25,6 +26,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'catalog',
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.OWNER]}>
+            <CatalogPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'branches',

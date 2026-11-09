@@ -18,9 +18,10 @@ export const TopNav: React.FC = () => {
 
   const navLinks = [
     { to: '/', label: 'Dashboard', icon: Activity, show: true },
+    { to: '/showroom', label: 'Showroom', icon: Store, show: true },
+    { to: '/catalog', label: 'Catalog', icon: Armchair, show: isOwner },
     { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
     { to: '/my-branch', label: 'My Branch', icon: MapPin, show: !isOwner && isAuthenticated },
-    { to: '/showroom', label: 'Showroom', icon: Store, show: true },
     { to: '/system-health', label: 'Health', icon: Building2, show: true },
   ].filter((l) => l.show);
 

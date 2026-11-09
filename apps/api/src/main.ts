@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
+import * as express from 'express';
+import * as path from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -17,6 +19,9 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+  // Static uploads directory for media assets
+  app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
   // Global prefix: /api/v1
   app.setGlobalPrefix('api/v1');

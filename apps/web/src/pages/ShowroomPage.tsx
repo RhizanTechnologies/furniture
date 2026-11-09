@@ -1,121 +1,307 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ProductDto } from '@furniture/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/feedback/EmptyState';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { LoadingState } from '@/components/feedback/LoadingState';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
-import { Armchair, Sparkles, Plus, Eye } from 'lucide-react';
+import { Armchair, Sparkles, Eye, Search, Clock, CheckCircle } from 'lucide-react';
 
 export const ShowroomPage: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
-  const sampleProducts = [
-    {
-      id: 'p1',
-      name: 'Grand Dining Set (8-Seater)',
-      category: 'Dining Room',
-      dimensions: '240cm x 110cm x 76cm',
-      basePrice: 85000,
-      leadDays: 7,
-      description: 'Solid Ethiopian Wanza wood with matte walnut polyurethane finish and hand-carved edge details.',
-    },
-    {
-      id: 'p2',
-      name: 'Chesterfield 3-Seater Velvet Sofa',
-      category: 'Living Room',
-      dimensions: '220cm x 95cm x 80cm',
-      basePrice: 68000,
-      leadDays: 10,
-      description: 'Deep button-tufted upholstery with high-density polyurethane foam and solid eucalyptus inner framework.',
-    },
-  ];
+  const { data: products, isLoading, error, refetch } = useQuery<ProductDto[]>({
+    queryKey: ['products'],
+    queryFn: () => apiClient<ProductDto[]>('/products'),
+  });
+
+  const categories = ['ALL', 'Living Room', 'Dining Room', 'Bedroom', 'Office'];
+
+  const filteredProducts = (products || []).filter((p) => {
+    const matchesCategory =
+      selectedCategory === 'ALL' ||
+      p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesSearch =
+      !searchTerm ||
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch && p.isActive;
+  });
+
+  const backendHost = (
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1'
+  ).replace(/\/api\/v1$/, '');
+
+  const getPrimaryImageUrl = (prod: ProductDto) => {
+    const primaryImg = prod.images.find((i) => i.isPrimary) || prod.images[0];
+    if (!primaryImg) return null;
+    return primaryImg.imageUrl.startsWith('http')
+      ? primaryImg.imageUrl
+      : `${backendHost}${primaryImg.imageUrl}`;
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Furniture Showroom"
-        description="Digital catalog presentation optimized for customer walk-in consultations and design reviews."
-        action={
-          <Button size="sm" className="space-x-1.5 shadow">
-            <Plus className="h-4 w-4" />
-            <span>Add Catalog Item</span>
-          </Button>
-        }
+        description="Digital catalog presentation optimized for client consultations, walk-in showroom tours, and order quotation."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sampleProducts.map((prod) => (
-          <Card key={prod.id} className="overflow-hidden border-wood-200/90 flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div>
-              {/* Product Thumbnail Mockup */}
-              <div className="h-48 w-full bg-wood-100 flex items-center justify-center text-wood-700 relative">
-                <Armchair className="h-16 w-16 opacity-40" />
-                <Badge variant="wood" className="absolute top-3 right-3 shadow-sm">
-                  {prod.category}
-                </Badge>
-              </div>
+      {/* Filter and Search Bar */}
+      <Card className="border-wood-200/90">
+        <CardContent className="p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search showroom models..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
 
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{prod.name}</CardTitle>
-                <CardDescription className="text-xs">{prod.dimensions}</CardDescription>
-              </CardHeader>
-
-              <CardContent>
-                <p className="text-sm text-charcoal-700 line-clamp-2">{prod.description}</p>
-                <div className="mt-4 flex items-baseline justify-between">
-                  <span className="text-xs uppercase text-muted-foreground font-semibold">Base Price</span>
-                  <span className="text-lg font-bold text-wood-900">{formatCurrency(prod.basePrice)}</span>
-                </div>
-              </CardContent>
-            </div>
-
-            <CardFooter className="pt-2 border-t border-wood-100 bg-wood-50/40 flex justify-between items-center">
-              <span className="text-xs text-charcoal-500 font-medium">Est. {prod.leadDays} days</span>
-              <Button variant="outline" size="sm" onClick={() => setSelectedProduct(prod)} className="space-x-1">
-                <Eye className="h-3.5 w-3.5" />
-                <span>Inspect</span>
+          <div className="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            {categories.map((cat) => (
+              <Button
+                key={cat}
+                type="button"
+                variant={selectedCategory === cat ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+                className="text-xs h-8 px-3 shrink-0"
+              >
+                {cat}
               </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-      {sampleProducts.length === 0 && (
-        <EmptyState
-          icon={<Sparkles className="h-6 w-6" />}
-          title="No Products in Catalog"
-          description="Start building the showroom by adding your primary furniture models and dimensions."
-          actionLabel="Create First Product"
-          onAction={() => alert('New product form')}
+      {isLoading && <LoadingState message="Loading showroom collection..." />}
+
+      {error && (
+        <ErrorState
+          title="Failed to Load Showroom"
+          message={(error as any)?.message || 'An error occurred while loading products.'}
+          onRetry={() => refetch()}
         />
       )}
 
-      {/* Inspect Product Dialog */}
-      <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        {selectedProduct && (
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{selectedProduct.name}</DialogTitle>
-              <DialogDescription>{selectedProduct.category} • {selectedProduct.dimensions}</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <p className="text-sm text-charcoal-700">{selectedProduct.description}</p>
-              <div className="p-3 rounded-md bg-wood-50 border border-wood-200">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Baseline Price:</span>
-                  <span className="font-bold text-wood-900">{formatCurrency(selectedProduct.basePrice)}</span>
+      {products && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map((prod) => {
+            const primaryImageUrl = getPrimaryImageUrl(prod);
+
+            return (
+              <Card
+                key={prod.id}
+                className="overflow-hidden border-wood-200/90 flex flex-col justify-between hover:shadow-md transition-shadow group"
+              >
+                <div>
+                  {/* Thumbnail Cover Photo */}
+                  <div className="h-52 w-full bg-wood-100 flex items-center justify-center text-wood-700 relative overflow-hidden">
+                    {primaryImageUrl ? (
+                      <img
+                        src={primaryImageUrl}
+                        alt={prod.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-wood-400">
+                        <Armchair className="h-16 w-16 mb-1 opacity-40" />
+                        <span className="text-[11px] font-medium text-wood-600/70">
+                          Handcrafted Furniture
+                        </span>
+                      </div>
+                    )}
+                    <Badge variant="wood" className="absolute top-3 right-3 shadow-sm text-[11px]">
+                      {prod.category}
+                    </Badge>
+                  </div>
+
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg text-charcoal-900 group-hover:text-wood-900 transition-colors">
+                          {prod.name}
+                        </CardTitle>
+                        <CardDescription className="text-xs font-mono">{prod.sku}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-3">
+                    {prod.dimensions && (
+                      <div className="text-xs text-charcoal-600 font-medium">
+                        Size: {prod.dimensions}
+                      </div>
+                    )}
+                    <p className="text-xs text-charcoal-600 line-clamp-2">
+                      {prod.description || 'Custom handcrafted piece built to client specifications.'}
+                    </p>
+                    <div className="pt-2 flex items-baseline justify-between border-t border-wood-100">
+                      <span className="text-xs uppercase text-muted-foreground font-semibold">
+                        Base Price
+                      </span>
+                      <span className="text-lg font-bold text-wood-900">
+                        {formatCurrency(prod.basePrice)}
+                      </span>
+                    </div>
+                  </CardContent>
                 </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="text-muted-foreground">Standard Lead Time:</span>
-                  <span className="font-medium">{selectedProduct.leadDays} Days</span>
+
+                <CardFooter className="pt-2 border-t border-wood-100 bg-wood-50/40 flex justify-between items-center">
+                  <span className="text-xs text-charcoal-600 flex items-center space-x-1 font-medium">
+                    <Clock className="h-3.5 w-3.5 text-wood-600" />
+                    <span>Est. {prod.estimatedProductionDays || 7} days</span>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedProduct(prod);
+                      setActivePhotoIndex(0);
+                    }}
+                    className="space-x-1 border-wood-300"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>Inspect</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {products && filteredProducts.length === 0 && (
+        <EmptyState
+          icon={<Sparkles className="h-6 w-6" />}
+          title="No Products Match"
+          description="Try selecting a different furniture category or clearing your search term."
+        />
+      )}
+
+      {/* Inspect Product Modal with High-Res Gallery */}
+      <Dialog
+        open={!!selectedProduct}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      >
+        {selectedProduct && (
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <div className="flex items-center space-x-2">
+                <Badge variant="wood">{selectedProduct.category}</Badge>
+                <span className="text-xs font-mono text-muted-foreground">
+                  {selectedProduct.sku}
+                </span>
+              </div>
+              <DialogTitle className="text-xl">{selectedProduct.name}</DialogTitle>
+              {selectedProduct.dimensions && (
+                <DialogDescription>
+                  Dimensions: <strong>{selectedProduct.dimensions}</strong>
+                </DialogDescription>
+              )}
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Photo Showcase */}
+              {selectedProduct.images.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="h-64 sm:h-80 w-full rounded-lg overflow-hidden bg-wood-100 border border-wood-200">
+                    <img
+                      src={
+                        selectedProduct.images[activePhotoIndex]?.imageUrl.startsWith('http')
+                          ? selectedProduct.images[activePhotoIndex].imageUrl
+                          : `${backendHost}${selectedProduct.images[activePhotoIndex]?.imageUrl}`
+                      }
+                      alt={selectedProduct.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {selectedProduct.images.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {selectedProduct.images.map((img, idx) => (
+                        <button
+                          key={img.id}
+                          type="button"
+                          onClick={() => setActivePhotoIndex(idx)}
+                          className={`h-16 w-16 rounded-md overflow-hidden border-2 shrink-0 transition-all ${
+                            activePhotoIndex === idx
+                              ? 'border-wood-800 scale-105'
+                              : 'border-wood-200 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <img
+                            src={
+                              img.thumbnailUrl?.startsWith('http')
+                                ? img.thumbnailUrl
+                                : `${backendHost}${img.thumbnailUrl || img.imageUrl}`
+                            }
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-44 rounded-lg bg-wood-50 border border-wood-200 flex flex-col items-center justify-center text-wood-500">
+                  <Armchair className="h-12 w-12 opacity-30 mb-1" />
+                  <span className="text-xs text-muted-foreground">
+                    No showroom photographs uploaded yet.
+                  </span>
+                </div>
+              )}
+
+              {/* Specifications Box */}
+              <div className="p-4 rounded-lg bg-wood-50/80 border border-wood-200 space-y-2.5">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs uppercase font-semibold text-muted-foreground">
+                    Quoted Baseline Price
+                  </span>
+                  <span className="text-xl font-bold text-wood-950">
+                    {formatCurrency(selectedProduct.basePrice)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-charcoal-700 pt-1 border-t border-wood-200/60">
+                  <span>Standard Lead Time:</span>
+                  <span className="font-semibold">{selectedProduct.estimatedProductionDays || 7} Days</span>
                 </div>
               </div>
+
+              {selectedProduct.description && (
+                <div className="space-y-1">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
+                    Specifications & Craftsmanship
+                  </h4>
+                  <p className="text-sm text-charcoal-700 leading-relaxed">
+                    {selectedProduct.description}
+                  </p>
+                </div>
+              )}
             </div>
+
             <DialogFooter>
-              <Button variant="secondary" onClick={() => setSelectedProduct(null)}>Close</Button>
-              <Button onClick={() => setSelectedProduct(null)}>Configure Order</Button>
+              <Button variant="secondary" onClick={() => setSelectedProduct(null)}>
+                Close
+              </Button>
+              <Button onClick={() => setSelectedProduct(null)}>
+                Quote & Create Order
+              </Button>
             </DialogFooter>
           </DialogContent>
         )}
