@@ -18,7 +18,7 @@ services:
       - furniture_erp_net
 
   minio:
-    image: quay.io/minio/minio:latest
+    image: minio/minio:latest
     container_name: furniture_erp_minio_prod
     restart: always
     command: server /data --console-address ":9001"
