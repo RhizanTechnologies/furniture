@@ -550,10 +550,10 @@ export const OrdersPage: React.FC = () => {
 
       {/* Create Order Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Furniture Order</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] sm:w-full max-w-2xl max-h-[92vh] overflow-y-auto p-3.5 sm:p-6">
+          <DialogHeader className="pr-6">
+            <DialogTitle className="text-lg sm:text-xl">Create New Furniture Order</DialogTitle>
+            <DialogDescription className="text-xs">
               Record the client contract, catalog or custom specifications, initial prepayment, and deadline. Offline creation is preserved locally.
             </DialogDescription>
           </DialogHeader>
@@ -759,10 +759,10 @@ export const OrdersPage: React.FC = () => {
 
       {/* Quick Customer Registration Dialog */}
       <Dialog open={isQuickCustomerOpen} onOpenChange={setIsQuickCustomerOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Quick Register Walk-In Client</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[94vw] sm:w-full sm:max-w-[425px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pr-6">
+            <DialogTitle className="text-base sm:text-lg">Quick Register Walk-In Client</DialogTitle>
+            <DialogDescription className="text-xs">
               Register client info and immediately assign them to the current order.
             </DialogDescription>
           </DialogHeader>

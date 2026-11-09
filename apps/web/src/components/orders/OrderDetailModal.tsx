@@ -139,11 +139,11 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
   return (
     <Dialog open={!!order} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="border-b border-wood-100 pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+      <DialogContent className="w-[95vw] sm:w-full max-w-3xl max-h-[92vh] overflow-y-auto p-3.5 sm:p-6">
+        <DialogHeader className="border-b border-wood-100 pb-3 pr-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="font-mono text-xs font-bold text-wood-800">
                   {order.orderNumber}
                 </span>
@@ -152,19 +152,19 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     backgroundColor: order.currentStage?.color || '#8B5A2B',
                     color: '#ffffff',
                   }}
-                  className="text-[11px]"
+                  className="text-[10px] sm:text-[11px]"
                 >
                   {order.currentStage?.name || 'In Production'}
                 </Badge>
               </div>
-              <DialogTitle className="text-xl font-bold mt-1">
+              <DialogTitle className="text-lg sm:text-xl font-bold mt-1 text-charcoal-900 break-words">
                 Order for {order.customer?.fullName || 'Walk-In Customer'}
               </DialogTitle>
             </div>
 
-            <div className="text-right text-xs text-muted-foreground">
+            <div className="text-left sm:text-right text-xs text-muted-foreground flex sm:flex-col flex-wrap gap-x-3 gap-y-0.5">
               <div>Created: {new Date(order.createdAt).toLocaleDateString()}</div>
-              <div className="flex items-center space-x-1 font-semibold text-charcoal-700 mt-0.5">
+              <div className="flex items-center space-x-1 font-semibold text-charcoal-700">
                 <Calendar className="h-3.5 w-3.5 text-wood-700" />
                 <span>Deadline: {new Date(order.deadlineDate).toLocaleDateString()}</span>
               </div>
@@ -172,63 +172,63 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-2">
+        <div className="space-y-5 sm:space-y-6 py-2">
           {/* Customer & Branch Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1 break-words">
               <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <User className="h-3.5 w-3.5 text-wood-700" />
                 <span>Customer Contact Information</span>
               </div>
-              <p className="text-charcoal-900 font-medium">{order.customer?.fullName}</p>
-              <p className="text-charcoal-600">Phone: {order.customer?.phone}</p>
+              <p className="text-charcoal-900 font-medium break-words">{order.customer?.fullName}</p>
+              <p className="text-charcoal-600 break-words">Phone: {order.customer?.phone}</p>
               {order.customer?.address && (
-                <p className="text-charcoal-500">Address: {order.customer?.address}</p>
+                <p className="text-charcoal-500 break-words">Address: {order.customer?.address}</p>
               )}
             </div>
 
-            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1">
+            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1 break-words">
               <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <MapPin className="h-3.5 w-3.5 text-wood-700" />
                 <span>Workshop Branch Tenancy</span>
               </div>
-              <p className="text-charcoal-900 font-medium">
+              <p className="text-charcoal-900 font-medium break-words">
                 {order.branch?.name} ({order.branch?.code})
               </p>
               <p className="text-charcoal-600">Stock Mode: {order.branch?.stockMode}</p>
-              <p className="text-charcoal-500">Location: {order.branch?.address}</p>
+              <p className="text-charcoal-500 break-words">Location: {order.branch?.address}</p>
             </div>
           </div>
 
           {/* Authoritative Financial Balance Box */}
-          <div className="p-4 rounded-xl border border-wood-200 bg-gradient-to-r from-wood-50/70 to-cream-50/50">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-3 flex items-center space-x-1.5">
+          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-gradient-to-r from-wood-50/70 to-cream-50/50">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2.5 sm:mb-3 flex items-center space-x-1.5">
               <DollarSign className="h-4 w-4 text-wood-700" />
               <span>Authoritative Financial Summary</span>
             </h4>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-center">
+              <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                   Agreed Price
                 </span>
-                <span className="font-mono text-base font-bold text-wood-950">
+                <span className="font-mono text-sm sm:text-base font-bold text-wood-950">
                   {formatCurrency(order.totalAgreedPrice)}
                 </span>
               </div>
-              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+              <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                   Total Paid
                 </span>
-                <span className="font-mono text-base font-bold text-emerald-700">
+                <span className="font-mono text-sm sm:text-base font-bold text-emerald-700">
                   {formatCurrency(order.totalPaid)}
                 </span>
               </div>
-              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+              <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                   Outstanding Balance
                 </span>
                 <span
-                  className={`font-mono text-base font-bold ${
+                  className={`font-mono text-sm sm:text-base font-bold ${
                     isFullyPaid ? 'text-emerald-600' : 'text-amber-800'
                   }`}
                 >
@@ -239,7 +239,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </div>
 
           {/* Raw Material Consumption & Product Costing (Prompt 6) */}
-          <div className="p-4 rounded-xl border border-wood-200 bg-white shadow-sm space-y-3">
+          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-white shadow-sm space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-800 flex items-center space-x-1.5">
@@ -266,13 +266,13 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <div className={`grid ${isOwner ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'} gap-2 pt-1`}>
               <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
                 <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
-                <span className="font-mono font-bold text-stone-900 text-sm">
+                <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
                   {formatCurrency(costing?.totalMaterialCost || 0)}
                 </span>
               </div>
               <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
                 <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Agreed Selling</span>
-                <span className="font-mono font-bold text-stone-900 text-sm">
+                <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
                   {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
                 </span>
               </div>
@@ -280,13 +280,13 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 <>
                   <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
                     <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
-                    <span className="font-mono font-bold text-emerald-900 text-sm">
+                    <span className="font-mono font-bold text-emerald-900 text-xs sm:text-sm">
                       {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
                     </span>
                   </div>
                   <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
                     <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
-                    <span className="font-mono font-bold text-wood-900 text-sm">
+                    <span className="font-mono font-bold text-wood-900 text-xs sm:text-sm">
                       {costing?.grossMarginPercentage || 100}%
                     </span>
                   </div>
@@ -296,8 +296,8 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
             {/* Consumed Materials Table */}
             {costing?.consumptions && costing.consumptions.length > 0 ? (
-              <div className="border rounded-md overflow-hidden text-xs">
-                <Table>
+              <div className="border rounded-md overflow-x-auto w-full text-xs">
+                <Table className="min-w-[480px]">
                   <TableHeader className="bg-stone-50">
                     <TableRow>
                       <TableHead>Material</TableHead>
@@ -339,8 +339,8 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </div>
 
           {/* Order Stage Pipeline & Transition Controls */}
-          <div className="p-4 rounded-xl border border-wood-200 bg-white space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center justify-between">
+          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-white space-y-3">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex flex-wrap items-center justify-between gap-1">
               <span>Production Workflow Pipeline</span>
               <span className="text-[10px] lowercase font-normal text-muted-foreground">
                 Move order through configured stages
@@ -375,7 +375,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </div>
 
             {/* Advance Stage Control */}
-            <div className="pt-3 border-t border-wood-200/60 flex flex-col sm:flex-row gap-2 items-center">
+            <div className="pt-3 border-t border-wood-200/60 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
               <select
                 value={targetStageId}
                 onChange={(e) => setTargetStageId(e.target.value)}
@@ -394,14 +394,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 placeholder="Transition remarks (optional e.g. Quality checked)"
                 value={transitionNotes}
                 onChange={(e) => setTransitionNotes(e.target.value)}
-                className="flex-1 h-9 px-3 rounded-md border border-input bg-background text-xs"
+                className="w-full sm:flex-1 h-9 px-3 rounded-md border border-input bg-background text-xs"
               />
 
               <Button
                 size="sm"
                 onClick={handleStageTransition}
                 disabled={!targetStageId || stageMutation.isPending}
-                className="w-full sm:w-auto h-9 text-xs"
+                className="w-full sm:w-auto h-9 text-xs shrink-0"
               >
                 {stageMutation.isPending ? 'Updating...' : 'Advance Stage'}
               </Button>
@@ -417,34 +417,36 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2">
               Contracted Furniture Products
             </h4>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Specification / Description</TableHead>
-                  <TableHead className="text-center">Quantity</TableHead>
-                  <TableHead className="text-right">Unit Price</TableHead>
-                  <TableHead className="text-right">Subtotal</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {order.items?.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-xs">
-                      {item.itemDescription}
-                    </TableCell>
-                    <TableCell className="text-center font-mono text-xs">
-                      {item.quantity}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      {formatCurrency(item.unitPrice)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs font-semibold">
-                      {formatCurrency(item.subtotal)}
-                    </TableCell>
+            <div className="border rounded-lg overflow-x-auto w-full">
+              <Table className="min-w-[420px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Specification / Description</TableHead>
+                    <TableHead className="text-center">Quantity</TableHead>
+                    <TableHead className="text-right">Unit Price</TableHead>
+                    <TableHead className="text-right">Subtotal</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {order.items?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-xs break-words">
+                        {item.itemDescription}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-xs">
+                        {item.quantity}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {formatCurrency(item.unitPrice)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs font-semibold">
+                        {formatCurrency(item.subtotal)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Stage Progression History Audit Trail */}
@@ -491,10 +493,10 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       {/* Log Material Consumption Modal */}
       {isConsumeOpen && (
         <Dialog open={isConsumeOpen} onOpenChange={setIsConsumeOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="w-[94vw] sm:w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Log Material Consumption</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-base sm:text-lg">Log Material Consumption</DialogTitle>
+              <DialogDescription className="text-xs">
                 Deduct raw materials consumed from inventory and allocate frozen historical cost to Order {order.orderNumber}.
               </DialogDescription>
             </DialogHeader>
