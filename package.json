@@ -9,7 +9,7 @@
     "build": "pnpm --filter @furniture/shared build && pnpm --filter @furniture/api build && pnpm --filter @furniture/web build",
     "test": "pnpm --recursive run test",
     "lint": "pnpm --recursive run lint",
-    "db:up": "docker compose up -d",
+    "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @furniture/api prisma:migrate",
     "db:seed": "pnpm --filter @furniture/api prisma:seed",
