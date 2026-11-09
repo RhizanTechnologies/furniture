@@ -1,0 +1,325 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  BRANCH_ADMIN
+}
+
+enum StockMode {
+  MAIN_STOCK
+  BRANCH_STOCK
+}
+
+enum PaymentType {
+  PREPAYMENT
+  PROGRESS_PAYMENT
+  FINAL_SETTLEMENT
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         UserRole  @default(BRANCH_ADMIN)
+  branchId     String?   @unique
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  branch               Branch?                @relation("BranchAdministrator", fields: [branchId], references: [id])
+  stageHistories       OrderStageHistory[]
+  paymentsRecorded     Payment[]
+  expensesRecorded     Expense[]
+  stockInsRecorded     MaterialStockIn[]
+  consumptionsRecorded MaterialConsumption[]
+  idempotencyRecords   IdempotencyRecord[]
+
+  @@map("users")
+}
+
+model Branch {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  code      String    @unique
+  address   String
+  phone     String?
+  stockMode StockMode @default(MAIN_STOCK)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  admin               User?                 @relation("BranchAdministrator")
+  customers           Customer[]
+  orders              Order[]
+  stockIns            MaterialStockIn[]
+  consumptions        MaterialConsumption[]
+  expenses            Expense[]
+
+  @@map("branches")
+}
+
+model Product {
+  id                     String         @id @default(uuid())
+  sku                    String         @unique
+  name                   String
+  category               String
+  description            String?
+  dimensions             String?
+  basePrice              Decimal        @db.Decimal(14, 2)
+  estimatedProductionDays Int?
+  isActive               Boolean        @default(true)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  images     ProductImage[]
+  orderItems OrderItem[]
+
+  @@index([name])
+  @@index([category])
+  @@map("products")
+}
+
+model ProductImage {
+  id            String   @id @default(uuid())
+  productId     String
+  imageUrl      String
+  thumbnailUrl  String?
+  isPrimary     Boolean  @default(false)
+  fileSizeBytes Int
+  mimeType      String
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  branchId  String
+  fullName  String
+  phone     String
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branch Branch  @relation(fields: [branchId], references: [id])
+  orders Order[]
+
+  @@index([fullName])
+  @@index([phone])
+  @@index([branchId])
+  @@map("customers")
+}
+
+model OrderStage {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  color         String   @default("#8B5A2B")
+  sequenceOrder Int
+  isFinalStage  Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  currentOrders Order[]
+  fromHistories OrderStageHistory[] @relation("FromStage")
+  toHistories   OrderStageHistory[] @relation("ToStage")
+
+  @@index([sequenceOrder])
+  @@map("order_stages")
+}
+
+model Order {
+  id                 String   @id @default(uuid())
+  orderNumber        String   @unique
+  customerId         String
+  branchId           String
+  currentStageId     String
+  totalAgreedPrice   Decimal  @db.Decimal(14, 2)
+  totalPaid          Decimal  @default(0.00) @db.Decimal(14, 2)
+  outstandingBalance Decimal  @db.Decimal(14, 2)
+  deadlineDate       DateTime
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  customer       Customer              @relation(fields: [customerId], references: [id])
+  branch         Branch                @relation(fields: [branchId], references: [id])
+  currentStage   OrderStage            @relation(fields: [currentStageId], references: [id])
+  items          OrderItem[]
+  payments       Payment[]
+  stageHistories OrderStageHistory[]
+  consumptions   MaterialConsumption[]
+
+  @@index([customerId])
+  @@index([branchId])
+  @@index([currentStageId])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  productId       String?
+  itemDescription String
+  quantity        Int      @default(1)
+  unitPrice       Decimal  @db.Decimal(14, 2)
+  subtotal        Decimal  @db.Decimal(14, 2)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStageHistory {
+  id              String   @id @default(uuid())
+  orderId         String
+  fromStageId     String?
+  toStageId       String
+  changedByUserId String
+  notes           String?
+  changedAt       DateTime @default(now())
+
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStage     OrderStage? @relation("FromStage", fields: [fromStageId], references: [id])
+  toStage       OrderStage  @relation("ToStage", fields: [toStageId], references: [id])
+  changedByUser User        @relation(fields: [changedByUserId], references: [id])
+
+  @@index([orderId])
+  @@index([changedAt])
+  @@map("order_stage_histories")
+}
+
+model RawMaterial {
+  id                   String   @id @default(uuid())
+  code                 String   @unique
+  name                 String
+  category             String
+  unitOfMeasurement    String
+  currentStockQuantity Decimal  @default(0.000) @db.Decimal(14, 3)
+  currentUnitCost      Decimal  @default(0.00) @db.Decimal(14, 2)
+  reorderAlertQuantity Decimal? @db.Decimal(14, 3)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  stockIns     MaterialStockIn[]
+  consumptions MaterialConsumption[]
+
+  @@index([name])
+  @@index([category])
+  @@map("raw_materials")
+}
+
+model MaterialStockIn {
+  id                 String   @id @default(uuid())
+  rawMaterialId      String
+  branchId           String?
+  receivedQuantity   Decimal  @db.Decimal(14, 3)
+  unitCost           Decimal  @db.Decimal(14, 2)
+  totalCost          Decimal  @db.Decimal(14, 2)
+  supplierInvoiceRef String?
+  receivedDate       DateTime @default(now())
+  recordedByUserId   String
+
+  rawMaterial    RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  branch         Branch?     @relation(fields: [branchId], references: [id])
+  recordedByUser User        @relation(fields: [recordedByUserId], references: [id])
+
+  @@index([rawMaterialId])
+  @@index([branchId])
+  @@index([receivedDate])
+  @@map("material_stock_ins")
+}
+
+model MaterialConsumption {
+  id                 String   @id @default(uuid())
+  orderId            String
+  rawMaterialId      String
+  branchId           String?
+  consumedQuantity   Decimal  @db.Decimal(14, 3)
+  unitCostAllocated  Decimal  @db.Decimal(14, 2)
+  totalMaterialCost  Decimal  @db.Decimal(14, 2)
+  consumedAt         DateTime @default(now())
+  recordedByUserId   String
+
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rawMaterial    RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  branch         Branch?     @relation(fields: [branchId], references: [id])
+  recordedByUser User        @relation(fields: [recordedByUserId], references: [id])
+
+  @@index([orderId])
+  @@index([rawMaterialId])
+  @@index([branchId])
+  @@map("material_consumptions")
+}
+
+model Payment {
+  id               String      @id @default(uuid())
+  orderId          String
+  amount           Decimal     @db.Decimal(14, 2)
+  paymentType      PaymentType @default(PROGRESS_PAYMENT)
+  paymentMethod    String      @default("Cash")
+  referenceNumber  String?
+  paymentDate      DateTime    @default(now())
+  recordedByUserId String
+  idempotencyKey   String?     @unique
+
+  order          Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  recordedByUser User  @relation(fields: [recordedByUserId], references: [id])
+
+  @@index([orderId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+model Expense {
+  id               String   @id @default(uuid())
+  branchId         String?
+  category         String
+  amount           Decimal  @db.Decimal(14, 2)
+  expenseDate      DateTime @default(now())
+  description      String
+  receiptRef       String?
+  recordedByUserId String
+  idempotencyKey   String?  @unique
+
+  branch         Branch? @relation(fields: [branchId], references: [id])
+  recordedByUser User    @relation(fields: [recordedByUserId], references: [id])
+
+  @@index([branchId])
+  @@index([expenseDate])
+  @@map("expenses")
+}
+
+model IdempotencyRecord {
+  id              String   @id @default(uuid())
+  idempotencyKey  String   @unique
+  userId          String
+  resourceType    String
+  resourceId      String?
+  responsePayload Json
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([idempotencyKey])
+  @@map("idempotency_records")
+}

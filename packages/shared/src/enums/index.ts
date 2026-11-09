@@ -1,0 +1,23 @@
+export enum UserRole {
+  OWNER = 'OWNER',
+  BRANCH_ADMIN = 'BRANCH_ADMIN'
+}
+
+export enum StockMode {
+  MAIN_STOCK = 'MAIN_STOCK',
+  BRANCH_STOCK = 'BRANCH_STOCK'
+}
+
+export enum PaymentType {
+  PREPAYMENT = 'PREPAYMENT',
+  PROGRESS_PAYMENT = 'PROGRESS_PAYMENT',
+  FINAL_SETTLEMENT = 'FINAL_SETTLEMENT'
+}
+
+export enum SyncStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CONFLICT = 'CONFLICT'
+}

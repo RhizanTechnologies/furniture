@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 28% 97%; /* #FAF7F2 warm linen */
+    --foreground: 24 10% 12%; /* #221F1D deep warm charcoal */
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 12%;
+
+    --primary: 28 42% 28%; /* Rich deep walnut brown */
+    --primary-foreground: 36 28% 97%;
+
+    --secondary: 30 20% 92%; /* Warm neutral stone */
+    --secondary-foreground: 24 10% 15%;
+
+    --muted: 30 15% 93%;
+    --muted-foreground: 24 8% 45%;
+
+    --accent: 32 35% 88%;
+    --accent-foreground: 28 42% 25%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 15% 86%;
+    --input: 30 15% 86%;
+    --ring: 28 42% 28%;
+
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-wood-200 selection:text-wood-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+}

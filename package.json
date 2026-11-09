@@ -1,0 +1,30 @@
+{
+  "name": "furniture-housing-erp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter @furniture/* dev",
+    "dev:api": "pnpm --filter @furniture/api dev",
+    "dev:web": "pnpm --filter @furniture/web dev",
+    "build": "pnpm --filter @furniture/shared build && pnpm --filter @furniture/api build && pnpm --filter @furniture/web build",
+    "test": "pnpm --recursive run test",
+    "lint": "pnpm --recursive run lint",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @furniture/api prisma:migrate",
+    "db:seed": "pnpm --filter @furniture/api prisma:seed",
+    "db:studio": "pnpm --filter @furniture/api prisma:studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}
