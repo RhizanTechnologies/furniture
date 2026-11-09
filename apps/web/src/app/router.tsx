@@ -6,6 +6,9 @@ import { BranchesPage } from '@/pages/BranchesPage';
 import { CatalogPage } from '@/pages/CatalogPage';
 import { MyBranchPage } from '@/pages/MyBranchPage';
 import { ShowroomPage } from '@/pages/ShowroomPage';
+import { CustomersPage } from '@/pages/CustomersPage';
+import { OrdersPage } from '@/pages/OrdersPage';
+import { OrderStagesPage } from '@/pages/OrderStagesPage';
 import { HealthPage } from '@/pages/HealthPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { UserRole } from '@furniture/shared';
@@ -26,6 +29,22 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'orders',
+        element: <OrdersPage />,
+      },
+      {
+        path: 'customers',
+        element: <CustomersPage />,
+      },
+      {
+        path: 'order-stages',
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.OWNER]}>
+            <OrderStagesPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'catalog',

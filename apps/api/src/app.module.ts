@@ -6,6 +6,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ProductsModule } from './modules/products/products.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { OrderStagesModule } from './modules/order-stages/order-stages.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { ProductsModule } from './modules/products/products.module';
     BranchesModule,
     StorageModule,
     ProductsModule,
+    CustomersModule,
+    OrderStagesModule,
+    OrdersModule,
     HealthModule,
   ],
 })

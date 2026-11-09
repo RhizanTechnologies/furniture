@@ -1,6 +1,17 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, Activity, Store, Building2, MapPin, LogOut, User } from 'lucide-react';
+import {
+  Armchair,
+  Activity,
+  Store,
+  Building2,
+  MapPin,
+  LogOut,
+  User,
+  ShoppingBag,
+  Users,
+  Layers,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +29,9 @@ export const TopNav: React.FC = () => {
 
   const navLinks = [
     { to: '/', label: 'Dashboard', icon: Activity, show: true },
+    { to: '/orders', label: 'Orders', icon: ShoppingBag, show: true },
+    { to: '/customers', label: 'Customers', icon: Users, show: true },
+    { to: '/order-stages', label: 'Stages', icon: Layers, show: isOwner },
     { to: '/showroom', label: 'Showroom', icon: Store, show: true },
     { to: '/catalog', label: 'Catalog', icon: Armchair, show: isOwner },
     { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
