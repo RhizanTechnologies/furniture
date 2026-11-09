@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ProductDto, ProductImageDto } from '@furniture/shared';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/api-client';
+import { db, OfflineImageRecord } from '@/lib/db';
+import { syncEngine } from '@/lib/sync-engine';
 import {
   UploadCloud,
   X,
@@ -13,6 +15,7 @@ import {
   Loader2,
   Camera,
   Image as ImageIcon,
+  Clock,
 } from 'lucide-react';
 
 interface ImageUploaderProps {
@@ -26,10 +29,47 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [offlinePendingImages, setOfflinePendingImages] = useState<
+    Array<{ id: string; previewUrl: string; fileName: string; status: string }>
+  >([]);
+
+  // Load offline pending images from IndexedDB
+  const loadOfflineImages = async () => {
+    try {
+      const records = await db.offlineImages
+        .where('productId')
+        .equals(product.id)
+        .toArray();
+
+      const items = records
+        .filter((r) => r.status === 'PENDING' || r.status === 'UPLOADING')
+        .map((r) => ({
+          id: r.id,
+          previewUrl: URL.createObjectURL(r.blob),
+          fileName: r.fileName,
+          status: r.status,
+        }));
+      setOfflinePendingImages(items);
+    } catch (e) {
+      console.error('Failed to load offline images', e);
+    }
+  };
+
+  useEffect(() => {
+    loadOfflineImages();
+    const unsub = syncEngine.subscribe(() => {
+      loadOfflineImages();
+    });
+    return unsub;
+  }, [product.id]);
 
   // Upload Mutation
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      if (!navigator.onLine) {
+        throw new Error('OFFLINE_MODE');
+      }
+
       const formData = new FormData();
       formData.append('image', file);
 
@@ -50,6 +90,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product', product.id] });
       handleClearSelection();
+    },
+    onError: async (err: any) => {
+      // If offline or network error, safely store Blob in IndexedDB
+      if (selectedFile) {
+        await syncEngine.enqueueImage(selectedFile, selectedFile.name, product.id);
+        await loadOfflineImages();
+        handleClearSelection();
+      }
     },
   });
 
@@ -123,10 +171,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
     }
   };
 
-  const handleStartUpload = () => {
-    if (selectedFile) {
-      uploadMutation.mutate(selectedFile);
+  const handleStartUpload = async () => {
+    if (!selectedFile) return;
+
+    if (!navigator.onLine) {
+      // Offline: save Blob directly to IndexedDB
+      await syncEngine.enqueueImage(selectedFile, selectedFile.name, product.id);
+      await loadOfflineImages();
+      handleClearSelection();
+      return;
     }
+
+    uploadMutation.mutate(selectedFile);
   };
 
   const backendHost = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1').replace(
@@ -159,17 +215,19 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
         />
 
         {!selectedFile ? (
-          <div className="space-y-2">
-            <div className="mx-auto h-12 w-12 rounded-full bg-wood-100 flex items-center justify-center text-wood-700">
-              <UploadCloud className="h-6 w-6" />
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <div className="p-3 bg-wood-100 rounded-full text-wood-800">
+              <Camera className="w-8 h-8" />
             </div>
-            <div className="text-sm font-medium text-charcoal-800">
-              Drag and drop a photo here, or browse files
+            <div>
+              <p className="text-sm font-medium text-wood-900">
+                Drag and drop your workshop photo here, or browse
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                JPEG, PNG, or WebP up to 5MB (Offline capture supported)
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Supports JPEG, PNG, and WebP (up to 5MB). Automatically converted and resized.
-            </p>
-            <div className="pt-2 flex justify-center gap-2">
+            <div className="flex gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
@@ -177,44 +235,39 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
                 onClick={() => fileInputRef.current?.click()}
                 className="space-x-1.5"
               >
-                <ImageIcon className="h-4 w-4" />
+                <UploadCloud className="w-4 h-4" />
                 <span>Select Photo</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="space-x-1.5 sm:hidden"
-              >
-                <Camera className="h-4 w-4" />
-                <span>Camera</span>
               </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="relative mx-auto max-w-[200px] rounded-lg overflow-hidden border border-wood-200 shadow-sm">
-              <img
-                src={previewUrl!}
-                alt="Selected preview"
-                className="w-full h-36 object-cover"
-              />
-              <button
-                type="button"
-                onClick={handleClearSelection}
-                className="absolute top-1 right-1 p-1 rounded-full bg-black/60 text-white hover:bg-black/80"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+          <div className="flex flex-col items-center space-y-4">
+            {previewUrl && (
+              <div className="relative rounded-lg overflow-hidden border border-wood-200 shadow-sm max-w-xs">
+                <img
+                  src={previewUrl}
+                  alt="Selected preview"
+                  className="w-full h-48 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  className="absolute top-2 right-2 p-1 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • {selectedFile.type}
+              </p>
             </div>
-            <div className="text-xs text-charcoal-700 font-medium truncate max-w-xs mx-auto">
-              {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-            </div>
-            <div className="flex justify-center space-x-2 pt-1">
+            <div className="flex gap-2">
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={handleClearSelection}
                 disabled={uploadMutation.isPending}
@@ -230,113 +283,120 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ product }) => {
               >
                 {uploadMutation.isPending ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Processing & Uploading...</span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-3.5 w-3.5" />
-                    <span>Upload to Storage</span>
+                    <UploadCloud className="w-4 h-4" />
+                    <span>{navigator.onLine ? 'Upload Image' : 'Save Locally (Offline)'}</span>
                   </>
                 )}
               </Button>
             </div>
           </div>
         )}
-
-        {validationError && (
-          <div className="mt-3 p-2 rounded bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-center space-x-1.5">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-            <span>{validationError}</span>
-          </div>
-        )}
-
-        {uploadMutation.isError && (
-          <div className="mt-3 p-2 rounded bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-center space-x-1.5">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-            <span>{(uploadMutation.error as any)?.message || 'Upload failed.'}</span>
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              onClick={handleStartUpload}
-              className="text-xs text-red-800 underline p-0 h-auto ml-1"
-            >
-              Retry
-            </Button>
-          </div>
-        )}
       </div>
 
-      {/* Gallery of Existing Images */}
-      <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-3">
-          Product Gallery ({product.images?.length || 0} Photos)
+      {validationError && (
+        <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{validationError}</span>
+        </div>
+      )}
+
+      {/* Offline Pending Images Section */}
+      {offlinePendingImages.length > 0 && (
+        <div className="space-y-3 p-3 bg-amber-500/10 rounded-lg border border-amber-300 dark:border-amber-800">
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
+            <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+            <span>Locally Saved Photos ({offlinePendingImages.length}) — Pending Sync</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {offlinePendingImages.map((img) => (
+              <div
+                key={img.id}
+                className="relative rounded-lg overflow-hidden border border-amber-300 bg-background shadow-sm"
+              >
+                <img
+                  src={img.previewUrl}
+                  alt={img.fileName}
+                  className="w-full h-28 object-cover opacity-90"
+                />
+                <div className="p-1.5 bg-background/90 text-[10px] font-medium flex items-center justify-between">
+                  <span className="truncate">{img.fileName}</span>
+                  <Badge variant="outline" className="text-[9px] py-0 px-1 bg-amber-100 text-amber-800">
+                    Pending
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Existing Confirmed Product Gallery */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+          <ImageIcon className="w-4 h-4" />
+          <span>Confirmed Product Gallery ({product.images?.length || 0})</span>
         </h4>
 
         {(!product.images || product.images.length === 0) ? (
-          <p className="text-xs text-muted-foreground italic">
-            No photographs uploaded yet for this product.
+          <p className="text-sm text-muted-foreground italic py-3 text-center border border-dashed rounded-lg">
+            No confirmed images yet for this product.
           </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {product.images.map((img) => {
-              const fullImgUrl = img.imageUrl.startsWith('http')
+              const fullUrl = img.imageUrl.startsWith('http')
                 ? img.imageUrl
                 : `${backendHost}${img.imageUrl}`;
 
               return (
                 <div
                   key={img.id}
-                  className="group relative rounded-lg border border-wood-200 overflow-hidden bg-white shadow-sm flex flex-col"
+                  className="group relative rounded-lg overflow-hidden border border-wood-200 bg-card shadow-sm"
                 >
-                  <div className="h-28 w-full relative bg-wood-100">
-                    <img
-                      src={fullImgUrl}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {img.isPrimary && (
-                      <Badge
-                        variant="wood"
-                        className="absolute top-1.5 left-1.5 text-[10px] space-x-1 shadow"
-                      >
-                        <Star className="h-3 w-3 fill-wood-700 text-wood-700" />
+                  <img
+                    src={fullUrl}
+                    alt={product.name}
+                    className="w-full h-32 object-cover transition-transform duration-200 group-hover:scale-105"
+                  />
+                  {img.isPrimary && (
+                    <div className="absolute top-1.5 left-1.5">
+                      <Badge className="bg-wood-800 text-wood-50 text-[10px] px-1.5 py-0.5 shadow-sm space-x-1">
+                        <Star className="w-3 h-3 fill-wood-300 text-wood-300" />
                         <span>Primary</span>
                       </Badge>
-                    )}
-                  </div>
-
-                  <div className="p-2 flex items-center justify-between bg-wood-50/50 text-xs">
-                    {!img.isPrimary ? (
-                      <button
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    {!img.isPrimary && (
+                      <Button
                         type="button"
+                        size="sm"
+                        variant="secondary"
                         onClick={() => setPrimaryMutation.mutate(img.id)}
                         disabled={setPrimaryMutation.isPending}
-                        className="text-[11px] text-wood-800 hover:underline flex items-center space-x-1 font-medium"
+                        className="h-8 px-2 text-xs"
+                        title="Set as Primary"
                       >
-                        <Star className="h-3 w-3" />
-                        <span>Make Primary</span>
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground font-semibold">
-                        Default Cover
-                      </span>
+                        <Star className="w-3.5 h-3.5 mr-1" />
+                        Primary
+                      </Button>
                     )}
-
-                    <button
+                    <Button
                       type="button"
-                      onClick={() => {
-                        if (confirm('Delete this photograph from storage?')) {
-                          deleteMutation.mutate(img.id);
-                        }
-                      }}
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteMutation.mutate(img.id)}
                       disabled={deleteMutation.isPending}
-                      className="text-charcoal-400 hover:text-red-600 transition-colors p-1"
-                      title="Delete photograph"
+                      className="h-8 w-8 p-0"
+                      title="Delete Image"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
                 </div>
               );

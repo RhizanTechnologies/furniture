@@ -23,8 +23,11 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { RecordSyncBadge } from '@/components/ui/RecordSyncBadge';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
+import { db } from '@/lib/db';
+import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
 import {
   DollarSign,
@@ -60,19 +63,90 @@ export const FinancialPage: React.FC = () => {
     queryFn: () => apiClient<FinancialSummaryDto>('/financial/summary'),
   });
 
-  // 2. Fetch Payments
-  const { data: payments = [], isLoading: isPaymentsLoading } = useQuery<PaymentDto[]>({
+  // 2. Fetch Payments with Dexie cache & pending local records
+  const { data: payments = [], isLoading: isPaymentsLoading } = useQuery<Array<PaymentDto & { isPendingSync?: boolean }>>({
     queryKey: ['payments'],
-    queryFn: () => apiClient<PaymentDto[]>('/payments'),
+    queryFn: async (): Promise<Array<PaymentDto & { isPendingSync?: boolean }>> => {
+      try {
+        const serverPayments = await apiClient<PaymentDto[]>('/payments');
+        for (const p of serverPayments) {
+          await db.payments.put({
+            id: p.id,
+            orderId: p.orderId,
+            amount: p.amount,
+            paymentType: p.paymentType,
+            paymentMethod: p.paymentMethod,
+            referenceNumber: p.referenceNumber,
+            paymentDate: p.paymentDate,
+            isPendingSync: false,
+          });
+        }
+        const localPending = await db.payments.filter((p) => p.isPendingSync === true).toArray();
+        const pendingMapped = localPending.map((p) => ({
+          ...p,
+          recordedByUserId: 'local-device',
+          orderNumber: 'LOCAL-PENDING',
+          customerName: 'Pending Sync Customer',
+          branchName: 'Local Branch',
+          recordedByUserName: 'Current Device',
+          isPendingSync: true,
+        }));
+        return [...pendingMapped, ...serverPayments] as any;
+      } catch (e) {
+        const local = await db.payments.toArray();
+        return local.map((p) => ({
+          ...p,
+          recordedByUserId: 'local-device',
+          orderNumber: 'LOCAL-OFFLINE',
+          customerName: 'Offline Record',
+          branchName: 'Local Branch',
+          recordedByUserName: 'Offline Staff',
+          isPendingSync: p.isPendingSync,
+        })) as any;
+      }
+    },
   });
 
-  // 3. Fetch Expenses
-  const { data: expenses = [], isLoading: isExpensesLoading } = useQuery<ExpenseDto[]>({
+  // 3. Fetch Expenses with Dexie cache & pending local records
+  const { data: expenses = [], isLoading: isExpensesLoading } = useQuery<Array<ExpenseDto & { isPendingSync?: boolean }>>({
     queryKey: ['expenses', selectedCategory],
-    queryFn: () => {
+    queryFn: async (): Promise<Array<ExpenseDto & { isPendingSync?: boolean }>> => {
       const params = new URLSearchParams();
       if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
-      return apiClient<ExpenseDto[]>(`/expenses?${params.toString()}`);
+
+      try {
+        const serverExpenses = await apiClient<ExpenseDto[]>(`/expenses?${params.toString()}`);
+        for (const exp of serverExpenses) {
+          await db.expenses.put({
+            id: exp.id,
+            branchId: exp.branchId,
+            category: exp.category,
+            amount: exp.amount,
+            expenseDate: exp.expenseDate,
+            description: exp.description,
+            receiptRef: exp.receiptRef,
+            isPendingSync: false,
+          });
+        }
+        const localPending = await db.expenses.filter((e) => e.isPendingSync === true).toArray();
+        const pendingMapped = localPending.map((e) => ({
+          ...e,
+          recordedByUserId: 'local-device',
+          branchName: 'Local Branch',
+          recordedByUserName: 'Current Device',
+          isPendingSync: true,
+        }));
+        return [...pendingMapped, ...serverExpenses] as any;
+      } catch (e) {
+        const local = await db.expenses.toArray();
+        return local.map((e) => ({
+          ...e,
+          recordedByUserId: 'local-device',
+          branchName: 'Local Branch',
+          recordedByUserName: 'Offline Staff',
+          isPendingSync: e.isPendingSync,
+        })) as any;
+      }
     },
   });
 
@@ -155,6 +229,73 @@ export const FinancialPage: React.FC = () => {
       setActionError(err.message || 'Failed to record expense');
     },
   });
+
+  const handlePaymentSubmit = async (data: CreatePaymentInput) => {
+    if (!navigator.onLine) {
+      const tempId = `temp-pay-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'PAYMENT',
+        action: 'CREATE',
+        payload: data,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setIsPaymentOpen(false);
+      paymentForm.reset();
+      return;
+    }
+
+    try {
+      await paymentMutation.mutateAsync(data);
+    } catch (err: any) {
+      const tempId = `temp-pay-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'PAYMENT',
+        action: 'CREATE',
+        payload: data,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setIsPaymentOpen(false);
+      paymentForm.reset();
+    }
+  };
+
+  const handleExpenseSubmit = async (data: CreateExpenseInput) => {
+    const payload = {
+      ...data,
+      branchId: data.branchId ? data.branchId : null,
+    };
+
+    if (!navigator.onLine) {
+      const tempId = `temp-exp-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'EXPENSE',
+        action: 'CREATE',
+        payload,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      setIsExpenseOpen(false);
+      expenseForm.reset();
+      return;
+    }
+
+    try {
+      await expenseMutation.mutateAsync(data);
+    } catch (err: any) {
+      const tempId = `temp-exp-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'EXPENSE',
+        action: 'CREATE',
+        payload,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      setIsExpenseOpen(false);
+      expenseForm.reset();
+    }
+  };
 
   // Filtered lists
   const ordersWithBalance = activeOrders.filter((o) => o.outstandingBalance > 0);
@@ -397,6 +538,7 @@ export const FinancialPage: React.FC = () => {
                     <TableHead>Payment Date</TableHead>
                     <TableHead>Order #</TableHead>
                     <TableHead>Customer</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Amount (ETB)</TableHead>
                     <TableHead className="text-center">Type</TableHead>
                     <TableHead>Method</TableHead>
@@ -415,6 +557,9 @@ export const FinancialPage: React.FC = () => {
                       </TableCell>
                       <TableCell className="font-medium text-xs text-stone-900">
                         {p.customerName}
+                      </TableCell>
+                      <TableCell>
+                        <RecordSyncBadge isPendingSync={p.isPendingSync} />
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold text-sm text-emerald-800">
                         {formatCurrency(p.amount)}
@@ -506,6 +651,7 @@ export const FinancialPage: React.FC = () => {
                     <TableHead>Date</TableHead>
                     <TableHead>Location / Branch</TableHead>
                     <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-right">Amount (ETB)</TableHead>
                     <TableHead>Receipt / Voucher Ref</TableHead>
@@ -525,6 +671,9 @@ export const FinancialPage: React.FC = () => {
                         <Badge variant="outline" className="text-xs">
                           {e.category}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <RecordSyncBadge isPendingSync={e.isPendingSync} />
                       </TableCell>
                       <TableCell className="text-xs text-stone-800 max-w-xs truncate">
                         {e.description}
@@ -610,7 +759,7 @@ export const FinancialPage: React.FC = () => {
           </DialogHeader>
 
           <form
-            onSubmit={paymentForm.handleSubmit((data) => paymentMutation.mutate(data))}
+            onSubmit={paymentForm.handleSubmit(handlePaymentSubmit)}
             className="space-y-4"
           >
             <div>
@@ -737,7 +886,7 @@ export const FinancialPage: React.FC = () => {
           </DialogHeader>
 
           <form
-            onSubmit={expenseForm.handleSubmit((data) => expenseMutation.mutate(data))}
+            onSubmit={expenseForm.handleSubmit(handleExpenseSubmit)}
             className="space-y-4"
           >
             {isOwner && (

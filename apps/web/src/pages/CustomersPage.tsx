@@ -17,7 +17,10 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { RecordSyncBadge } from '@/components/ui/RecordSyncBadge';
 import { apiClient } from '@/lib/api-client';
+import { db } from '@/lib/db';
+import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
 import {
   UserPlus,
@@ -36,13 +39,58 @@ export const CustomersPage: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
-  // Fetch customers
-  const { data: customers, isLoading, error, refetch } = useQuery<CustomerDto[]>({
+  // Fetch customers with Dexie cache & local pending sync records
+  const { data: customers, isLoading, error, refetch } = useQuery<Array<CustomerDto & { isPendingSync?: boolean }>>({
     queryKey: ['customers', searchTerm],
-    queryFn: () =>
-      apiClient<CustomerDto[]>(
-        `/customers${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`,
-      ),
+    queryFn: async () => {
+      try {
+        const serverCustomers = await apiClient<CustomerDto[]>(
+          `/customers${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`,
+        );
+        // Cache server records in IndexedDB
+        for (const c of serverCustomers) {
+          await db.customers.put({
+            id: c.id,
+            fullName: c.fullName,
+            phone: c.phone,
+            email: c.email,
+            address: c.address,
+            notes: c.notes,
+            branchId: c.branchId,
+            isPendingSync: false,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          });
+        }
+        // Include any local pending customers
+        const pending = await db.customers.filter((c) => c.isPendingSync === true).toArray();
+        const pendingMapped: Array<CustomerDto & { isPendingSync?: boolean }> = pending.map((p) => ({
+          ...p,
+          ordersCount: 0,
+          totalSpent: 0,
+          outstandingBalance: 0,
+          isPendingSync: true,
+        }));
+
+        return [...pendingMapped, ...serverCustomers];
+      } catch (e) {
+        // Fallback to IndexedDB
+        const local = await db.customers.toArray();
+        const filtered = local.filter(
+          (c) =>
+            !searchTerm ||
+            c.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.phone.includes(searchTerm),
+        );
+        return filtered.map((c) => ({
+          ...c,
+          ordersCount: 0,
+          totalSpent: 0,
+          outstandingBalance: 0,
+          isPendingSync: c.isPendingSync,
+        }));
+      }
+    },
   });
 
   // Fetch selected customer details
@@ -72,13 +120,56 @@ export const CustomersPage: React.FC = () => {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    onSuccess: (newCustomer) => {
+  });
+
+  const handleFormSubmit = async (data: CreateCustomerInput) => {
+    if (!navigator.onLine) {
+      // Offline: Enqueue in outbox & save to Dexie
+      const tempId = `temp-cust-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'CUSTOMER',
+        action: 'CREATE',
+        payload: data,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      setIsCreateOpen(false);
+      createForm.reset();
+      return;
+    }
+
+    try {
+      const newCustomer = await createMutation.mutateAsync(data);
+      await db.customers.put({
+        id: newCustomer.id,
+        fullName: newCustomer.fullName,
+        phone: newCustomer.phone,
+        email: newCustomer.email,
+        address: newCustomer.address,
+        notes: newCustomer.notes,
+        branchId: newCustomer.branchId,
+        isPendingSync: false,
+        createdAt: newCustomer.createdAt,
+        updatedAt: newCustomer.updatedAt,
+      });
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       setIsCreateOpen(false);
       createForm.reset();
       setSelectedCustomerId(newCustomer.id);
-    },
-  });
+    } catch (err: any) {
+      // Network failure during submit: save locally
+      const tempId = `temp-cust-${crypto.randomUUID()}`;
+      await syncEngine.enqueueMutation({
+        entityType: 'CUSTOMER',
+        action: 'CREATE',
+        payload: data,
+        tempEntityId: tempId,
+      });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      setIsCreateOpen(false);
+      createForm.reset();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -99,151 +190,165 @@ export const CustomersPage: React.FC = () => {
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by customer name, phone, or email..."
+              placeholder="Search by customer name or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9"
+              className="pl-9 bg-background/50 border-wood-200"
             />
           </div>
         </CardContent>
       </Card>
 
-      {isLoading && <LoadingState message="Loading registered customers..." />}
-
-      {error && (
-        <ErrorState
-          title="Failed to Load Customers"
-          message={(error as any)?.message || 'An error occurred while fetching customer records.'}
-          onRetry={() => refetch()}
-        />
-      )}
-
       {/* Customer Registry Table */}
-      {customers && (
-        <Card className="border-wood-200/90 overflow-hidden">
-          <CardHeader className="py-3 px-5 border-b border-wood-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Customers ({customers.length})</CardTitle>
-          </CardHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer Name</TableHead>
-                <TableHead>Phone Number</TableHead>
-                <TableHead className="hidden md:table-cell">Address</TableHead>
-                <TableHead className="hidden sm:table-cell">Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
-                <TableHead>Outstanding Balance</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.map((cust) => (
-                <TableRow key={cust.id}>
-                  <TableCell className="font-semibold text-charcoal-900">
-                    <div>{cust.fullName}</div>
-                    {cust.email && (
-                      <div className="text-[11px] text-muted-foreground">{cust.email}</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">{cust.phone}</TableCell>
-                  <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
-                    {cust.address || '—'}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="wood" className="text-[10px]">
-                      {cust.ordersCount || 0} Orders
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {formatCurrency(cust.totalSpent || 0)}
-                  </TableCell>
-                  <TableCell>
-                    {(cust.outstandingBalance || 0) > 0 ? (
-                      <span className="font-semibold text-amber-700">
-                        {formatCurrency(cust.outstandingBalance || 0)}
-                      </span>
-                    ) : (
-                      <Badge variant="success" className="text-[10px]">
-                        Cleared
+      <Card className="border-wood-200">
+        <CardHeader className="pb-3 border-b border-wood-100">
+          <CardTitle className="text-lg">Registered Clients Directory</CardTitle>
+          <CardDescription>
+            Master client record for quotation delivery, progress updates, and payment reconciliation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <LoadingState message="Loading registered showroom customers..." />
+          ) : !customers || customers.length === 0 ? (
+            <div className="text-center py-12">
+              <ShoppingBag className="mx-auto h-12 w-12 text-wood-300" />
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">No Customers Found</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {searchTerm
+                  ? 'No clients match your filter criteria.'
+                  : 'Start by registering your first showroom walk-in client.'}
+              </p>
+              <div className="mt-6">
+                <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+                  <UserPlus className="mr-1.5 h-4 w-4" />
+                  Register Customer
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-wood-50/50">
+                  <TableHead>Customer Name</TableHead>
+                  <TableHead>Phone Number</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Address</TableHead>
+                  <TableHead className="hidden sm:table-cell">Orders</TableHead>
+                  <TableHead>Total Spent</TableHead>
+                  <TableHead>Outstanding Balance</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((cust) => (
+                  <TableRow key={cust.id}>
+                    <TableCell className="font-semibold text-charcoal-900">
+                      <div>{cust.fullName}</div>
+                      {cust.email && (
+                        <div className="text-[11px] text-muted-foreground">{cust.email}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">{cust.phone}</TableCell>
+                    <TableCell>
+                      <RecordSyncBadge isPendingSync={cust.isPendingSync} />
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
+                      {cust.address || '—'}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge variant="wood" className="text-[10px]">
+                        {cust.ordersCount || 0} Orders
                       </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedCustomerId(cust.id)}
-                      className="h-7 text-xs space-x-1 border-wood-300"
-                    >
-                      <Eye className="h-3 w-3" />
-                      <span>History</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {customers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No customers found matching your search term.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(cust.totalSpent || 0)}
+                    </TableCell>
+                    <TableCell>
+                      {(cust.outstandingBalance || 0) > 0 ? (
+                        <span className="font-semibold text-amber-700">
+                          {formatCurrency(cust.outstandingBalance || 0)}
+                        </span>
+                      ) : (
+                        <Badge variant="success" className="text-[10px]">
+                          Cleared
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedCustomerId(cust.id)}
+                        className="h-7 text-xs space-x-1 border-wood-300"
+                      >
+                        <Eye className="h-3 w-3" />
+                        <span>History</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Register Customer Dialog */}
+      {/* Customer Registration Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Register Walk-In Customer</DialogTitle>
+            <DialogTitle>Register Showroom Customer</DialogTitle>
             <DialogDescription>
-              Capture visitor information quickly. Phone number is validated to prevent duplicates.
+              Record client identity, contact information, and delivery location. Offline entries are preserved automatically.
             </DialogDescription>
           </DialogHeader>
 
           <FormProvider {...createForm}>
-            <form
-              onSubmit={createForm.handleSubmit((data) => createMutation.mutate(data))}
-              className="space-y-4 py-2"
-            >
-              <FormInput name="fullName" label="Full Name" placeholder="e.g. Almaz Ayana" />
+            <form onSubmit={createForm.handleSubmit(handleFormSubmit)} className="space-y-4">
+              <FormInput
+                name="fullName"
+                label="Full Name"
+                placeholder="e.g., Almaz Ayana"
+                required
+              />
+
               <FormInput
                 name="phone"
-                label="Primary Phone Number"
-                placeholder="e.g. +251911223344"
-                description="Used as primary deduplication key across orders."
+                label="Phone Number"
+                placeholder="e.g., +251 911 234567"
+                required
+                description="Unique identifier used for customer profile identification"
               />
+
               <FormInput
                 name="email"
-                label="Email (Optional)"
-                type="email"
-                placeholder="e.g. almaz@example.com"
+                label="Email Address"
+                placeholder="e.g., almaz@example.com (optional)"
               />
+
               <FormInput
                 name="address"
-                label="Physical / Delivery Address (Optional)"
-                placeholder="Subcity, Woreda, Landmark"
+                label="Physical Address / Sub-city"
+                placeholder="e.g., Bole Subcity, Woreda 03, Addis Ababa"
               />
+
               <FormInput
                 name="notes"
-                label="Intake Remarks (Optional)"
-                placeholder="Wood preferences, architectural drawings, etc."
+                label="Client Notes"
+                placeholder="e.g., Prefers solid walnut wood finish, referred by interior architect"
               />
 
-              {createMutation.isError && (
-                <p className="text-xs text-red-600 font-medium p-2 bg-red-50 rounded border border-red-200">
-                  {(createMutation.error as any)?.message || 'Failed to register customer.'}
-                </p>
-              )}
-
               <DialogFooter className="pt-2">
-                <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Saving...' : 'Register Customer'}
+                  {createMutation.isPending ? 'Saving...' : 'Save Customer'}
                 </Button>
               </DialogFooter>
             </form>
@@ -251,67 +356,101 @@ export const CustomersPage: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Customer Order History Dialog */}
+      {/* Customer Profile & Purchase History Modal */}
       <Dialog
         open={!!selectedCustomerId}
         onOpenChange={(open) => !open && setSelectedCustomerId(null)}
       >
-        {customerDetails && (
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{customerDetails.fullName}</DialogTitle>
-              <DialogDescription className="space-x-3 text-xs">
-                <span>{customerDetails.phone}</span>
-                {customerDetails.email && <span>• {customerDetails.email}</span>}
-                {customerDetails.address && <span>• {customerDetails.address}</span>}
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{customerDetails?.fullName}</span>
+              <Badge variant="wood">Profile Record</Badge>
+            </DialogTitle>
+            <DialogDescription>
+              Customer purchase summary and complete order progression history.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="space-y-4 py-2">
-              <div className="grid grid-cols-3 gap-3 p-3 rounded-lg bg-wood-50 border border-wood-200 text-center">
+          {isDetailsLoading ? (
+            <LoadingState message="Fetching client details..." />
+          ) : customerDetails ? (
+            <div className="space-y-6 pt-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-wood-50/50 p-4 rounded-lg border border-wood-100 text-xs">
                 <div>
-                  <div className="text-[11px] uppercase font-semibold text-muted-foreground">Orders</div>
-                  <div className="text-lg font-bold text-charcoal-900">{customerDetails.orders.length}</div>
+                  <span className="text-muted-foreground block">Phone</span>
+                  <span className="font-semibold">{customerDetails.phone}</span>
                 </div>
                 <div>
-                  <div className="text-[11px] uppercase font-semibold text-muted-foreground">Total Paid</div>
-                  <div className="text-lg font-bold text-emerald-800">
+                  <span className="text-muted-foreground block">Email</span>
+                  <span className="font-medium">{customerDetails.email || '—'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block">Address</span>
+                  <span className="font-medium">{customerDetails.address || '—'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block">Total Orders</span>
+                  <span className="font-semibold">{customerDetails.ordersCount || 0}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block">Total Revenue</span>
+                  <span className="font-semibold text-emerald-800">
                     {formatCurrency(customerDetails.totalSpent || 0)}
-                  </div>
+                  </span>
                 </div>
                 <div>
-                  <div className="text-[11px] uppercase font-semibold text-muted-foreground">Outstanding</div>
-                  <div className="text-lg font-bold text-amber-800">
+                  <span className="text-muted-foreground block">Outstanding</span>
+                  <span className="font-semibold text-amber-800">
                     {formatCurrency(customerDetails.outstandingBalance || 0)}
-                  </div>
+                  </span>
                 </div>
               </div>
 
+              {customerDetails.notes && (
+                <div className="p-3 bg-amber-50/50 rounded border border-amber-200/50 text-xs">
+                  <span className="font-semibold text-amber-900 block mb-0.5">Client Preferences & Notes:</span>
+                  <p className="text-amber-800">{customerDetails.notes}</p>
+                </div>
+              )}
+
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2">
-                  Order History
+                <h4 className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">
+                  Order History ({customerDetails.orders?.length || 0})
                 </h4>
-                {customerDetails.orders.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic py-3">
-                    No orders placed yet by this customer.
+                {(!customerDetails.orders || customerDetails.orders.length === 0) ? (
+                  <p className="text-xs text-muted-foreground italic py-4 text-center border border-dashed rounded">
+                    No orders logged for this customer yet.
                   </p>
                 ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="space-y-2">
                     {customerDetails.orders.map((ord: any) => (
                       <div
                         key={ord.id}
-                        className="p-3 rounded-md border border-wood-200 bg-white flex items-center justify-between text-xs"
+                        className="flex items-center justify-between p-3 border rounded-lg bg-card text-xs hover:border-wood-300"
                       >
                         <div>
-                          <div className="font-semibold text-wood-900">{ord.orderNumber}</div>
-                          <div className="text-muted-foreground">
-                            {new Date(ord.createdAt).toLocaleDateString()} • {ord.itemsCount} item(s)
+                          <div className="font-mono font-bold text-wood-900">{ord.orderNumber}</div>
+                          <div className="text-muted-foreground text-[11px]">
+                            {new Date(ord.createdAt).toLocaleDateString()} • {ord.items?.length || 0} items
                           </div>
                         </div>
-                        <div className="text-right space-y-1">
-                          <div className="font-bold">{formatCurrency(ord.totalAgreedPrice)}</div>
-                          <Badge variant="wood" className="text-[10px]">
-                            {ord.currentStage?.name || 'In Production'}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="font-medium">{formatCurrency(ord.totalAgreedPrice)}</div>
+                            <div className="text-[10px] text-muted-foreground">
+                              Paid: {formatCurrency(ord.totalPaid)}
+                            </div>
+                          </div>
+                          <Badge
+                            style={{
+                              backgroundColor: `${ord.currentStage?.colorHex || '#666'}15`,
+                              color: ord.currentStage?.colorHex || '#666',
+                              borderColor: `${ord.currentStage?.colorHex || '#666'}40`,
+                            }}
+                            className="border text-[10px]"
+                          >
+                            {ord.currentStage?.name || 'In Progress'}
                           </Badge>
                         </div>
                       </div>
@@ -320,12 +459,14 @@ export const CustomersPage: React.FC = () => {
                 )}
               </div>
             </div>
+          ) : null}
 
-            <DialogFooter>
-              <Button onClick={() => setSelectedCustomerId(null)}>Close</Button>
-            </DialogFooter>
-          </DialogContent>
-        )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedCustomerId(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

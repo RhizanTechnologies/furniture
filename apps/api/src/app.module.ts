@@ -12,6 +12,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { FinancialModule } from './modules/financial/financial.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { SyncModule } from './modules/sync/sync.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     InventoryModule,
     FinancialModule,
     AnalyticsModule,
+    SyncModule,
     HealthModule,
   ],
 })
