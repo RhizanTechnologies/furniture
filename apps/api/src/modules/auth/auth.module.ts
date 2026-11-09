@@ -13,7 +13,10 @@ import { BranchAccessGuard } from '../../common/guards/branch-access.guard';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('SESSION_SECRET', 'super_secret_session_key_change_in_production_32chars'),
+        secret:
+          config.get<string>('SESSION_SECRET') ||
+          config.get<string>('JWT_SECRET') ||
+          'super_secret_session_key_change_in_production_32chars',
         signOptions: { expiresIn: '7d' },
       }),
     }),
