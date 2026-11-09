@@ -241,3 +241,116 @@ export interface HealthCheckResponse {
   database: 'connected' | 'disconnected';
   uptimeSeconds: number;
 }
+
+export interface RawMaterialDto {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  unitOfMeasurement: string;
+  currentStockQuantity: number;
+  currentUnitCost: number;
+  stockValue: number;
+  reorderAlertQuantity?: number | null;
+  isLowStock: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRawMaterialDto {
+  code: string;
+  name: string;
+  category: string;
+  unitOfMeasurement: string;
+  initialStockQuantity?: number;
+  initialUnitCost?: number;
+  reorderAlertQuantity?: number | null;
+}
+
+export interface UpdateRawMaterialDto {
+  name?: string;
+  category?: string;
+  unitOfMeasurement?: string;
+  reorderAlertQuantity?: number | null;
+  isActive?: boolean;
+}
+
+export interface MaterialStockInDto {
+  id: string;
+  rawMaterialId: string;
+  rawMaterialName: string;
+  rawMaterialCode: string;
+  unitOfMeasurement: string;
+  branchId?: string | null;
+  branchName?: string | null;
+  receivedQuantity: number;
+  unitCost: number;
+  totalCost: number;
+  supplierInvoiceRef?: string | null;
+  receivedDate: string;
+  recordedByUserName: string;
+  recordedByUserId: string;
+}
+
+export interface CreateMaterialStockInDto {
+  rawMaterialId: string;
+  branchId?: string | null;
+  receivedQuantity: number;
+  unitCost: number;
+  supplierInvoiceRef?: string | null;
+  receivedDate?: string;
+}
+
+export interface MaterialConsumptionDto {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  rawMaterialId: string;
+  rawMaterialName: string;
+  rawMaterialCode: string;
+  unitOfMeasurement: string;
+  branchId?: string | null;
+  branchName?: string | null;
+  consumedQuantity: number;
+  unitCostAllocated: number;
+  totalMaterialCost: number;
+  consumedAt: string;
+  recordedByUserName: string;
+  recordedByUserId: string;
+}
+
+export interface CreateMaterialConsumptionDto {
+  orderId: string;
+  rawMaterialId: string;
+  branchId?: string | null;
+  consumedQuantity: number;
+  unit?: string | null;
+  notes?: string | null;
+}
+
+export interface StockValuationCategorySummary {
+  category: string;
+  itemCount: number;
+  totalQuantity: number;
+  totalStockValue: number;
+}
+
+export interface StockValuationDto {
+  totalStockValue: number;
+  totalItemsInStock: number;
+  lowStockCount: number;
+  stockLocation: string;
+  categories: StockValuationCategorySummary[];
+  materials: RawMaterialDto[];
+}
+
+export interface OrderMaterialCostDto {
+  orderId: string;
+  orderNumber: string;
+  totalAgreedPrice: number;
+  totalMaterialCost: number;
+  grossProfit: number;
+  grossMarginPercentage: number;
+  consumptions: MaterialConsumptionDto[];
+}

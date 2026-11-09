@@ -135,3 +135,48 @@ export const assignBranchAdminSchema = z.object({
 
 export type AssignBranchAdminInput = z.infer<typeof assignBranchAdminSchema>;
 
+export const createRawMaterialSchema = z.object({
+  code: z.string().min(2, 'Material code must be at least 2 characters').toUpperCase(),
+  name: z.string().min(2, 'Material name is required'),
+  category: z.string().min(2, 'Category is required'),
+  unitOfMeasurement: z.string().min(1, 'Unit of measurement is required'),
+  initialStockQuantity: z.coerce.number().min(0, 'Quantity cannot be negative').default(0),
+  initialUnitCost: z.coerce.number().min(0, 'Unit cost cannot be negative').default(0),
+  reorderAlertQuantity: z.coerce.number().min(0, 'Reorder threshold cannot be negative').optional().nullable(),
+});
+
+export type CreateRawMaterialInput = z.infer<typeof createRawMaterialSchema>;
+
+export const updateRawMaterialSchema = z.object({
+  name: z.string().min(2, 'Material name is required').optional(),
+  category: z.string().min(2, 'Category is required').optional(),
+  unitOfMeasurement: z.string().min(1, 'Unit of measurement is required').optional(),
+  reorderAlertQuantity: z.coerce.number().min(0, 'Reorder threshold cannot be negative').optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateRawMaterialInput = z.infer<typeof updateRawMaterialSchema>;
+
+export const createStockInSchema = z.object({
+  rawMaterialId: z.string().min(1, 'Material selection is required'),
+  branchId: z.string().optional().nullable(),
+  receivedQuantity: z.coerce.number().positive('Received quantity must be greater than 0'),
+  unitCost: z.coerce.number().min(0, 'Unit purchase cost cannot be negative'),
+  supplierInvoiceRef: z.string().optional().nullable(),
+  receivedDate: z.string().optional(),
+});
+
+export type CreateStockInInput = z.infer<typeof createStockInSchema>;
+
+export const createMaterialConsumptionSchema = z.object({
+  orderId: z.string().min(1, 'Order selection is required'),
+  rawMaterialId: z.string().min(1, 'Raw material is required'),
+  branchId: z.string().optional().nullable(),
+  consumedQuantity: z.coerce.number().positive('Consumed quantity must be greater than 0'),
+  unit: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+
+export type CreateMaterialConsumptionInput = z.infer<typeof createMaterialConsumptionSchema>;
+
+

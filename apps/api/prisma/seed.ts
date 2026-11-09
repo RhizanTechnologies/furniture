@@ -195,6 +195,108 @@ async function main() {
     });
   }
   console.log(`Successfully seeded ${initialProducts.length} furniture catalog products.`);
+
+  console.log('Seeding initial raw materials and opening inventory stock...');
+  const initialMaterials = [
+    {
+      code: 'MAT-WNZ-001',
+      name: 'Solid Wanza Hardwood Timber',
+      category: 'Timber',
+      unitOfMeasurement: 'Meter',
+      currentStockQuantity: 120.0,
+      currentUnitCost: 450.0,
+      reorderAlertQuantity: 20.0,
+    },
+    {
+      code: 'MAT-FAB-001',
+      name: 'Premium Velvet Upholstery Fabric',
+      category: 'Fabric',
+      unitOfMeasurement: 'Meter',
+      currentStockQuantity: 80.0,
+      currentUnitCost: 380.0,
+      reorderAlertQuantity: 15.0,
+    },
+    {
+      code: 'MAT-FOM-001',
+      name: 'High-Density Polyurethane Foam (40D)',
+      category: 'Foam',
+      unitOfMeasurement: 'Sheet',
+      currentStockQuantity: 35.0,
+      currentUnitCost: 1200.0,
+      reorderAlertQuantity: 5.0,
+    },
+    {
+      code: 'MAT-HRD-001',
+      name: 'Heavy-Duty Ball-Bearing Drawer Slides',
+      category: 'Hardware',
+      unitOfMeasurement: 'Set',
+      currentStockQuantity: 50.0,
+      currentUnitCost: 350.0,
+      reorderAlertQuantity: 10.0,
+    },
+    {
+      code: 'MAT-FIN-001',
+      name: 'Clear Satin Polyurethane Varnish',
+      category: 'Finishing',
+      unitOfMeasurement: 'Liter',
+      currentStockQuantity: 40.0,
+      currentUnitCost: 550.0,
+      reorderAlertQuantity: 8.0,
+    },
+    {
+      code: 'MAT-FST-001',
+      name: 'Assorted Furniture Screws & Dowels',
+      category: 'Hardware',
+      unitOfMeasurement: 'Box',
+      currentStockQuantity: 60.0,
+      currentUnitCost: 250.0,
+      reorderAlertQuantity: 12.0,
+    },
+  ];
+
+  for (const mat of initialMaterials) {
+    const rawMat = await prisma.rawMaterial.upsert({
+      where: { code: mat.code },
+      update: {
+        name: mat.name,
+        category: mat.category,
+        unitOfMeasurement: mat.unitOfMeasurement,
+        currentStockQuantity: mat.currentStockQuantity,
+        currentUnitCost: mat.currentUnitCost,
+        reorderAlertQuantity: mat.reorderAlertQuantity,
+      },
+      create: {
+        code: mat.code,
+        name: mat.name,
+        category: mat.category,
+        unitOfMeasurement: mat.unitOfMeasurement,
+        currentStockQuantity: mat.currentStockQuantity,
+        currentUnitCost: mat.currentUnitCost,
+        reorderAlertQuantity: mat.reorderAlertQuantity,
+        isActive: true,
+      },
+    });
+
+    // Check if initial stock-in exists
+    const existingStockIn = await prisma.materialStockIn.findFirst({
+      where: { rawMaterialId: rawMat.id, supplierInvoiceRef: 'INITIAL-OPENING-STOCK' },
+    });
+    if (!existingStockIn) {
+      await prisma.materialStockIn.create({
+        data: {
+          rawMaterialId: rawMat.id,
+          branchId: null,
+          receivedQuantity: mat.currentStockQuantity,
+          unitCost: mat.currentUnitCost,
+          totalCost: mat.currentStockQuantity * mat.currentUnitCost,
+          supplierInvoiceRef: 'INITIAL-OPENING-STOCK',
+          receivedDate: new Date(),
+          recordedByUserId: owner.id,
+        },
+      });
+    }
+  }
+  console.log(`Successfully seeded ${initialMaterials.length} raw materials with opening inventory.`);
 }
 
 main()

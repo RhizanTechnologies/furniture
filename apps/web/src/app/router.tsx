@@ -9,6 +9,7 @@ import { ShowroomPage } from '@/pages/ShowroomPage';
 import { CustomersPage } from '@/pages/CustomersPage';
 import { OrdersPage } from '@/pages/OrdersPage';
 import { OrderStagesPage } from '@/pages/OrderStagesPage';
+import { InventoryPage } from '@/pages/InventoryPage';
 import { HealthPage } from '@/pages/HealthPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { UserRole } from '@furniture/shared';
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
       {
         path: 'customers',
         element: <CustomersPage />,
+      },
+      {
+        path: 'inventory',
+        element: <InventoryPage />,
       },
       {
         path: 'order-stages',

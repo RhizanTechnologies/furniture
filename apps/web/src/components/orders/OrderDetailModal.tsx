@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { OrderDto, OrderStageDto } from '@furniture/shared';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  OrderDto,
+  OrderStageDto,
+  OrderMaterialCostDto,
+  RawMaterialDto,
+  CreateMaterialConsumptionDto,
+} from '@furniture/shared';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
@@ -17,6 +24,10 @@ import {
   DollarSign,
   AlertCircle,
   History,
+  Boxes,
+  Plus,
+  Percent,
+  TrendingUp,
 } from 'lucide-react';
 
 interface OrderDetailModalProps {
@@ -34,6 +45,28 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [targetStageId, setTargetStageId] = useState<string>('');
   const [transitionNotes, setTransitionNotes] = useState<string>('');
   const [transitionError, setTransitionError] = useState<string | null>(null);
+
+  // Material consumption form state
+  const [isConsumeOpen, setIsConsumeOpen] = useState(false);
+  const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
+  const [consumeQty, setConsumeQty] = useState<number>(1);
+  const [consumeUnit, setConsumeUnit] = useState<string>('');
+  const [consumeNotes, setConsumeNotes] = useState<string>('');
+  const [consumeError, setConsumeError] = useState<string | null>(null);
+
+  // 1. Fetch Order Material Costing
+  const { data: costing, refetch: refetchCosting } = useQuery<OrderMaterialCostDto>({
+    queryKey: ['order-costing', order?.id],
+    queryFn: () => apiClient<OrderMaterialCostDto>(`/inventory/orders/${order?.id}/costing`),
+    enabled: !!order?.id,
+  });
+
+  // 2. Fetch Raw Materials for consumption selection
+  const { data: materials = [] } = useQuery<RawMaterialDto[]>({
+    queryKey: ['raw-materials-dropdown'],
+    queryFn: () => apiClient<RawMaterialDto[]>('/inventory/materials'),
+    enabled: isConsumeOpen,
+  });
 
   const stageMutation = useMutation({
     mutationFn: (data: { toStageId: string; notes?: string }) =>
@@ -53,6 +86,28 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     },
   });
 
+  const consumptionMutation = useMutation({
+    mutationFn: (data: CreateMaterialConsumptionDto) =>
+      apiClient('/inventory/consumption', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order-costing', order?.id] });
+      queryClient.invalidateQueries({ queryKey: ['raw-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-valuation'] });
+      setIsConsumeOpen(false);
+      setSelectedMaterialId('');
+      setConsumeQty(1);
+      setConsumeUnit('');
+      setConsumeNotes('');
+      setConsumeError(null);
+    },
+    onError: (err: any) => {
+      setConsumeError(err.message || 'Failed to record material consumption.');
+    },
+  });
+
   if (!order) return null;
 
   const handleStageTransition = () => {
@@ -60,6 +115,21 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     stageMutation.mutate({
       toStageId: targetStageId,
       notes: transitionNotes || undefined,
+    });
+  };
+
+  const handleRecordConsumption = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMaterialId || consumeQty <= 0) {
+      setConsumeError('Please select a material and enter a positive quantity.');
+      return;
+    }
+    consumptionMutation.mutate({
+      orderId: order.id,
+      rawMaterialId: selectedMaterialId,
+      consumedQuantity: consumeQty,
+      unit: consumeUnit.trim() || undefined,
+      notes: consumeNotes.trim() || undefined,
     });
   };
 
@@ -101,103 +171,193 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-6 py-2">
-          {/* Customer & Branch Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-lg bg-wood-50/70 border border-wood-200 text-xs">
-            <div className="space-y-1">
-              <span className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
+          {/* Customer & Branch Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1">
+              <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <User className="h-3.5 w-3.5 text-wood-700" />
-                <span>{order.customer?.fullName}</span>
-              </span>
-              <div className="text-muted-foreground pl-5">{order.customer?.phone}</div>
+                <span>Customer Contact Information</span>
+              </div>
+              <p className="text-charcoal-900 font-medium">{order.customer?.fullName}</p>
+              <p className="text-charcoal-600">Phone: {order.customer?.phone}</p>
               {order.customer?.address && (
-                <div className="text-muted-foreground pl-5 truncate">
-                  {order.customer?.address}
-                </div>
+                <p className="text-charcoal-500">Address: {order.customer?.address}</p>
               )}
             </div>
 
-            <div className="space-y-1 sm:text-right">
-              <span className="font-semibold text-charcoal-800 flex items-center sm:justify-end space-x-1.5">
+            <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1">
+              <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <MapPin className="h-3.5 w-3.5 text-wood-700" />
-                <span>{order.branch?.name || 'Assigned Branch'}</span>
+                <span>Workshop Branch Tenancy</span>
+              </div>
+              <p className="text-charcoal-900 font-medium">
+                {order.branch?.name} ({order.branch?.code})
+              </p>
+              <p className="text-charcoal-600">Stock Mode: {order.branch?.stockMode}</p>
+              <p className="text-charcoal-500">Location: {order.branch?.address}</p>
+            </div>
+          </div>
+
+          {/* Authoritative Financial Balance Box */}
+          <div className="p-4 rounded-xl border border-wood-200 bg-gradient-to-r from-wood-50/70 to-cream-50/50">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-3 flex items-center space-x-1.5">
+              <DollarSign className="h-4 w-4 text-wood-700" />
+              <span>Authoritative Financial Summary</span>
+            </h4>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                  Agreed Price
+                </span>
+                <span className="font-mono text-base font-bold text-wood-950">
+                  {formatCurrency(order.totalAgreedPrice)}
+                </span>
+              </div>
+              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                  Total Paid
+                </span>
+                <span className="font-mono text-base font-bold text-emerald-700">
+                  {formatCurrency(order.totalPaid)}
+                </span>
+              </div>
+              <div className="p-2.5 bg-white/80 rounded-lg border border-wood-100 shadow-sm">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground block">
+                  Outstanding Balance
+                </span>
+                <span
+                  className={`font-mono text-base font-bold ${
+                    isFullyPaid ? 'text-emerald-600' : 'text-amber-800'
+                  }`}
+                >
+                  {formatCurrency(order.outstandingBalance)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Raw Material Consumption & Product Costing (Prompt 6) */}
+          <div className="p-4 rounded-xl border border-wood-200 bg-white shadow-sm space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-800 flex items-center space-x-1.5">
+                  <Boxes className="h-4 w-4 text-wood-700" />
+                  <span>Production Material Costing & Margin</span>
+                </h4>
+                <p className="text-[11px] text-muted-foreground">
+                  Frozen historical raw material costs allocated to this furniture order.
+                </p>
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsConsumeOpen(true)}
+                className="h-8 text-xs text-wood-800 border-wood-300 hover:bg-wood-50 space-x-1"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Log Material Usage</span>
+              </Button>
+            </div>
+
+            {/* Costing & Profitability Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
+                <span className="font-mono font-bold text-stone-900 text-sm">
+                  {formatCurrency(costing?.totalMaterialCost || 0)}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Agreed Selling</span>
+                <span className="font-mono font-bold text-stone-900 text-sm">
+                  {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
+                <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
+                <span className="font-mono font-bold text-emerald-900 text-sm">
+                  {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
+                <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
+                <span className="font-mono font-bold text-wood-900 text-sm">
+                  {costing?.grossMarginPercentage || 100}%
+                </span>
+              </div>
+            </div>
+
+            {/* Consumed Materials Table */}
+            {costing?.consumptions && costing.consumptions.length > 0 ? (
+              <div className="border rounded-md overflow-hidden text-xs">
+                <Table>
+                  <TableHeader className="bg-stone-50">
+                    <TableRow>
+                      <TableHead>Material</TableHead>
+                      <TableHead className="text-right">Qty Consumed</TableHead>
+                      <TableHead className="text-right">Allocated WAC Cost</TableHead>
+                      <TableHead className="text-right">Cost Contribution</TableHead>
+                      <TableHead>Logged By</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {costing.consumptions.map((c) => (
+                      <TableRow key={c.id}>
+                        <TableCell>
+                          <div className="font-semibold text-stone-900">{c.rawMaterialName}</div>
+                          <div className="font-mono text-[10px] text-muted-foreground">{c.rawMaterialCode}</div>
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {c.consumedQuantity} {c.unitOfMeasurement}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {formatCurrency(c.unitCostAllocated)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold text-wood-900">
+                          {formatCurrency(c.totalMaterialCost)}
+                        </TableCell>
+                        <TableCell className="text-stone-600 text-[11px]">
+                          {c.recordedByUserName}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic bg-stone-50 p-2.5 rounded border text-center">
+                No materials logged yet for this order. Click "Log Material Usage" as workshop staff assemble this order.
+              </p>
+            )}
+          </div>
+
+          {/* Order Stage Pipeline & Transition Controls */}
+          <div className="p-4 rounded-xl border border-wood-200 bg-white space-y-3">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center justify-between">
+              <span>Production Workflow Pipeline</span>
+              <span className="text-[10px] lowercase font-normal text-muted-foreground">
+                Move order through configured stages
               </span>
-              <div className="text-muted-foreground font-mono">
-                Stock Mode: {order.branch?.stockMode === 'MAIN_STOCK' ? 'Main Stock' : 'Branch Stock'}
-              </div>
-            </div>
-          </div>
+            </h4>
 
-          {/* Financial Breakdown Cards */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 rounded-lg border border-wood-200 bg-white">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground">
-                Agreed Total Price
-              </div>
-              <div className="text-lg font-bold text-charcoal-900 mt-1">
-                {formatCurrency(order.totalAgreedPrice)}
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg border border-wood-200 bg-white">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground">
-                Total Paid / Deposit
-              </div>
-              <div className="text-lg font-bold text-emerald-800 mt-1">
-                {formatCurrency(order.totalPaid)}
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg border border-wood-200 bg-white">
-              <div className="text-[10px] uppercase font-bold text-muted-foreground">
-                Outstanding Balance
-              </div>
-              <div className="text-lg font-bold mt-1">
-                {isFullyPaid ? (
-                  <span className="text-emerald-700 flex items-center space-x-1 text-sm font-semibold">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span>Settled</span>
-                  </span>
-                ) : (
-                  <span className="text-amber-800">
-                    {formatCurrency(order.outstandingBalance)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Visual Stage Pipeline */}
-          <div className="space-y-3 p-4 rounded-lg bg-wood-50/90 border border-wood-200">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Production Stage Progression
-              </h4>
-              <Badge variant="wood" className="text-[10px]">
-                Stage: {order.currentStage?.name}
-              </Badge>
-            </div>
-
-            {/* Stage Step Indicators */}
-            <div className="flex items-center overflow-x-auto py-2 gap-1.5 scrollbar-thin">
+            {/* Stage Progress Bar / Chips */}
+            <div className="flex flex-wrap items-center gap-1.5 py-1">
               {stages.map((st, idx) => {
-                const isCurrent = order.currentStageId === st.id;
-                const isPast =
-                  order.stageHistories?.some((h) => h.toStageId === st.id) && !isCurrent;
-
+                const isCurrent = st.id === order.currentStageId;
                 return (
-                  <div key={st.id} className="flex items-center shrink-0">
+                  <div key={st.id} className="flex items-center">
                     <div
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center space-x-1.5 transition-all ${
+                      className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                         isCurrent
-                          ? 'bg-wood-800 text-white border-wood-900 shadow-sm font-bold ring-2 ring-wood-400'
-                          : isPast
-                          ? 'bg-wood-200/70 text-wood-950 border-wood-300'
-                          : 'bg-white text-muted-foreground border-wood-200 opacity-60'
+                          ? 'border-wood-800 bg-wood-800 text-white shadow-sm ring-2 ring-wood-300'
+                          : 'border-wood-200 bg-wood-50/50 text-charcoal-600'
                       }`}
                     >
-                      <span className="h-4 w-4 rounded-full bg-black/10 flex items-center justify-center text-[10px]">
-                        {idx + 1}
-                      </span>
+                      <span
+                        className="w-2 h-2 rounded-full inline-block"
+                        style={{ backgroundColor: st.color }}
+                      />
                       <span>{st.name}</span>
                     </div>
                     {idx < stages.length - 1 && (
@@ -321,6 +481,100 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Log Material Consumption Modal */}
+      {isConsumeOpen && (
+        <Dialog open={isConsumeOpen} onOpenChange={setIsConsumeOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Log Material Consumption</DialogTitle>
+              <DialogDescription>
+                Deduct raw materials consumed from inventory and allocate frozen historical cost to Order {order.orderNumber}.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleRecordConsumption} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">
+                  Raw Material <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedMaterialId}
+                  onChange={(e) => setSelectedMaterialId(e.target.value)}
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  required
+                >
+                  <option value="">-- Choose Raw Material --</option>
+                  {materials.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({m.code}) — {m.currentStockQuantity} {m.unitOfMeasurement} available
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                    Quantity Consumed <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.001"
+                    min="0.001"
+                    value={consumeQty}
+                    onChange={(e) => setConsumeQty(parseFloat(e.target.value) || 0)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                    Custom Unit (Optional)
+                  </label>
+                  <Input
+                    placeholder="e.g. cm, m, sqft"
+                    value={consumeUnit}
+                    onChange={(e) => setConsumeUnit(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">
+                  Workshop Usage Notes
+                </label>
+                <Input
+                  placeholder="e.g. Table frame assembly and joinery"
+                  value={consumeNotes}
+                  onChange={(e) => setConsumeNotes(e.target.value)}
+                />
+              </div>
+
+              {consumeError && (
+                <p className="text-xs text-red-600 font-medium">{consumeError}</p>
+              )}
+
+              <DialogFooter className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsConsumeOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-wood-700 hover:bg-wood-800"
+                  disabled={consumptionMutation.isPending}
+                >
+                  {consumptionMutation.isPending ? 'Logging Usage...' : 'Confirm Consumption'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 };
