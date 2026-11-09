@@ -1,4 +1,4 @@
-import { UserRole, StockMode } from '../enums/index.js';
+import { UserRole, StockMode, PaymentType } from '../enums/index.js';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -353,4 +353,77 @@ export interface OrderMaterialCostDto {
   grossProfit: number;
   grossMarginPercentage: number;
   consumptions: MaterialConsumptionDto[];
+}
+
+export interface PaymentDto {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  customerName: string;
+  amount: number;
+  paymentType: PaymentType;
+  paymentMethod: string;
+  referenceNumber?: string | null;
+  paymentDate: string;
+  recordedByUserName: string;
+  recordedByUserId: string;
+  idempotencyKey?: string | null;
+}
+
+export interface CreatePaymentDto {
+  orderId: string;
+  amount: number;
+  paymentType?: PaymentType;
+  paymentMethod?: string;
+  referenceNumber?: string | null;
+  paymentDate?: string;
+  idempotencyKey?: string | null;
+}
+
+export interface ExpenseDto {
+  id: string;
+  branchId?: string | null;
+  branchName?: string | null;
+  category: string;
+  amount: number;
+  expenseDate: string;
+  description: string;
+  receiptRef?: string | null;
+  recordedByUserName: string;
+  recordedByUserId: string;
+  idempotencyKey?: string | null;
+}
+
+export interface CreateExpenseDto {
+  branchId?: string | null;
+  category: string;
+  amount: number;
+  description: string;
+  expenseDate?: string;
+  receiptRef?: string | null;
+  idempotencyKey?: string | null;
+}
+
+export interface BranchFinancialContribution {
+  branchId: string;
+  branchName: string;
+  totalOrdersValue: number;
+  totalCashCollected: number;
+  totalExpenses: number;
+  netContribution: number;
+}
+
+export interface FinancialSummaryDto {
+  period: string;
+  totalContractedRevenue: number;
+  totalEarnedRevenue: number;
+  totalCashCollected: number;
+  totalReceivables: number;
+  totalMaterialCost: number;
+  totalOperatingExpenses: number;
+  grossProfit: number;
+  grossMarginPercentage: number;
+  netProfit: number;
+  netMarginPercentage: number;
+  branchBreakdown: BranchFinancialContribution[];
 }

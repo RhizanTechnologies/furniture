@@ -10,6 +10,7 @@ import { CustomersPage } from '@/pages/CustomersPage';
 import { OrdersPage } from '@/pages/OrdersPage';
 import { OrderStagesPage } from '@/pages/OrderStagesPage';
 import { InventoryPage } from '@/pages/InventoryPage';
+import { FinancialPage } from '@/pages/FinancialPage';
 import { HealthPage } from '@/pages/HealthPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { UserRole } from '@furniture/shared';
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
       {
         path: 'inventory',
         element: <InventoryPage />,
+      },
+      {
+        path: 'finance',
+        element: <FinancialPage />,
       },
       {
         path: 'order-stages',

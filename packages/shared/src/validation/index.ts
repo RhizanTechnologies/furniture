@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserRole, StockMode } from '../enums/index.js';
+import { UserRole, StockMode, PaymentType } from '../enums/index.js';
 
 export const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -178,5 +178,30 @@ export const createMaterialConsumptionSchema = z.object({
 });
 
 export type CreateMaterialConsumptionInput = z.infer<typeof createMaterialConsumptionSchema>;
+
+export const createPaymentSchema = z.object({
+  orderId: z.string().min(1, 'Order selection is required'),
+  amount: z.coerce.number().positive('Payment amount must be greater than 0'),
+  paymentType: z.nativeEnum(PaymentType).default(PaymentType.PROGRESS_PAYMENT),
+  paymentMethod: z.string().min(1, 'Payment method is required').default('Cash'),
+  referenceNumber: z.string().optional().nullable(),
+  paymentDate: z.string().optional(),
+  idempotencyKey: z.string().optional().nullable(),
+});
+
+export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
+
+export const createExpenseSchema = z.object({
+  branchId: z.string().optional().nullable(),
+  category: z.string().min(2, 'Category is required'),
+  amount: z.coerce.number().positive('Expense amount must be greater than 0'),
+  description: z.string().min(2, 'Description is required'),
+  expenseDate: z.string().optional(),
+  receiptRef: z.string().optional().nullable(),
+  idempotencyKey: z.string().optional().nullable(),
+});
+
+export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
+
 
 
