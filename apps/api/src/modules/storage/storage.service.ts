@@ -30,8 +30,10 @@ export class StorageService implements OnModuleInit {
   }
 
   onModuleInit() {
+    const isTest = process.env.NODE_ENV === 'test';
     const cloudinaryUrl =
-      this.config.get<string>('CLOUDINARY_URL') || process.env.CLOUDINARY_URL;
+      !isTest &&
+      (this.config.get<string>('CLOUDINARY_URL') || process.env.CLOUDINARY_URL);
 
     if (cloudinaryUrl) {
       cloudinary.config({

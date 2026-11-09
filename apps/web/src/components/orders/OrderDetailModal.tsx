@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 import {
   OrderDto,
   OrderStageDto,
@@ -42,6 +43,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  const { isOwner } = useAuth();
   const [targetStageId, setTargetStageId] = useState<string>('');
   const [transitionNotes, setTransitionNotes] = useState<string>('');
   const [transitionError, setTransitionError] = useState<string | null>(null);
@@ -260,8 +262,8 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </Button>
             </div>
 
-            {/* Costing & Profitability Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            {/* Costing & Profitability Pills (Owner sees Gross Profit/Margin) */}
+            <div className={`grid ${isOwner ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'} gap-2 pt-1`}>
               <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
                 <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
                 <span className="font-mono font-bold text-stone-900 text-sm">
@@ -274,18 +276,22 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
-                <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
-                <span className="font-mono font-bold text-emerald-900 text-sm">
-                  {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
-                </span>
-              </div>
-              <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
-                <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
-                <span className="font-mono font-bold text-wood-900 text-sm">
-                  {costing?.grossMarginPercentage || 100}%
-                </span>
-              </div>
+              {isOwner && (
+                <>
+                  <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
+                    <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
+                    <span className="font-mono font-bold text-emerald-900 text-sm">
+                      {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
+                    <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
+                    <span className="font-mono font-bold text-wood-900 text-sm">
+                      {costing?.grossMarginPercentage || 100}%
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Consumed Materials Table */}

@@ -119,10 +119,13 @@ export class InventoryController {
   @ApiOperation({ summary: 'List historical stock-in purchase batches' })
   @ApiResponse({ status: 200, description: 'Stock-ins retrieved' })
   async listStockIns(
+    @Req() req: any,
     @Query('rawMaterialId') rawMaterialId?: string,
     @Query('branchId') branchId?: string,
   ): Promise<ApiEnvelope<MaterialStockInDto[]>> {
-    const stockIns = await this.inventoryService.listStockIns(rawMaterialId, branchId);
+    const effectiveBranchId =
+      req.user?.role === UserRole.BRANCH_ADMIN ? req.user.branchId : branchId;
+    const stockIns = await this.inventoryService.listStockIns(rawMaterialId, effectiveBranchId);
     return {
       success: true,
       data: stockIns,
@@ -163,7 +166,8 @@ export class InventoryController {
   }
 
   @Get('valuation')
-  @ApiOperation({ summary: 'Get total stock valuation report using Weighted Average Cost' })
+  @Roles(UserRole.OWNER)
+  @ApiOperation({ summary: 'Get total stock valuation report using Weighted Average Cost (Owner only)' })
   @ApiResponse({ status: 200, description: 'Valuation report generated' })
   async getStockValuation(
     @Query('branchId') branchId?: string,

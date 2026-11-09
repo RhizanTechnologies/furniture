@@ -5,13 +5,15 @@ import { useAuth } from '@/context/AuthContext';
 
 export const BottomNav: React.FC = () => {
   const location = useLocation();
-  const { isOwner, isAuthenticated } = useAuth();
+  const { user, isOwner, isAuthenticated } = useAuth();
+  const canAccessStock = isOwner || user?.branch?.stockMode === 'BRANCH_STOCK';
 
   const links = [
     { to: '/', label: 'Home', icon: Activity, show: true },
     { to: '/orders', label: 'Orders', icon: ShoppingBag, show: true },
-    { to: '/inventory', label: 'Stock', icon: Boxes, show: true },
-    { to: '/finance', label: 'Finance', icon: DollarSign, show: true },
+    { to: '/customers', label: 'Customers', icon: Users, show: true },
+    { to: '/inventory', label: 'Stock', icon: Boxes, show: canAccessStock },
+    { to: '/finance', label: 'Finance', icon: DollarSign, show: isOwner },
     { to: isOwner ? '/branches' : '/my-branch', label: isOwner ? 'Branches' : 'Branch', icon: isOwner ? Building2 : MapPin, show: isAuthenticated },
   ].filter((l) => l.show);
 

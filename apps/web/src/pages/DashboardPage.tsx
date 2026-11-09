@@ -9,6 +9,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 import {
   Plus,
   TrendingUp,
@@ -20,17 +21,23 @@ import {
   BarChart3,
   CreditCard,
   ShoppingBag,
+  UserPlus,
+  Users,
+  CheckCircle2,
 } from 'lucide-react';
 import { ExecutiveDashboardAnalyticsDto, OrderDto } from '@furniture/shared';
 
 export const DashboardPage: React.FC = () => {
-  // 1. Fetch Live Analytics
+  const { user, isOwner } = useAuth();
+
+  // 1. Fetch Live Analytics (Only for Owner)
   const { data: analytics, isLoading: isAnalyticsLoading } = useQuery<ExecutiveDashboardAnalyticsDto>({
     queryKey: ['dashboard-analytics'],
     queryFn: () => apiClient<ExecutiveDashboardAnalyticsDto>('/analytics/dashboard?period=monthly'),
+    enabled: isOwner,
   });
 
-  // 2. Fetch Recent Orders
+  // 2. Fetch Recent Orders (Owner gets all, Branch Admin gets branch orders)
   const { data: orders = [], isLoading: isOrdersLoading } = useQuery<OrderDto[]>({
     queryKey: ['recent-orders'],
     queryFn: () => apiClient<OrderDto[]>('/orders'),
@@ -39,7 +46,8 @@ export const DashboardPage: React.FC = () => {
   const fin = analytics?.financialOverview;
   const stock = analytics?.stockOverview;
 
-  const stats = [
+  // Executive stats for Owner only
+  const ownerStats = [
     {
       title: 'Monthly Sales Pipeline',
       value: formatCurrency(fin?.contractedRevenue || 0),
@@ -66,19 +74,63 @@ export const DashboardPage: React.FC = () => {
     },
   ];
 
-  const recentOrders = orders.slice(0, 5);
+  // Operational stats for Branch Admin
+  const inProductionOrders = orders.filter((o) => !o.currentStage?.isFinalStage);
+  const completedOrders = orders.filter((o) => o.currentStage?.isFinalStage);
+  const uniqueCustomersCount = new Set(orders.map((o) => o.customerId).filter(Boolean)).size;
+
+  const branchStats = [
+    {
+      title: 'Total Branch Orders',
+      value: `${orders.length}`,
+      icon: ShoppingBag,
+      sub: `${orders.length} orders recorded`,
+    },
+    {
+      title: 'In Production / Framing',
+      value: `${inProductionOrders.length}`,
+      icon: Layers,
+      sub: 'Active workshop workflows',
+    },
+    {
+      title: 'Fulfilled / Delivered',
+      value: `${completedOrders.length}`,
+      icon: CheckCircle2,
+      sub: 'Completed deliveries',
+    },
+    {
+      title: 'Registered Clients',
+      value: `${uniqueCustomersCount}`,
+      icon: Users,
+      sub: 'Branch customer accounts',
+    },
+  ];
+
+  const recentOrders = orders.slice(0, 8);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Executive Overview"
-        description="Unified operations monitoring across business branches, workshops, inventory and financials."
+        title={isOwner ? 'Executive Overview' : `${user?.branch?.name || 'Branch'} Operations`}
+        description={
+          isOwner
+            ? 'Unified operations monitoring across business branches, workshops, inventory and financials.'
+            : 'Track branch orders, update production stages, register customers and manage local fulfillments.'
+        }
         action={
           <div className="flex items-center space-x-2">
-            <Link to="/analytics">
+            {isOwner && (
+              <Link to="/analytics">
+                <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Deep Analytics</span>
+                </Button>
+              </Link>
+            )}
+            <Link to="/customers">
               <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
-                <BarChart3 className="h-4 w-4" />
-                <span>Deep Analytics</span>
+                <UserPlus className="h-4 w-4" />
+                <span>Register Customer</span>
               </Button>
             </Link>
             <Link to="/orders">
@@ -93,7 +145,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, idx) => {
+        {(isOwner ? ownerStats : branchStats).map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <Card key={idx} className="border-wood-200/80 hover:border-wood-400 transition-colors">
@@ -121,8 +173,12 @@ export const DashboardPage: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent Workshop Orders</CardTitle>
-              <CardDescription>Live order stage progression and financial balances from database.</CardDescription>
+              <CardTitle className="text-lg">
+                {isOwner ? 'Recent Business Orders' : 'Recent Branch Orders'}
+              </CardTitle>
+              <CardDescription>
+                Live order stage progression, customer details and payment balances.
+              </CardDescription>
             </div>
             <Link to="/orders">
               <Button variant="ghost" size="sm" className="text-xs text-wood-800 space-x-1">
@@ -134,10 +190,10 @@ export const DashboardPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isOrdersLoading ? (
-            <LoadingState message="Loading recent workshop orders..." />
+            <LoadingState message="Loading recent orders..." />
           ) : recentOrders.length === 0 ? (
             <p className="text-xs text-muted-foreground italic text-center py-6">
-              No workshop orders recorded yet.
+              No orders recorded yet. Click "Create Order" to record an order.
             </p>
           ) : (
             <Table>
@@ -145,7 +201,7 @@ export const DashboardPage: React.FC = () => {
                 <TableRow>
                   <TableHead>Order #</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="hidden md:table-cell">Branch</TableHead>
+                  {isOwner && <TableHead className="hidden md:table-cell">Branch</TableHead>}
                   <TableHead className="text-right">Agreed Total</TableHead>
                   <TableHead className="text-right">Remaining Balance</TableHead>
                   <TableHead className="text-center">Current Stage</TableHead>
@@ -158,11 +214,14 @@ export const DashboardPage: React.FC = () => {
                       {order.orderNumber}
                     </TableCell>
                     <TableCell className="font-medium text-xs">
-                      {order.customer?.fullName || 'Walk-In Customer'}
+                      <div>{order.customer?.fullName || 'Walk-In Customer'}</div>
+                      <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell text-charcoal-600 text-xs">
-                      {order.branch?.name}
-                    </TableCell>
+                    {isOwner && (
+                      <TableCell className="hidden md:table-cell text-charcoal-600 text-xs">
+                        {order.branch?.name}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right font-medium font-mono text-xs">
                       {formatCurrency(order.totalAgreedPrice)}
                     </TableCell>

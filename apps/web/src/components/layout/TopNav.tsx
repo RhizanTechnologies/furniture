@@ -30,19 +30,21 @@ export const TopNav: React.FC = () => {
     navigate('/login');
   };
 
+  const canAccessStock = isOwner || user?.branch?.stockMode === 'BRANCH_STOCK';
+
   const navLinks = [
     { to: '/', label: 'Dashboard', icon: Activity, show: true },
     { to: '/orders', label: 'Orders', icon: ShoppingBag, show: true },
-    { to: '/inventory', label: 'Inventory', icon: Boxes, show: true },
-    { to: '/finance', label: 'Finance', icon: DollarSign, show: true },
-    { to: '/analytics', label: 'Analytics', icon: BarChart3, show: isOwner },
     { to: '/customers', label: 'Customers', icon: Users, show: true },
+    { to: '/inventory', label: 'Inventory', icon: Boxes, show: canAccessStock },
+    { to: '/finance', label: 'Finance', icon: DollarSign, show: isOwner },
+    { to: '/analytics', label: 'Analytics', icon: BarChart3, show: isOwner },
     { to: '/order-stages', label: 'Stages', icon: Layers, show: isOwner },
     { to: '/showroom', label: 'Showroom', icon: Store, show: true },
     { to: '/catalog', label: 'Catalog', icon: Armchair, show: isOwner },
     { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
     { to: '/my-branch', label: 'My Branch', icon: MapPin, show: !isOwner && isAuthenticated },
-    { to: '/system-health', label: 'Health', icon: Building2, show: true },
+    { to: '/system-health', label: 'Health', icon: Building2, show: isOwner },
   ].filter((l) => l.show);
 
   return (

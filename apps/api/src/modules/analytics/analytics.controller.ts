@@ -10,7 +10,9 @@ import { AnalyticsService } from './analytics.service';
 import { AnalyticsQueryDto } from './dto/analytics-query.dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import {
+  UserRole,
   ExecutiveDashboardAnalyticsDto,
   ApiResponse as ApiEnvelope,
 } from '@furniture/shared';

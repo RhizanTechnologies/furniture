@@ -17,7 +17,9 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { FinancialQueryDto } from './dto/financial-query.dto';
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import {
+  UserRole,
   PaymentDto,
   ExpenseDto,
   FinancialSummaryDto,
@@ -94,7 +96,8 @@ export class FinancialController {
   }
 
   @Get('financial/summary')
-  @ApiOperation({ summary: 'Get financial performance summary, revenue, receivables and net profit' })
+  @Roles(UserRole.OWNER)
+  @ApiOperation({ summary: 'Get business-wide financial performance summary, revenue, receivables and net profit (Owner only)' })
   @ApiResponse({ status: 200, description: 'Financial summary generated' })
   async getFinancialSummary(
     @Query() query: FinancialQueryDto,

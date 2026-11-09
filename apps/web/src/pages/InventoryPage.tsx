@@ -42,7 +42,9 @@ import {
 
 export const InventoryPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { isOwner } = useAuth();
+  const { user, isOwner } = useAuth();
+  const isBranchAdmin = user?.role === 'BRANCH_ADMIN';
+  const isBranchStock = !isBranchAdmin || user?.branch?.stockMode === 'BRANCH_STOCK';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -64,12 +66,14 @@ export const InventoryPage: React.FC = () => {
       if (onlyLowStock) params.append('onlyLowStock', 'true');
       return apiClient<RawMaterialDto[]>(`/inventory/materials?${params.toString()}`);
     },
+    enabled: isBranchStock,
   });
 
-  // 2. Fetch Stock Valuation
+  // 2. Fetch Stock Valuation (Executive & Owner only - hidden for Branch Admin)
   const { data: valuation, isLoading: isValuationLoading } = useQuery<StockValuationDto>({
     queryKey: ['stock-valuation'],
     queryFn: () => apiClient<StockValuationDto>('/inventory/valuation'),
+    enabled: !isBranchAdmin,
   });
 
   // 3. Fetch Selected Material History
@@ -204,71 +208,86 @@ export const InventoryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Stock Valuation Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Total Stock Valuation
-            </CardDescription>
-            <CardTitle className="text-2xl font-bold text-wood-900 font-mono">
-              {formatCurrency(valuation?.totalStockValue || 0)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
-            Weighted average cost valuation across all active materials
-          </CardContent>
-        </Card>
+      {/* Stock Valuation Metric Cards (Executive Owner Only - hidden for Branch Admin) */}
+      {!isBranchAdmin && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+                Total Stock Valuation
+              </CardDescription>
+              <CardTitle className="text-2xl font-bold text-wood-900 font-mono">
+                {formatCurrency(valuation?.totalStockValue || 0)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-charcoal-600">
+              Weighted average cost valuation across all active materials
+            </CardContent>
+          </Card>
 
-        <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Active Materials
-            </CardDescription>
-            <CardTitle className="text-2xl font-bold text-charcoal-900 font-mono">
-              {valuation?.totalItemsInStock || 0}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
-            Catalog materials with positive on-hand quantity
-          </CardContent>
-        </Card>
+          <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+                Active Materials
+              </CardDescription>
+              <CardTitle className="text-2xl font-bold text-charcoal-900 font-mono">
+                {valuation?.totalItemsInStock || 0}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-charcoal-600">
+              Catalog materials with positive on-hand quantity
+            </CardContent>
+          </Card>
 
-        <Card className={`border-wood-200/80 ${
-          (valuation?.lowStockCount || 0) > 0 ? 'bg-amber-50/60 border-amber-300' : 'bg-gradient-to-br from-white to-wood-50/40'
-        }`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
-              <span>Reorder Alerts</span>
-              {(valuation?.lowStockCount || 0) > 0 && (
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-              )}
-            </CardDescription>
-            <CardTitle className={`text-2xl font-bold font-mono ${
-              (valuation?.lowStockCount || 0) > 0 ? 'text-amber-800' : 'text-charcoal-900'
-            }`}>
-              {valuation?.lowStockCount || 0}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
-            Materials at or below minimum threshold
-          </CardContent>
-        </Card>
+          <Card className={`border-wood-200/80 ${
+            (valuation?.lowStockCount || 0) > 0 ? 'bg-amber-50/60 border-amber-300' : 'bg-gradient-to-br from-white to-wood-50/40'
+          }`}>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
+                <span>Reorder Alerts</span>
+                {(valuation?.lowStockCount || 0) > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                )}
+              </CardDescription>
+              <CardTitle className={`text-2xl font-bold font-mono ${
+                (valuation?.lowStockCount || 0) > 0 ? 'text-amber-800' : 'text-charcoal-900'
+              }`}>
+                {valuation?.lowStockCount || 0}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-charcoal-600">
+              Materials at or below minimum threshold
+            </CardContent>
+          </Card>
 
-        <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Stock Location
-            </CardDescription>
-            <CardTitle className="text-sm font-bold text-wood-900 truncate">
-              {valuation?.stockLocation || 'Central Main Warehouse'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
-            Authoritative warehouse pool
-          </CardContent>
+          <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+                Stock Location
+              </CardDescription>
+              <CardTitle className="text-sm font-bold text-wood-900 truncate">
+                {valuation?.stockLocation || 'Central Main Warehouse'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-charcoal-600">
+              Authoritative warehouse pool
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Notice for branches operating under Central Main Stock */}
+      {isBranchAdmin && !isBranchStock && (
+        <Card className="border-wood-200 bg-wood-50/50 p-6 text-center space-y-3">
+          <Boxes className="h-10 w-10 text-wood-600 mx-auto" />
+          <h3 className="text-base font-semibold text-charcoal-900">
+            Central Main Stock Allocation
+          </h3>
+          <p className="text-sm text-charcoal-600 max-w-md mx-auto">
+            Your branch (<strong>{user?.branch?.name}</strong>) operates under the <strong>Main Central Stock</strong> model. Raw materials, timber replenishment, and inventory accounting are managed centrally by the workshop.
+          </p>
         </Card>
-      </div>
+      )}
 
       {/* Filter and Search Bar */}
       <Card className="border-wood-200/90">

@@ -31,6 +31,17 @@ export class InventoryService {
    * List raw materials with real-time stock balances, WAC unit costs, and stock valuations
    */
   async listMaterials(query: InventoryQueryDto, user: any): Promise<RawMaterialDto[]> {
+    // Branch Admin can only view stock if their branch operates in BRANCH_STOCK mode
+    if (user && user.role === UserRole.BRANCH_ADMIN && user.branchId) {
+      const branch = await this.prisma.branch.findUnique({
+        where: { id: user.branchId },
+        select: { stockMode: true },
+      });
+      if (branch && branch.stockMode !== StockMode.BRANCH_STOCK) {
+        return [];
+      }
+    }
+
     const where: Prisma.RawMaterialWhereInput = {};
 
     if (!query.includeInactive) {

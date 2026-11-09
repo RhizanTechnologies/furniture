@@ -47,11 +47,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'finance',
-        element: <FinancialPage />,
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.OWNER]}>
+            <FinancialPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'analytics',
-        element: <AnalyticsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={[UserRole.OWNER]}>
+            <AnalyticsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'order-stages',

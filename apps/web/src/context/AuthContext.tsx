@@ -22,16 +22,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = async () => {
     try {
       const profile = await apiClient<UserDto & { branch?: any }>('/auth/me');
-      setUser(profile);
+      if (typeof window !== 'undefined') setUser(profile);
     } catch (err) {
-      setUser(null);
+      if (typeof window !== 'undefined') setUser(null);
     } finally {
-      setIsLoading(false);
+      if (typeof window !== 'undefined') setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    refreshProfile();
+    let isMounted = true;
+    const load = async () => {
+      try {
+        const profile = await apiClient<UserDto & { branch?: any }>('/auth/me');
+        if (isMounted) setUser(profile);
+      } catch (err) {
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {

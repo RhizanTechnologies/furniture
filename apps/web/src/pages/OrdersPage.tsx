@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/context/AuthContext';
 import {
   OrderDto,
   OrderStageDto,
@@ -36,14 +38,23 @@ import {
   ArrowRight,
   Eye,
   AlertTriangle,
+  UserPlus,
 } from 'lucide-react';
 
 export const OrdersPage: React.FC = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStageId, setSelectedStageId] = useState<string>('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null);
+
+  // Quick Customer Registration Modal state
+  const [isQuickCustomerOpen, setIsQuickCustomerOpen] = useState(false);
+  const [quickFullName, setQuickFullName] = useState('');
+  const [quickPhone, setQuickPhone] = useState('');
+  const [quickAddress, setQuickAddress] = useState('');
+  const [isSubmittingQuickCustomer, setIsSubmittingQuickCustomer] = useState(false);
 
   // 1. Fetch Orders with Dexie cache & local pending orders inclusion
   const { data: orders, isLoading, error, refetch } = useQuery<Array<OrderDto & { isPendingSync?: boolean }>>({
@@ -242,6 +253,91 @@ export const OrdersPage: React.FC = () => {
     }
   };
 
+  // Quick Customer Registration inside Order Dialog
+  const handleQuickRegisterCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickFullName.trim() || !quickPhone.trim()) return;
+    setIsSubmittingQuickCustomer(true);
+    try {
+      const inputData = {
+        fullName: quickFullName.trim(),
+        phone: quickPhone.trim(),
+        address: quickAddress.trim() || undefined,
+      };
+
+      let assignedCustomerId: string;
+
+      if (navigator.onLine) {
+        try {
+          const createdCustomer = await apiClient<CustomerDto>('/customers', {
+            method: 'POST',
+            body: JSON.stringify(inputData),
+          });
+          assignedCustomerId = createdCustomer.id;
+          await db.customers.put({
+            id: createdCustomer.id,
+            fullName: createdCustomer.fullName,
+            phone: createdCustomer.phone,
+            address: createdCustomer.address,
+            branchId: createdCustomer.branchId || user?.branchId || '',
+            isPendingSync: false,
+            createdAt: createdCustomer.createdAt,
+            updatedAt: createdCustomer.updatedAt,
+          });
+        } catch {
+          const tempId = `temp-cust-${crypto.randomUUID()}`;
+          await syncEngine.enqueueMutation({
+            entityType: 'CUSTOMER',
+            action: 'CREATE',
+            payload: inputData,
+            tempEntityId: tempId,
+          });
+          await db.customers.put({
+            id: tempId,
+            fullName: inputData.fullName,
+            phone: inputData.phone,
+            address: inputData.address,
+            branchId: user?.branchId || '',
+            isPendingSync: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+          assignedCustomerId = tempId;
+        }
+      } else {
+        const tempId = `temp-cust-${crypto.randomUUID()}`;
+        await syncEngine.enqueueMutation({
+          entityType: 'CUSTOMER',
+          action: 'CREATE',
+          payload: inputData,
+          tempEntityId: tempId,
+        });
+        await db.customers.put({
+          id: tempId,
+          fullName: inputData.fullName,
+          phone: inputData.phone,
+          address: inputData.address,
+          branchId: user?.branchId || '',
+          isPendingSync: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        assignedCustomerId = tempId;
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['customers'] });
+      orderForm.setValue('customerId', assignedCustomerId);
+      setIsQuickCustomerOpen(false);
+      setQuickFullName('');
+      setQuickPhone('');
+      setQuickAddress('');
+    } catch (err: any) {
+      alert(err.message || 'Failed to register customer');
+    } finally {
+      setIsSubmittingQuickCustomer(false);
+    }
+  };
+
   // Handle product selection in item row
   const handleSelectProduct = (index: number, productId: string) => {
     const prod = products.find((p) => p.id === productId);
@@ -279,17 +375,25 @@ export const OrdersPage: React.FC = () => {
         title="Furniture Orders & Pipeline"
         description="Track client bespoke commissions through customizable workshop stages from deposit intake to final delivery."
         action={
-          <Button
-            size="sm"
-            onClick={() => {
-              orderForm.reset();
-              setIsCreateOpen(true);
-            }}
-            className="space-x-1.5 shadow"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Create Order</span>
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Link to="/customers">
+              <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
+                <UserPlus className="h-4 w-4" />
+                <span>Register Customer</span>
+              </Button>
+            </Link>
+            <Button
+              size="sm"
+              onClick={() => {
+                orderForm.reset();
+                setIsCreateOpen(true);
+              }}
+              className="space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create Order</span>
+            </Button>
+          </div>
         }
       />
 
@@ -461,9 +565,21 @@ export const OrdersPage: React.FC = () => {
             >
               {/* Customer Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                  Select Registered Customer
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
+                    Select Registered Customer
+                  </label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs text-wood-700 hover:text-wood-900 px-1.5 space-x-1"
+                    onClick={() => setIsQuickCustomerOpen(true)}
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    <span>+ Quick Register New</span>
+                  </Button>
+                </div>
                 <select
                   {...orderForm.register('customerId')}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-medium"
@@ -638,6 +754,67 @@ export const OrdersPage: React.FC = () => {
               </DialogFooter>
             </form>
           </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Customer Registration Dialog */}
+      <Dialog open={isQuickCustomerOpen} onOpenChange={setIsQuickCustomerOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Quick Register Walk-In Client</DialogTitle>
+            <DialogDescription>
+              Register client info and immediately assign them to the current order.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleQuickRegisterCustomer} className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
+                Full Name *
+              </label>
+              <Input
+                required
+                placeholder="e.g. Solomon Desta"
+                value={quickFullName}
+                onChange={(e) => setQuickFullName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
+                Phone Number *
+              </label>
+              <Input
+                required
+                placeholder="e.g. +251 911 234 567"
+                value={quickPhone}
+                onChange={(e) => setQuickPhone(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
+                Delivery Address (Optional)
+              </label>
+              <Input
+                placeholder="e.g. Bole Atlas, Addis Ababa"
+                value={quickAddress}
+                onChange={(e) => setQuickAddress(e.target.value)}
+              />
+            </div>
+
+            <DialogFooter className="pt-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsQuickCustomerOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmittingQuickCustomer}>
+                {isSubmittingQuickCustomer ? 'Saving...' : 'Save & Select Client'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
