@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -12,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -29,6 +29,7 @@ import {
   Plus,
   Percent,
   TrendingUp,
+  Layers,
 } from 'lucide-react';
 
 interface OrderDetailModalProps {
@@ -294,42 +295,39 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               )}
             </div>
 
-            {/* Consumed Materials Table */}
+            {/* Consumed Materials Cards (Card-based layout for full responsive PWA) */}
             {costing?.consumptions && costing.consumptions.length > 0 ? (
-              <div className="border rounded-md overflow-x-auto w-full text-xs">
-                <Table className="min-w-[480px]">
-                  <TableHeader className="bg-stone-50">
-                    <TableRow>
-                      <TableHead>Material</TableHead>
-                      <TableHead className="text-right">Qty Consumed</TableHead>
-                      <TableHead className="text-right">Allocated WAC Cost</TableHead>
-                      <TableHead className="text-right">Cost Contribution</TableHead>
-                      <TableHead>Logged By</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {costing.consumptions.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell>
-                          <div className="font-semibold text-stone-900">{c.rawMaterialName}</div>
-                          <div className="font-mono text-[10px] text-muted-foreground">{c.rawMaterialCode}</div>
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {c.consumedQuantity} {c.unitOfMeasurement}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {formatCurrency(c.unitCostAllocated)}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-wood-900">
-                          {formatCurrency(c.totalMaterialCost)}
-                        </TableCell>
-                        <TableCell className="text-stone-600 text-[11px]">
-                          {c.recordedByUserName}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="space-y-2">
+                {costing.consumptions.map((c) => (
+                  <div
+                    key={c.id}
+                    className="p-3 rounded-lg border border-wood-100 bg-stone-50/60 hover:bg-stone-50 transition-colors space-y-2 text-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-semibold text-stone-900 break-words">{c.rawMaterialName}</div>
+                        <div className="font-mono text-[10px] text-muted-foreground">{c.rawMaterialCode}</div>
+                      </div>
+                      <Badge variant="secondary" className="font-mono text-xs shrink-0">
+                        {c.consumedQuantity} {c.unitOfMeasurement}
+                      </Badge>
+                    </div>
+
+                    <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                      <div className="text-muted-foreground">
+                        Unit WAC Cost: <span className="font-mono text-stone-800">{formatCurrency(c.unitCostAllocated)}</span>
+                      </div>
+                      <div className="text-stone-800">
+                        Allocated Cost: <span className="font-mono font-bold text-wood-900">{formatCurrency(c.totalMaterialCost)}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground flex justify-between items-center pt-0.5">
+                      <span>Logged by: {c.recordedByUserName || 'Staff'}</span>
+                      {c.consumedAt && <span>{new Date(c.consumedAt).toLocaleDateString()}</span>}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground italic bg-stone-50 p-2.5 rounded border text-center">
@@ -340,11 +338,23 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
           {/* Order Stage Pipeline & Transition Controls */}
           <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-white space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex flex-wrap items-center justify-between gap-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex flex-wrap items-center justify-between gap-2">
               <span>Production Workflow Pipeline</span>
-              <span className="text-[10px] lowercase font-normal text-muted-foreground">
-                Move order through configured stages
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] lowercase font-normal text-muted-foreground hidden sm:inline">
+                  Move order through configured stages
+                </span>
+                {isOwner && (
+                  <Link
+                    to="/order-stages"
+                    onClick={onClose}
+                    className="inline-flex items-center space-x-1 text-[11px] font-semibold text-wood-700 hover:text-wood-950 bg-wood-50 hover:bg-wood-100 border border-wood-200 px-2 py-0.5 rounded transition-colors"
+                  >
+                    <Layers className="h-3 w-3" />
+                    <span>Customize Stages</span>
+                  </Link>
+                )}
+              </div>
             </h4>
 
             {/* Stage Progress Bar / Chips */}
@@ -412,40 +422,45 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             )}
           </div>
 
-          {/* Ordered Furniture Items Table */}
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2">
-              Contracted Furniture Products
+          {/* Ordered Furniture Items Cards (Card-based layout for full responsive PWA) */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center justify-between">
+              <span>Contracted Furniture Products</span>
+              <span className="text-[11px] font-normal text-muted-foreground font-mono">
+                {order.items?.length || 0} item{order.items?.length === 1 ? '' : 's'}
+              </span>
             </h4>
-            <div className="border rounded-lg overflow-x-auto w-full">
-              <Table className="min-w-[420px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Specification / Description</TableHead>
-                    <TableHead className="text-center">Quantity</TableHead>
-                    <TableHead className="text-right">Unit Price</TableHead>
-                    <TableHead className="text-right">Subtotal</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {order.items?.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium text-xs break-words">
+
+            <div className="space-y-2">
+              {order.items?.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 rounded-lg border border-wood-200/90 bg-white shadow-xs space-y-2 text-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="font-semibold text-stone-900 leading-snug break-words">
                         {item.itemDescription}
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-xs">
-                        {item.quantity}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs">
-                        {formatCurrency(item.unitPrice)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs font-semibold">
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="font-mono text-xs shrink-0 bg-stone-50 border-stone-300">
+                      Qty: <span className="font-bold ml-1">{item.quantity}</span>
+                    </Badge>
+                  </div>
+
+                  <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="text-muted-foreground">
+                      Unit Price: <span className="font-mono text-stone-800">{formatCurrency(item.unitPrice)}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-muted-foreground text-[11px] mr-1">Subtotal:</span>
+                      <span className="font-mono font-bold text-wood-950 text-xs sm:text-sm">
                         {formatCurrency(item.subtotal)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

@@ -42,7 +42,7 @@ import {
 } from 'lucide-react';
 
 export const OrdersPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isOwner } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStageId, setSelectedStageId] = useState<string>('ALL');
@@ -375,11 +375,21 @@ export const OrdersPage: React.FC = () => {
         title="Furniture Orders & Pipeline"
         description="Track client bespoke commissions through customizable workshop stages from deposit intake to final delivery."
         action={
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {isOwner && (
+              <Link to="/order-stages">
+                <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
+                  <Layers className="h-4 w-4" />
+                  <span className="hidden sm:inline">Customize Stages</span>
+                  <span className="sm:hidden">Stages</span>
+                </Button>
+              </Link>
+            )}
             <Link to="/customers">
               <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
                 <UserPlus className="h-4 w-4" />
-                <span>Register Customer</span>
+                <span className="hidden sm:inline">Register Customer</span>
+                <span className="sm:hidden">Customer</span>
               </Button>
             </Link>
             <Button
@@ -440,7 +450,7 @@ export const OrdersPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Orders Table */}
+      {/* Orders List: Mobile Cards + Desktop Table */}
       {isLoading ? (
         <LoadingState message="Loading custom production orders..." />
       ) : error ? (
@@ -449,103 +459,190 @@ export const OrdersPage: React.FC = () => {
           message="Failed to fetch orders from server or local offline store."
           onRetry={() => refetch()}
         />
-      ) : (
-        <Card className="border-wood-200">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-wood-50/50">
-                <TableHead>Order #</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Current Stage</TableHead>
-                <TableHead className="hidden sm:table-cell">Deadline</TableHead>
-                <TableHead>Total Agreed</TableHead>
-                <TableHead>Paid / Balance</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((ord) => {
-                const deadlinePassed =
-                  new Date(ord.deadlineDate).getTime() < Date.now();
-
-                return (
-                  <TableRow
-                    key={ord.id}
-                    className="cursor-pointer hover:bg-wood-100/60"
-                    onClick={() => setSelectedOrder(ord)}
-                  >
-                    <TableCell className="font-mono text-xs font-bold text-wood-900">
-                      {ord.orderNumber}
-                    </TableCell>
-                    <TableCell className="font-medium text-charcoal-900">
-                      <div>{ord.customer?.fullName || 'Walk-In'}</div>
-                      <div className="text-[11px] text-muted-foreground">{ord.customer?.phone}</div>
-                    </TableCell>
-                    <TableCell>
-                      <RecordSyncBadge isPendingSync={ord.isPendingSync} />
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        style={{
-                          backgroundColor: ord.currentStage?.color || '#8B5A2B',
-                          color: '#ffffff',
-                        }}
-                        className="text-[10px]"
-                      >
-                        {ord.currentStage?.name || 'In Production'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs">
-                      <div className={`flex items-center space-x-1 ${deadlinePassed ? 'text-red-700 font-semibold' : 'text-charcoal-700'}`}>
-                        {deadlinePassed && <AlertTriangle className="h-3.5 w-3.5" />}
-                        <span>{new Date(ord.deadlineDate).toLocaleDateString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold text-charcoal-900">
-                      {formatCurrency(ord.totalAgreedPrice)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-xs">
-                        <div className="text-emerald-800 font-medium">{formatCurrency(ord.totalPaid)}</div>
-                        {ord.outstandingBalance > 0 ? (
-                          <div className="text-amber-800 font-semibold">
-                            Bal: {formatCurrency(ord.outstandingBalance)}
-                          </div>
-                        ) : (
-                          <Badge variant="success" className="text-[9px] mt-0.5">
-                            Fully Paid
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(ord);
-                        }}
-                        className="h-7 text-xs space-x-1 border-wood-300"
-                      >
-                        <Eye className="h-3 w-3" />
-                        <span>Inspect</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {filteredOrders.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    No orders found matching the filter.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      ) : filteredOrders.length === 0 ? (
+        <Card className="border-wood-200 text-center py-12">
+          <CardContent>
+            <p className="text-muted-foreground text-sm">No orders found matching the filter.</p>
+          </CardContent>
         </Card>
+      ) : (
+        <>
+          {/* Mobile Card-Based View (PWA Responsive) */}
+          <div className="md:hidden space-y-3">
+            {filteredOrders.map((ord) => {
+              const deadlinePassed = new Date(ord.deadlineDate).getTime() < Date.now();
+              return (
+                <div
+                  key={ord.id}
+                  onClick={() => setSelectedOrder(ord)}
+                  className="p-3.5 rounded-xl border border-wood-200 bg-white shadow-xs hover:border-wood-400 active:bg-wood-50/50 transition-all cursor-pointer space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono text-xs font-bold text-wood-950">
+                        {ord.orderNumber}
+                      </span>
+                      <RecordSyncBadge isPendingSync={ord.isPendingSync} />
+                    </div>
+                    <Badge
+                      style={{
+                        backgroundColor: ord.currentStage?.color || '#8B5A2B',
+                        color: '#ffffff',
+                      }}
+                      className="text-[10px] font-medium"
+                    >
+                      {ord.currentStage?.name || 'In Production'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-start justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-charcoal-900">{ord.customer?.fullName || 'Walk-In'}</div>
+                      <div className="text-[11px] text-muted-foreground">{ord.customer?.phone}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`flex items-center justify-end space-x-1 text-[11px] ${deadlinePassed ? 'text-red-700 font-semibold' : 'text-stone-500'}`}>
+                        {deadlinePassed && <AlertTriangle className="h-3 w-3" />}
+                        <span>Due {new Date(ord.deadlineDate).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">Total Agreed</span>
+                      <span className="font-semibold text-charcoal-900 font-mono">
+                        {formatCurrency(ord.totalAgreedPrice)}
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">Paid / Bal</span>
+                      <span className="font-medium text-emerald-800 font-mono mr-1.5">
+                        {formatCurrency(ord.totalPaid)}
+                      </span>
+                      {ord.outstandingBalance > 0 ? (
+                        <span className="font-semibold text-amber-800 font-mono text-[11px]">
+                          (Bal: {formatCurrency(ord.outstandingBalance)})
+                        </span>
+                      ) : (
+                        <Badge variant="success" className="text-[9px] py-0">
+                          Paid
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-1 flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedOrder(ord);
+                      }}
+                      className="h-7 text-xs space-x-1 border-wood-300 w-full"
+                    >
+                      <Eye className="h-3 w-3" />
+                      <span>View Order Details & Pipeline</span>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <Card className="hidden md:block border-wood-200">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-wood-50/50">
+                  <TableHead>Order #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Current Stage</TableHead>
+                  <TableHead className="hidden sm:table-cell">Deadline</TableHead>
+                  <TableHead>Total Agreed</TableHead>
+                  <TableHead>Paid / Balance</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredOrders.map((ord) => {
+                  const deadlinePassed =
+                    new Date(ord.deadlineDate).getTime() < Date.now();
+
+                  return (
+                    <TableRow
+                      key={ord.id}
+                      className="cursor-pointer hover:bg-wood-100/60"
+                      onClick={() => setSelectedOrder(ord)}
+                    >
+                      <TableCell className="font-mono text-xs font-bold text-wood-900">
+                        {ord.orderNumber}
+                      </TableCell>
+                      <TableCell className="font-medium text-charcoal-900">
+                        <div>{ord.customer?.fullName || 'Walk-In'}</div>
+                        <div className="text-[11px] text-muted-foreground">{ord.customer?.phone}</div>
+                      </TableCell>
+                      <TableCell>
+                        <RecordSyncBadge isPendingSync={ord.isPendingSync} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          style={{
+                            backgroundColor: ord.currentStage?.color || '#8B5A2B',
+                            color: '#ffffff',
+                          }}
+                          className="text-[10px]"
+                        >
+                          {ord.currentStage?.name || 'In Production'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs">
+                        <div className={`flex items-center space-x-1 ${deadlinePassed ? 'text-red-700 font-semibold' : 'text-charcoal-700'}`}>
+                          {deadlinePassed && <AlertTriangle className="h-3.5 w-3.5" />}
+                          <span>{new Date(ord.deadlineDate).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold text-charcoal-900">
+                        {formatCurrency(ord.totalAgreedPrice)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          <div className="text-emerald-800 font-medium">{formatCurrency(ord.totalPaid)}</div>
+                          {ord.outstandingBalance > 0 ? (
+                            <div className="text-amber-800 font-semibold">
+                              Bal: {formatCurrency(ord.outstandingBalance)}
+                            </div>
+                          ) : (
+                            <Badge variant="success" className="text-[9px] mt-0.5">
+                              Fully Paid
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(ord);
+                          }}
+                          className="h-7 text-xs space-x-1 border-wood-300"
+                        >
+                          <Eye className="h-3 w-3" />
+                          <span>Inspect</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+        </>
       )}
 
       {/* Create Order Dialog */}
