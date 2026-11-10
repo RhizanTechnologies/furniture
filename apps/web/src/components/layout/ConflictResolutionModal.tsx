@@ -75,7 +75,7 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
                         <p>Available on Server: {item.conflictDetails.availableStock} {item.conflictDetails.unitOfMeasurement || 'units'}</p>
                       )}
                       {item.conflictDetails.requestedQuantity !== undefined && (
-                        <p>Offline Attempted Quantity: {item.conflictDetails.requestedQuantity}</p>
+                        <p>Offline Attempted Quantity: {item.conflictDetails.requestedQuantity} {item.conflictDetails.unitOfMeasurement || 'units'}</p>
                       )}
                       {item.conflictDetails.outstandingBalance !== undefined && (
                         <p>Remaining Balance: ETB {item.conflictDetails.outstandingBalance}</p>

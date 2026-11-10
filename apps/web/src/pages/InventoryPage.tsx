@@ -163,6 +163,7 @@ export const InventoryPage: React.FC = () => {
 
   const categories = ['ALL', 'Timber', 'Fabric', 'Foam', 'Hardware', 'Finishing'];
 
+  const watchMaterialUnit = materialForm.watch('unitOfMeasurement') || 'Unit';
   const watchStockInQty = stockInForm.watch('receivedQuantity') || 0;
   const watchStockInCost = stockInForm.watch('unitCost') || 0;
   const computedStockInTotal = watchStockInQty * watchStockInCost;
@@ -485,13 +486,21 @@ export const InventoryPage: React.FC = () => {
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Quantity Received ({selectedMaterialForStockIn?.unitOfMeasurement || 'Units'}) <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="number"
-                  step="0.001"
-                  min="0.001"
-                  placeholder="0.00"
-                  {...stockInForm.register('receivedQuantity', { valueAsNumber: true })}
-                />
+                <div className="relative">
+                  <Input
+                    type="number"
+                    step="0.001"
+                    min="0.001"
+                    placeholder="0.00"
+                    {...stockInForm.register('receivedQuantity', { valueAsNumber: true })}
+                    className={selectedMaterialForStockIn ? 'pr-16 font-mono' : 'font-mono'}
+                  />
+                  {selectedMaterialForStockIn && (
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-wood-100 text-wood-900 pointer-events-none">
+                      {selectedMaterialForStockIn.unitOfMeasurement}
+                    </span>
+                  )}
+                </div>
                 {stockInForm.formState.errors.receivedQuantity && (
                   <p className="text-xs text-red-500 mt-1">
                     {stockInForm.formState.errors.receivedQuantity.message}
@@ -501,7 +510,7 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Unit Cost (ETB) <span className="text-red-500">*</span>
+                  Unit Cost per {selectedMaterialForStockIn?.unitOfMeasurement || 'Unit'} (ETB) <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
@@ -509,6 +518,7 @@ export const InventoryPage: React.FC = () => {
                   min="0"
                   placeholder="0.00"
                   {...stockInForm.register('unitCost', { valueAsNumber: true })}
+                  className="font-mono"
                 />
                 {stockInForm.formState.errors.unitCost && (
                   <p className="text-xs text-red-500 mt-1">
@@ -517,6 +527,13 @@ export const InventoryPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {selectedMaterialForStockIn && (
+              <p className="text-xs text-stone-600 bg-stone-50 border border-stone-200 p-2.5 rounded-lg flex items-center justify-between">
+                <span>Preset Measurement Unit: <strong className="text-wood-950 font-semibold">{selectedMaterialForStockIn.unitOfMeasurement}</strong></span>
+                <span className="text-stone-500 text-[11px]">Current: {selectedMaterialForStockIn.currentStockQuantity} {selectedMaterialForStockIn.unitOfMeasurement} on hand</span>
+              </p>
+            )}
 
             {/* Total Batch Cost Preview */}
             <div className="p-3 bg-wood-50 rounded-lg border border-wood-200 flex justify-between items-center text-sm">
@@ -621,12 +638,38 @@ export const InventoryPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Unit of Measure <span className="text-red-500">*</span>
+                  Preset Unit of Measure <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  placeholder="Meter, Sheet, Liter, Kg"
+                <input
+                  list="preset-material-units"
+                  placeholder="e.g. Meter, Piece, Sheet, Kg"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   {...materialForm.register('unitOfMeasurement')}
                 />
+                <datalist id="preset-material-units">
+                  <option value="Meter" />
+                  <option value="Piece" />
+                  <option value="Sheet" />
+                  <option value="Square Meter" />
+                  <option value="Board Foot" />
+                  <option value="Kilogram" />
+                  <option value="Liter" />
+                  <option value="Roll" />
+                  <option value="Set" />
+                  <option value="Box" />
+                </datalist>
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {['Meter', 'Piece', 'Sheet', 'Sq.M', 'Kg', 'Liter'].map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => materialForm.setValue('unitOfMeasurement', u)}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200 transition-colors"
+                    >
+                      +{u}
+                    </button>
+                  ))}
+                </div>
                 {materialForm.formState.errors.unitOfMeasurement && (
                   <p className="text-xs text-red-500 mt-1">
                     {materialForm.formState.errors.unitOfMeasurement.message}
@@ -636,7 +679,7 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Reorder Alert Threshold
+                  Reorder Alert Threshold ({watchMaterialUnit})
                 </label>
                 <Input
                   type="number"
@@ -644,13 +687,16 @@ export const InventoryPage: React.FC = () => {
                   placeholder="e.g. 10.0"
                   {...materialForm.register('reorderAlertQuantity', { valueAsNumber: true })}
                 />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Triggers alert when balance falls below this level.
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2 border-t">
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1 uppercase tracking-wider">
-                  Opening Quantity
+                  Opening Quantity ({watchMaterialUnit})
                 </label>
                 <Input
                   type="number"
@@ -663,7 +709,7 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1 uppercase tracking-wider">
-                  Initial Cost (ETB)
+                  Initial Cost per {watchMaterialUnit} (ETB)
                 </label>
                 <Input
                   type="number"

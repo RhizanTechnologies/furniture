@@ -53,7 +53,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [isConsumeOpen, setIsConsumeOpen] = useState(false);
   const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
   const [consumeQty, setConsumeQty] = useState<number>(1);
-  const [consumeUnit, setConsumeUnit] = useState<string>('');
   const [consumeNotes, setConsumeNotes] = useState<string>('');
   const [consumeError, setConsumeError] = useState<string | null>(null);
 
@@ -102,7 +101,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       setIsConsumeOpen(false);
       setSelectedMaterialId('');
       setConsumeQty(1);
-      setConsumeUnit('');
       setConsumeNotes('');
       setConsumeError(null);
     },
@@ -121,17 +119,24 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     });
   };
 
+  const selectedMaterial = materials.find((m) => m.id === selectedMaterialId);
+
   const handleRecordConsumption = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMaterialId || consumeQty <= 0) {
       setConsumeError('Please select a material and enter a positive quantity.');
       return;
     }
+    if (selectedMaterial && consumeQty > selectedMaterial.currentStockQuantity) {
+      setConsumeError(
+        `Entered quantity (${consumeQty} ${selectedMaterial.unitOfMeasurement}) exceeds available inventory (${selectedMaterial.currentStockQuantity} ${selectedMaterial.unitOfMeasurement}). Negative stock is disallowed.`
+      );
+      return;
+    }
     consumptionMutation.mutate({
       orderId: order.id,
       rawMaterialId: selectedMaterialId,
       consumedQuantity: consumeQty,
-      unit: consumeUnit.trim() || undefined,
       notes: consumeNotes.trim() || undefined,
     });
   };
@@ -536,31 +541,59 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-stone-700">
                     Quantity Consumed <span className="text-red-500">*</span>
                   </label>
+                  {selectedMaterial && (
+                    <Badge variant="outline" className="text-xs font-mono bg-wood-50 text-wood-900 border-wood-300">
+                      Preset Unit: {selectedMaterial.unitOfMeasurement}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="relative">
                   <Input
                     type="number"
                     step="0.001"
                     min="0.001"
                     value={consumeQty}
-                    onChange={(e) => setConsumeQty(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => {
+                      setConsumeQty(parseFloat(e.target.value) || 0);
+                      setConsumeError(null);
+                    }}
+                    className={selectedMaterial ? 'pr-20 font-mono' : 'font-mono'}
+                    placeholder="0.00"
                     required
                   />
+                  {selectedMaterial && (
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-wood-100 text-wood-900 pointer-events-none">
+                      {selectedMaterial.unitOfMeasurement}
+                    </span>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
-                    Custom Unit (Optional)
-                  </label>
-                  <Input
-                    placeholder="e.g. cm, m, sqft"
-                    value={consumeUnit}
-                    onChange={(e) => setConsumeUnit(e.target.value)}
-                  />
-                </div>
+                {selectedMaterial ? (
+                  <div className="mt-2 p-2.5 rounded-lg bg-stone-50 border border-stone-200 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-stone-600">Preset Unit of Measure:</span>
+                      <strong className="text-wood-950 font-semibold">{selectedMaterial.unitOfMeasurement}</strong>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-stone-600">Available Inventory:</span>
+                      <span className="font-mono font-medium text-stone-900">{selectedMaterial.currentStockQuantity} {selectedMaterial.unitOfMeasurement}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-dashed border-stone-200">
+                      <span className="text-stone-600">Allocated WAC Unit Cost:</span>
+                      <span className="font-mono text-wood-900 font-bold">{formatCurrency(selectedMaterial.currentUnitCost)} / {selectedMaterial.unitOfMeasurement}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground mt-1 italic">
+                    Select a raw material above to display its fixed measurement unit and available workshop inventory.
+                  </p>
+                )}
               </div>
 
               <div>
