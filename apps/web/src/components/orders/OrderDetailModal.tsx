@@ -7,12 +7,14 @@ import {
   OrderStageDto,
   OrderMaterialCostDto,
   RawMaterialDto,
+  PaymentDto,
   CreateMaterialConsumptionDto,
 } from '@furniture/shared';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { RecordPaymentModal } from './RecordPaymentModal';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
 import {
@@ -30,6 +32,8 @@ import {
   Percent,
   TrendingUp,
   Layers,
+  CreditCard,
+  Receipt,
 } from 'lucide-react';
 
 interface OrderDetailModalProps {
@@ -48,6 +52,9 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [targetStageId, setTargetStageId] = useState<string>('');
   const [transitionNotes, setTransitionNotes] = useState<string>('');
   const [transitionError, setTransitionError] = useState<string | null>(null);
+
+  // Payment recording state
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   // Material consumption form state
   const [isConsumeOpen, setIsConsumeOpen] = useState(false);
@@ -68,6 +75,13 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     queryKey: ['raw-materials-dropdown'],
     queryFn: () => apiClient<RawMaterialDto[]>('/inventory/materials'),
     enabled: isConsumeOpen,
+  });
+
+  // 3. Fetch Order Payments History
+  const { data: orderPayments = [] } = useQuery<PaymentDto[]>({
+    queryKey: ['order-payments', order?.id],
+    queryFn: () => apiClient<PaymentDto[]>(`/payments?orderId=${order?.id}`),
+    enabled: !!order?.id,
   });
 
   const stageMutation = useMutation({
@@ -207,11 +221,24 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </div>
 
           {/* Authoritative Financial Balance Box */}
-          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-gradient-to-r from-wood-50/70 to-cream-50/50">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2.5 sm:mb-3 flex items-center space-x-1.5">
-              <DollarSign className="h-4 w-4 text-wood-700" />
-              <span>Authoritative Financial Summary</span>
-            </h4>
+          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-gradient-to-r from-wood-50/70 to-cream-50/50 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center space-x-1.5">
+                <DollarSign className="h-4 w-4 text-wood-700" />
+                <span>Authoritative Financial Summary</span>
+              </h4>
+              {!isFullyPaid && (
+                <Button
+                  size="sm"
+                  onClick={() => setIsPaymentOpen(true)}
+                  className="h-7 text-xs bg-emerald-700 hover:bg-emerald-800 text-white space-x-1.5 shadow-sm px-2.5"
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  <span>Record Payment</span>
+                </Button>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-center">
               <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
@@ -242,6 +269,99 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 </span>
               </div>
             </div>
+
+            {/* Settle Balance CTA / Fully Paid banner */}
+            {!isFullyPaid ? (
+              <div className="pt-2 border-t border-wood-200/60 flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div className="text-xs text-amber-900 font-medium">
+                  Remaining to collect:{' '}
+                  <span className="font-mono font-bold text-sm text-amber-800">
+                    {formatCurrency(order.outstandingBalance)}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setIsPaymentOpen(true)}
+                  className="w-full sm:w-auto h-8 text-xs bg-emerald-700 hover:bg-emerald-800 text-white space-x-1.5 shadow"
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  <span>Settle / Record Progress Payment</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-between">
+                <div className="flex items-center space-x-1.5 text-xs text-emerald-800 font-semibold">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span>Order is fully paid and cleared</span>
+                </div>
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
+                  Zero Outstanding Balance
+                </Badge>
+              </div>
+            )}
+          </div>
+
+          {/* Payment Receipts & Transaction Audit */}
+          <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-white shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-800 flex items-center space-x-1.5">
+                <Receipt className="h-4 w-4 text-wood-700" />
+                <span>Payment Receipts & Inflow Ledger ({orderPayments.length})</span>
+              </h4>
+              {!isFullyPaid && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsPaymentOpen(true)}
+                  className="h-7 text-xs text-emerald-800 border-emerald-300 hover:bg-emerald-50 space-x-1"
+                >
+                  <Plus className="h-3 w-3" />
+                  <span>Add Payment</span>
+                </Button>
+              )}
+            </div>
+
+            {orderPayments.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic py-2 text-center">
+                No individual payment transactions recorded yet.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {orderPayments.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-2.5 rounded-lg border border-wood-100 bg-stone-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-stone-900">
+                          {formatCurrency(p.amount)}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] py-0 bg-white border-wood-200 text-wood-900"
+                        >
+                          {p.paymentType}
+                        </Badge>
+                        <span className="text-[11px] text-stone-500 font-medium">
+                          via {p.paymentMethod}
+                        </span>
+                      </div>
+                      {p.referenceNumber && (
+                        <div className="font-mono text-[11px] text-stone-600">
+                          Ref: {p.referenceNumber}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-[11px] text-muted-foreground sm:text-right">
+                      <div>{new Date(p.paymentDate).toLocaleDateString()}</div>
+                      <div className="text-[10px]">Logged by {p.recordedByUserName || 'Staff'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Raw Material Consumption & Product Costing (Prompt 6) */}
@@ -631,6 +751,13 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Record Payment Modal */}
+      <RecordPaymentModal
+        order={order}
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+      />
     </Dialog>
   );
 };

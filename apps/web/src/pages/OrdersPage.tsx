@@ -24,6 +24,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { OrderDetailModal } from '@/components/orders/OrderDetailModal';
+import { RecordPaymentModal } from '@/components/orders/RecordPaymentModal';
 import { RecordSyncBadge } from '@/components/ui/RecordSyncBadge';
 import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
@@ -40,6 +41,7 @@ import {
   Eye,
   AlertTriangle,
   UserPlus,
+  CreditCard,
 } from 'lucide-react';
 
 export const OrdersPage: React.FC = () => {
@@ -50,6 +52,7 @@ export const OrdersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null);
+  const [paymentOrder, setPaymentOrder] = useState<OrderDto | null>(null);
 
   const PAGE_SIZE = 10;
 
@@ -551,7 +554,20 @@ export const OrdersPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="pt-1 flex justify-end">
+                  <div className="pt-1 flex items-center gap-1.5">
+                    {ord.outstandingBalance > 0 && (
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPaymentOrder(ord);
+                        }}
+                        className="h-7 text-xs space-x-1 bg-emerald-700 hover:bg-emerald-800 text-white flex-1"
+                      >
+                        <CreditCard className="h-3 w-3" />
+                        <span>Pay Balance</span>
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
@@ -559,10 +575,12 @@ export const OrdersPage: React.FC = () => {
                         e.stopPropagation();
                         setSelectedOrder(ord);
                       }}
-                      className="h-7 text-xs space-x-1 border-wood-300 w-full"
+                      className={`h-7 text-xs space-x-1 border-wood-300 ${
+                        ord.outstandingBalance > 0 ? 'flex-1' : 'w-full'
+                      }`}
                     >
                       <Eye className="h-3 w-3" />
-                      <span>View Order Details & Pipeline</span>
+                      <span>{ord.outstandingBalance > 0 ? 'Details' : 'View Order Details & Pipeline'}</span>
                     </Button>
                   </div>
                 </div>
@@ -640,7 +658,20 @@ export const OrdersPage: React.FC = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right space-x-1">
+                        {ord.outstandingBalance > 0 && (
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPaymentOrder(ord);
+                            }}
+                            className="h-7 text-xs space-x-1 bg-emerald-700 hover:bg-emerald-800 text-white"
+                          >
+                            <CreditCard className="h-3 w-3" />
+                            <span>Record Payment</span>
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
@@ -944,7 +975,7 @@ export const OrdersPage: React.FC = () => {
       {/* Order Detail Modal */}
       {selectedOrder && (
         <OrderDetailModal
-          order={selectedOrder}
+          order={orders?.find((o) => o.id === selectedOrder.id) || selectedOrder}
           onClose={() => {
             setSelectedOrder(null);
             refetch();
@@ -952,6 +983,16 @@ export const OrdersPage: React.FC = () => {
           stages={stages}
         />
       )}
+
+      {/* Quick Record Payment Modal */}
+      <RecordPaymentModal
+        order={paymentOrder}
+        isOpen={!!paymentOrder}
+        onClose={() => {
+          setPaymentOrder(null);
+          refetch();
+        }}
+      />
     </div>
   );
 };
