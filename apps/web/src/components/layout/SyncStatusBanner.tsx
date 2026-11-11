@@ -16,9 +16,13 @@ export const SyncStatusBanner: React.FC = () => {
 
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
 
-  // If online, not syncing, and no pending or conflict items, show a minimal subtle indicator
+  // If online, not syncing, and no pending or conflict items, do not render a banner to save screen space
   const hasPendingItems = pendingCount > 0 || imageCount > 0 || failedCount > 0;
   const hasConflicts = conflictCount > 0;
+
+  if (isOnline && !hasPendingItems && !hasConflicts && !isSyncing) {
+    return null;
+  }
 
   return (
     <>

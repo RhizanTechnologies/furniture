@@ -18,12 +18,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { useSync } from '@/context/SyncContext';
 import { UserRole } from '@furniture/shared';
 
 export const TopNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, isOwner, logout } = useAuth();
+  const { isOnline } = useSync();
 
   const handleLogout = async () => {
     await logout();
@@ -80,11 +82,22 @@ export const TopNav: React.FC = () => {
           })}
         </nav>
 
-        {/* User profile & Online status */}
-        <div className="flex items-center space-x-3">
-          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-emerald-700 font-medium bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Online</span>
+        {/* User profile & Online status: compact dot indicator */}
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div
+            className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${
+              isOnline
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : 'bg-amber-50 text-amber-800 border-amber-200'
+            }`}
+            title={isOnline ? 'Online (Connected to ERP Cloud)' : 'Offline Mode (Local Storage)'}
+          >
+            <span
+              className={`h-2 w-2 rounded-full inline-block ${
+                isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}
+            />
+            <span className="text-[10px] sm:text-xs font-semibold">{isOnline ? 'Online' : 'Offline'}</span>
           </div>
 
           {isAuthenticated && user ? (
