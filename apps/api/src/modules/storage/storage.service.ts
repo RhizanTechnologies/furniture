@@ -26,7 +26,10 @@ export class StorageService implements OnModuleInit {
   private isCloudinaryConfigured = false;
 
   constructor(private readonly config: ConfigService) {
-    this.uploadDir = path.resolve(process.cwd(), 'uploads');
+    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    this.uploadDir = isServerless
+      ? path.join('/tmp', 'uploads')
+      : path.resolve(process.cwd(), 'uploads');
   }
 
   onModuleInit() {
@@ -42,9 +45,15 @@ export class StorageService implements OnModuleInit {
       this.isCloudinaryConfigured = true;
       this.logger.log('Cloudinary storage initialized for product & image uploads.');
     } else {
-      if (!fs.existsSync(this.uploadDir)) {
-        fs.mkdirSync(this.uploadDir, { recursive: true });
-        this.logger.log(`Created local uploads storage directory at: ${this.uploadDir}`);
+      try {
+        if (!fs.existsSync(this.uploadDir)) {
+          fs.mkdirSync(this.uploadDir, { recursive: true });
+          this.logger.log(`Created uploads storage directory at: ${this.uploadDir}`);
+        }
+      } catch (err: any) {
+        this.logger.warn(
+          `Could not create uploads directory at ${this.uploadDir}: ${err?.message || err}. Configure CLOUDINARY_URL for persistent image uploads on Vercel.`
+        );
       }
     }
   }

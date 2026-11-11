@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
+    "build": "prisma generate && nest build",
+    "vercel-build": "prisma generate && nest build",
     "dev": "nest start --watch",
     "start": "node dist/src/main",
     "prisma:generate": "prisma generate",
@@ -34,6 +35,7 @@
     "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
+    "express": "^4.22.1",
     "multer": "^2.5.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
