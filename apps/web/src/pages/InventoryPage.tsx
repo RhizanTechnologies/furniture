@@ -7,6 +7,7 @@ import {
   MaterialStockInDto,
   MaterialConsumptionDto,
   StockValuationDto,
+  BranchDto,
   createRawMaterialSchema,
   createStockInSchema,
   CreateRawMaterialInput,
@@ -39,16 +40,19 @@ import {
   CheckCircle2,
   Calendar,
   Eye,
+  Building2,
+  MapPin,
 } from 'lucide-react';
 
 export const InventoryPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { user, isOwner } = useAuth();
   const isBranchAdmin = user?.role === 'BRANCH_ADMIN';
-  const isBranchStock = !isBranchAdmin || user?.branch?.stockMode === 'BRANCH_STOCK';
+  const isBranchStock = isOwner || !isBranchAdmin || user?.branch?.stockMode === 'BRANCH_STOCK';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [onlyLowStock, setOnlyLowStock] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const PAGE_SIZE = 10;
@@ -59,14 +63,22 @@ export const InventoryPage: React.FC = () => {
   const [selectedMaterialHistoryId, setSelectedMaterialHistoryId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // Fetch branches if Owner (so Owner can filter stock by branch or choose destination in Stock-In)
+  const { data: branches = [] } = useQuery<BranchDto[]>({
+    queryKey: ['branches'],
+    queryFn: () => apiClient<BranchDto[]>('/branches'),
+    enabled: isOwner,
+  });
+
   // 1. Fetch Materials
   const { data: materials = [], isLoading: isMaterialsLoading, error: materialsError, refetch } = useQuery<RawMaterialDto[]>({
-    queryKey: ['raw-materials', searchTerm, selectedCategory, onlyLowStock],
+    queryKey: ['raw-materials', searchTerm, selectedCategory, onlyLowStock, selectedBranchId],
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
       if (onlyLowStock) params.append('onlyLowStock', 'true');
+      if (isOwner && selectedBranchId !== 'ALL') params.append('branchId', selectedBranchId);
       return apiClient<RawMaterialDto[]>(`/inventory/materials?${params.toString()}`);
     },
     enabled: isBranchStock,
@@ -77,11 +89,14 @@ export const InventoryPage: React.FC = () => {
     currentPage * PAGE_SIZE
   );
 
-  // 2. Fetch Stock Valuation (Executive & Owner only - hidden for Branch Admin)
+  // 2. Fetch Stock Valuation (Both Owner and Branch Admin can see their authoritative stock valuation)
   const { data: valuation, isLoading: isValuationLoading } = useQuery<StockValuationDto>({
-    queryKey: ['stock-valuation'],
-    queryFn: () => apiClient<StockValuationDto>('/inventory/valuation'),
-    enabled: !isBranchAdmin,
+    queryKey: ['stock-valuation', selectedBranchId],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (isOwner && selectedBranchId !== 'ALL') params.append('branchId', selectedBranchId);
+      return apiClient<StockValuationDto>(`/inventory/valuation?${params.toString()}`);
+    },
   });
 
   // 3. Fetch Selected Material History
@@ -180,9 +195,41 @@ export const InventoryPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Inventory & Raw Materials"
-        description="Monitor physical stock levels, record replenishments with automatic Weighted Average Cost (WAC) calculations, and view authoritative stock valuations."
+        description={
+          isOwner
+            ? "Monitor central and branch stock levels, record replenishments, and view authoritative stock valuations."
+            : `Showing physical stock and material balances allocated to ${user?.branch?.name || 'this branch'}.`
+        }
         action={
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+            {isOwner && branches.length > 0 && (
+              <div className="flex items-center space-x-1.5 bg-wood-50 border border-wood-200/90 rounded-lg px-2.5 h-8 sm:h-9 shadow-xs">
+                <Building2 className="h-3.5 w-3.5 text-wood-700 shrink-0" />
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => {
+                    setSelectedBranchId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Branches & Central Pool</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} ({b.stockMode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {isBranchAdmin && (
+              <Badge variant="wood" className="text-xs h-8 sm:h-9 px-2.5 flex items-center space-x-1">
+                <MapPin className="h-3.5 w-3.5" />
+                <span>{user?.branch?.name || 'Branch'} Stock</span>
+              </Badge>
+            )}
+
             <Button
               onClick={() => openStockInModal()}
               className="flex-1 sm:flex-none bg-wood-700 hover:bg-wood-800 text-white space-x-1 sm:space-x-1.5 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
@@ -587,6 +634,28 @@ export const InventoryPage: React.FC = () => {
                 </p>
               )}
             </div>
+
+            {isOwner && branches.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">
+                  Target Destination Location
+                </label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  {...stockInForm.register('branchId')}
+                >
+                  <option value="">Central Main Warehouse (Global Pool)</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} ({b.code}) — {b.stockMode}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Select a dedicated branch to allocate this batch directly to that location's inventory.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>

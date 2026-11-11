@@ -42,6 +42,11 @@ export class InventoryService {
       }
     }
 
+    const effectiveBranchId =
+      user?.role === UserRole.BRANCH_ADMIN
+        ? user.branchId
+        : (query.branchId && query.branchId !== 'ALL' ? query.branchId : null);
+
     const where: Prisma.RawMaterialWhereInput = {};
 
     if (!query.includeInactive) {
@@ -65,7 +70,51 @@ export class InventoryService {
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
     });
 
-    const dtos = materials.map((m) => this.mapRawMaterialToDto(m));
+    // If viewing for a specific branch (Branch Admin or Owner filtered by branch),
+    // calculate stock strictly for that branch based on branch stock-in receipts and consumptions.
+    let branchStockMap: Map<string, number> | null = null;
+    if (effectiveBranchId) {
+      branchStockMap = new Map();
+      const stockIns = await this.prisma.materialStockIn.groupBy({
+        by: ['rawMaterialId'],
+        where: { branchId: effectiveBranchId },
+        _sum: { receivedQuantity: true },
+      });
+
+      const consumptions = await this.prisma.materialConsumption.groupBy({
+        by: ['rawMaterialId'],
+        where: { branchId: effectiveBranchId },
+        _sum: { consumedQuantity: true },
+      });
+
+      for (const s of stockIns) {
+        branchStockMap.set(s.rawMaterialId, Number(s._sum.receivedQuantity || 0));
+      }
+
+      for (const c of consumptions) {
+        const current = branchStockMap.get(c.rawMaterialId) || 0;
+        const consumed = Number(c._sum.consumedQuantity || 0);
+        branchStockMap.set(c.rawMaterialId, Math.max(0, current - consumed));
+      }
+    }
+
+    const dtos = materials.map((m) => {
+      const baseDto = this.mapRawMaterialToDto(m);
+      if (branchStockMap) {
+        const branchQty = branchStockMap.get(m.id) || 0;
+        const unitCost = baseDto.currentUnitCost;
+        const alertQty = baseDto.reorderAlertQuantity;
+        const isLowStock = alertQty !== null ? branchQty <= alertQty : false;
+
+        return {
+          ...baseDto,
+          currentStockQuantity: branchQty,
+          stockValue: Math.round(branchQty * unitCost * 100) / 100,
+          isLowStock,
+        };
+      }
+      return baseDto;
+    });
 
     if (query.onlyLowStock) {
       return dtos.filter((d) => d.isLowStock);
@@ -402,12 +451,61 @@ export class InventoryService {
    * Consumed materials are excluded from remaining stock value.
    */
   async getStockValuation(branchId?: string, user?: any): Promise<StockValuationDto> {
+    const effectiveBranchId =
+      user?.role === UserRole.BRANCH_ADMIN
+        ? user.branchId
+        : (branchId && branchId !== 'ALL' ? branchId : null);
+
     const materials = await this.prisma.rawMaterial.findMany({
       where: { isActive: true },
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
     });
 
-    const mappedMaterials = materials.map((m) => this.mapRawMaterialToDto(m));
+    let branchStockMap: Map<string, number> | null = null;
+    let branchInfo: any = null;
+
+    if (effectiveBranchId) {
+      branchInfo = await this.prisma.branch.findUnique({ where: { id: effectiveBranchId } });
+      branchStockMap = new Map();
+      const stockIns = await this.prisma.materialStockIn.groupBy({
+        by: ['rawMaterialId'],
+        where: { branchId: effectiveBranchId },
+        _sum: { receivedQuantity: true },
+      });
+
+      const consumptions = await this.prisma.materialConsumption.groupBy({
+        by: ['rawMaterialId'],
+        where: { branchId: effectiveBranchId },
+        _sum: { consumedQuantity: true },
+      });
+
+      for (const s of stockIns) {
+        branchStockMap.set(s.rawMaterialId, Number(s._sum.receivedQuantity || 0));
+      }
+
+      for (const c of consumptions) {
+        const current = branchStockMap.get(c.rawMaterialId) || 0;
+        const consumed = Number(c._sum.consumedQuantity || 0);
+        branchStockMap.set(c.rawMaterialId, Math.max(0, current - consumed));
+      }
+    }
+
+    const mappedMaterials = materials.map((m) => {
+      const baseDto = this.mapRawMaterialToDto(m);
+      if (branchStockMap) {
+        const branchQty = branchStockMap.get(m.id) || 0;
+        const unitCost = baseDto.currentUnitCost;
+        const alertQty = baseDto.reorderAlertQuantity;
+        const isLowStock = alertQty !== null ? branchQty <= alertQty : false;
+        return {
+          ...baseDto,
+          currentStockQuantity: branchQty,
+          stockValue: Math.round(branchQty * unitCost * 100) / 100,
+          isLowStock,
+        };
+      }
+      return baseDto;
+    });
 
     let totalStockValue = 0;
     let lowStockCount = 0;
@@ -437,7 +535,9 @@ export class InventoryService {
     }));
 
     let stockLocation = 'Central Main Warehouse & Global Pool';
-    if (branchId) {
+    if (branchInfo) {
+      stockLocation = `${branchInfo.name} (${branchInfo.code}) Dedicated Stock`;
+    } else if (branchId) {
       const b = await this.prisma.branch.findUnique({ where: { id: branchId } });
       if (b) stockLocation = `${b.name} (${b.code})`;
     }

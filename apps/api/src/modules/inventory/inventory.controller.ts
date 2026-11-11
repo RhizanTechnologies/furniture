@@ -166,8 +166,8 @@ export class InventoryController {
   }
 
   @Get('valuation')
-  @Roles(UserRole.OWNER)
-  @ApiOperation({ summary: 'Get total stock valuation report using Weighted Average Cost (Owner only)' })
+  @Roles(UserRole.OWNER, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Get total stock valuation report using Weighted Average Cost' })
   @ApiResponse({ status: 200, description: 'Valuation report generated' })
   async getStockValuation(
     @Query('branchId') branchId?: string,

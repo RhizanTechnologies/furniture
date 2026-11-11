@@ -34,27 +34,32 @@ export const BottomNav: React.FC = () => {
 
   const canAccessStock = isOwner || user?.branch?.stockMode === 'BRANCH_STOCK';
 
-  // Core 4 primary tabs + More
-  const primaryTabs = [
-    { to: '/', label: 'Home', icon: Activity },
-    { to: '/orders', label: 'Orders', icon: ShoppingBag },
-    { to: '/customers', label: 'Customers', icon: Users },
-    {
-      to: canAccessStock ? '/inventory' : '/showroom',
-      label: canAccessStock ? 'Stock' : 'Showroom',
-      icon: canAccessStock ? Boxes : Store,
-    },
-  ];
+  // Role-customized primary tabs (5 core items + 1 More hub on a single 6-column row)
+  const primaryTabs = isOwner
+    ? [
+        { to: '/', label: 'Home', icon: Activity },
+        { to: '/orders', label: 'Orders', icon: ShoppingBag },
+        { to: '/inventory', label: 'Stock', icon: Boxes },
+        { to: '/branches', label: 'Branches', icon: Building2 },
+        { to: '/finance', label: 'Finance', icon: DollarSign },
+      ]
+    : [
+        { to: '/', label: 'Home', icon: Activity },
+        { to: '/orders', label: 'Orders', icon: ShoppingBag },
+        { to: '/customers', label: 'Customers', icon: Users },
+        { to: '/inventory', label: 'Stock', icon: Boxes },
+        { to: '/my-branch', label: 'Branch', icon: MapPin },
+      ];
 
   // Secondary modules accessible via the "More Hub"
   const secondaryModules = [
     {
-      to: '/finance',
-      label: 'Financial Ledger',
-      description: 'Cash collected, payouts & expenses',
-      icon: DollarSign,
-      color: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-      show: isOwner,
+      to: '/customers',
+      label: 'Client Registry',
+      description: 'Customer contact records & purchase history',
+      icon: Users,
+      color: 'bg-blue-50 text-blue-800 border-blue-200',
+      show: isOwner, // Shown in More for owner because Orders/Stock/Branches/Finance are on the main bar
     },
     {
       to: '/showroom',
@@ -62,7 +67,7 @@ export const BottomNav: React.FC = () => {
       description: 'High-res gallery for client consultations',
       icon: Store,
       color: 'bg-wood-50 text-wood-800 border-wood-200',
-      show: canAccessStock, // If already in primary tabs, show here too for consistency
+      show: true,
     },
     {
       to: '/catalog',
@@ -87,14 +92,6 @@ export const BottomNav: React.FC = () => {
       icon: BarChart3,
       color: 'bg-sky-50 text-sky-800 border-sky-200',
       show: isOwner,
-    },
-    {
-      to: isOwner ? '/branches' : '/my-branch',
-      label: isOwner ? 'Branches Directory' : 'My Assigned Branch',
-      description: isOwner ? 'Manage workshops and retail stores' : 'Branch details and stock mode',
-      icon: isOwner ? Building2 : MapPin,
-      color: 'bg-stone-50 text-stone-800 border-stone-200',
-      show: isAuthenticated,
     },
     {
       to: '/system-health',
@@ -140,7 +137,7 @@ export const BottomNav: React.FC = () => {
           bottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))',
         }}
       >
-        <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-wood-200/90 dark:border-stone-800 shadow-[0_8px_32px_rgba(44,30,15,0.14)] rounded-2xl px-1.5 py-1 flex items-center justify-around gap-1">
+        <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-wood-200/90 dark:border-stone-800 shadow-[0_8px_32px_rgba(44,30,15,0.14)] rounded-2xl px-1 py-1 grid grid-cols-6 items-center gap-0.5">
           {primaryTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = location.pathname === tab.to;
@@ -149,18 +146,18 @@ export const BottomNav: React.FC = () => {
               <Link
                 key={tab.to}
                 to={tab.to}
-                className={`relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-center flex-1 transition-all duration-200 ${
+                className={`relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-center transition-all duration-200 ${
                   isActive
                     ? 'bg-wood-100/90 text-wood-950 font-bold scale-[1.02] shadow-xs'
                     : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50 active:scale-95'
                 }`}
               >
                 <Icon
-                  className={`h-5 w-5 transition-transform duration-200 ${
+                  className={`h-4.5 w-4.5 transition-transform duration-200 ${
                     isActive ? 'stroke-[2.4px] text-wood-900 scale-105' : 'stroke-2'
                   }`}
                 />
-                <span className="text-[10px] tracking-tight leading-none mt-1 select-none">
+                <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none truncate max-w-full">
                   {tab.label}
                 </span>
                 {isActive && (
@@ -175,18 +172,18 @@ export const BottomNav: React.FC = () => {
             type="button"
             onClick={() => setIsMoreOpen(true)}
             aria-label="Open More Menu Hub"
-            className={`relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-center flex-1 transition-all duration-200 ${
+            className={`relative flex flex-col items-center justify-center py-1 px-1 rounded-xl text-center transition-all duration-200 ${
               isMoreOpen || isSecondaryActive
                 ? 'bg-wood-100/90 text-wood-950 font-bold scale-[1.02] shadow-xs'
                 : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50 active:scale-95'
             }`}
           >
             <MoreHorizontal
-              className={`h-5 w-5 transition-transform duration-200 ${
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${
                 isMoreOpen || isSecondaryActive ? 'stroke-[2.4px] text-wood-900 scale-105' : 'stroke-2'
               }`}
             />
-            <span className="text-[10px] tracking-tight leading-none mt-1 select-none">
+            <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none">
               More
             </span>
             {isSecondaryActive && (
