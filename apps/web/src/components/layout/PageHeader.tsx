@@ -17,21 +17,25 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-6 border-b border-wood-200/60 mb-6',
+        'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 sm:pb-6 border-b border-wood-200/60 mb-4 sm:mb-6',
         className
       )}
     >
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-charcoal-900 sm:text-3xl">
+      <div className="space-y-1 min-w-0">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-charcoal-900 leading-tight">
           {title}
         </h1>
         {description && (
-          <p className="mt-1 text-sm text-charcoal-600 max-w-2xl">
+          <p className="text-xs sm:text-sm text-charcoal-600 max-w-2xl leading-normal">
             {description}
           </p>
         )}
       </div>
-      {action && <div className="flex items-center space-x-2">{action}</div>}
+      {action && (
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto pt-1 sm:pt-0 shrink-0">
+          {action}
+        </div>
+      )}
     </div>
   );
 };

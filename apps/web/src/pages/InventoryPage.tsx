@@ -174,22 +174,23 @@ export const InventoryPage: React.FC = () => {
         title="Inventory & Raw Materials"
         description="Monitor physical stock levels, record replenishments with automatic Weighted Average Cost (WAC) calculations, and view authoritative stock valuations."
         action={
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <Button
               onClick={() => openStockInModal()}
-              className="bg-wood-700 hover:bg-wood-800 text-white space-x-1.5"
+              className="flex-1 sm:flex-none bg-wood-700 hover:bg-wood-800 text-white space-x-1 sm:space-x-1.5 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
-              <ArrowDownToLine className="h-4 w-4" />
+              <ArrowDownToLine className="h-3.5 w-3.5 shrink-0" />
               <span>Stock In</span>
             </Button>
             {isOwner && (
               <Button
                 variant="outline"
                 onClick={() => setIsAddMaterialOpen(true)}
-                className="space-x-1.5 border-wood-300 text-wood-900"
+                className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 border-wood-300 text-wood-900 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
               >
-                <Plus className="h-4 w-4" />
-                <span>New Material</span>
+                <Plus className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">New Material</span>
+                <span className="sm:hidden">Material</span>
               </Button>
             )}
           </div>

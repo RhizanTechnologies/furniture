@@ -118,25 +118,39 @@ export const DashboardPage: React.FC = () => {
             : 'Track branch orders, update production stages, register customers and manage local fulfillments.'
         }
         action={
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             {isOwner && (
-              <Link to="/analytics">
-                <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Deep Analytics</span>
+              <Link to="/analytics" className="flex-1 sm:flex-none">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9"
+                >
+                  <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden sm:inline">Deep Analytics</span>
+                  <span className="sm:hidden">Analytics</span>
                 </Button>
               </Link>
             )}
-            <Link to="/customers">
-              <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
-                <UserPlus className="h-4 w-4" />
-                <span>Register Customer</span>
+            <Link to="/customers" className="flex-1 sm:flex-none">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9"
+              >
+                <UserPlus className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">Register Customer</span>
+                <span className="sm:hidden">Customer</span>
               </Button>
             </Link>
-            <Link to="/orders">
-              <Button size="sm" className="space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow">
-                <Plus className="h-4 w-4" />
-                <span>Create Order</span>
+            <Link to="/orders" className="flex-1 sm:flex-none">
+              <Button
+                size="sm"
+                className="w-full space-x-1 sm:space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow text-xs px-2 sm:px-3 h-8 sm:h-9"
+              >
+                <Plus className="h-3.5 w-3.5 shrink-0" />
+                <span className="hidden sm:inline">Create Order</span>
+                <span className="sm:hidden">Order</span>
               </Button>
             </Link>
           </div>

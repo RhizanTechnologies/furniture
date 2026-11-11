@@ -375,19 +375,19 @@ export const OrdersPage: React.FC = () => {
         title="Furniture Orders & Pipeline"
         description="Track client bespoke commissions through customizable workshop stages from deposit intake to final delivery."
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             {isOwner && (
-              <Link to="/order-stages">
-                <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
-                  <Layers className="h-4 w-4" />
+              <Link to="/order-stages" className="flex-1 sm:flex-none">
+                <Button variant="outline" size="sm" className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9">
+                  <Layers className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden sm:inline">Customize Stages</span>
                   <span className="sm:hidden">Stages</span>
                 </Button>
               </Link>
             )}
-            <Link to="/customers">
-              <Button variant="outline" size="sm" className="space-x-1.5 border-wood-300">
-                <UserPlus className="h-4 w-4" />
+            <Link to="/customers" className="flex-1 sm:flex-none">
+              <Button variant="outline" size="sm" className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9">
+                <UserPlus className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden sm:inline">Register Customer</span>
                 <span className="sm:hidden">Customer</span>
               </Button>
@@ -398,10 +398,11 @@ export const OrdersPage: React.FC = () => {
                 orderForm.reset();
                 setIsCreateOpen(true);
               }}
-              className="space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow"
+              className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow text-xs px-2 sm:px-3 h-8 sm:h-9"
             >
-              <Plus className="h-4 w-4" />
-              <span>Create Order</span>
+              <Plus className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">Create Order</span>
+              <span className="sm:hidden">Order</span>
             </Button>
           </div>
         }

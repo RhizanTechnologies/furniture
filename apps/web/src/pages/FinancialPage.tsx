@@ -339,20 +339,20 @@ export const FinancialPage: React.FC = () => {
         title="Financial Management & Accounting"
         description="Monitor cash inflows, record order payments and progress disbursements, log operational expenses, and track net enterprise profit."
         action={
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <Button
               onClick={() => setIsPaymentOpen(true)}
-              className="bg-wood-700 hover:bg-wood-800 text-white space-x-1.5"
+              className="flex-1 sm:flex-none bg-wood-700 hover:bg-wood-800 text-white space-x-1 sm:space-x-1.5 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
-              <CreditCard className="h-4 w-4" />
+              <CreditCard className="h-3.5 w-3.5 shrink-0" />
               <span>Record Payment</span>
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsExpenseOpen(true)}
-              className="space-x-1.5 border-wood-300 text-wood-900"
+              className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 border-wood-300 text-wood-900 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
-              <Receipt className="h-4 w-4" />
+              <Receipt className="h-3.5 w-3.5 shrink-0" />
               <span>Record Expense</span>
             </Button>
           </div>
