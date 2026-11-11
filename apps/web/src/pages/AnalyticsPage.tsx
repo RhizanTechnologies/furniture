@@ -117,24 +117,39 @@ export const AnalyticsPage: React.FC = () => {
       />
 
       {/* Custom Date Range Controls */}
-      <Card className="border-wood-200/80 bg-stone-50/50">
-        <CardContent className="p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-wood-700" />
-            <span className="font-semibold text-stone-700">Custom Date Range:</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="px-2 py-1 border rounded bg-white text-xs"
-            />
-            <span className="text-muted-foreground">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="px-2 py-1 border rounded bg-white text-xs"
-            />
+      <Card className="border-wood-200/80 bg-stone-50/60">
+        <CardContent className="p-3 sm:p-4 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-1.5 text-xs font-semibold text-stone-800">
+              <Calendar className="w-4 h-4 text-wood-700 shrink-0" />
+              <span>Custom Date Range:</span>
+            </div>
+            <div className="text-[11px] sm:text-xs text-stone-500 font-medium">
+              Active: <span className="font-bold text-wood-950 capitalize">{analytics?.period || period}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:items-center gap-2">
+            <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-wood-200/90 shadow-xs flex-1">
+              <span className="text-[11px] font-medium text-muted-foreground shrink-0 w-8 sm:w-auto">From:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-transparent text-xs font-mono text-stone-800 focus:outline-none cursor-pointer"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-wood-200/90 shadow-xs flex-1">
+              <span className="text-[11px] font-medium text-muted-foreground shrink-0 w-8 sm:w-auto">To:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-transparent text-xs font-mono text-stone-800 focus:outline-none cursor-pointer"
+              />
+            </div>
+
             {(startDate || endDate) && (
               <Button
                 variant="ghost"
@@ -143,15 +158,11 @@ export const AnalyticsPage: React.FC = () => {
                   setStartDate('');
                   setEndDate('');
                 }}
-                className="h-7 text-xs text-red-600"
+                className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 self-end sm:self-center"
               >
-                Clear
+                Clear Range
               </Button>
             )}
-          </div>
-
-          <div className="text-stone-500 font-medium">
-            Active Interval: <span className="font-bold text-wood-900 capitalize">{analytics?.period || period}</span>
           </div>
         </CardContent>
       </Card>
@@ -427,53 +438,119 @@ export const AnalyticsPage: React.FC = () => {
                 }
 
                 return (
-                  <Table>
-                    <TableHeader className="bg-wood-50/50">
-                      <TableRow>
-                        <TableHead>Rank</TableHead>
-                        <TableHead>Furniture Model</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead className="text-center">Units Sold</TableHead>
-                        <TableHead className="text-right">Total Revenue</TableHead>
-                        <TableHead className="text-right">Allocated COGS</TableHead>
-                        <TableHead className="text-right">Gross Profit</TableHead>
-                        <TableHead className="text-right">Gross Margin</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+                    <div className="lg:hidden space-y-3">
                       {list.map((p, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell className="font-bold text-xs font-mono text-wood-800">
-                            #{idx + 1}
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-semibold text-stone-900 text-xs">{p.productName}</div>
-                            <div className="font-mono text-[10px] text-muted-foreground">{p.sku}</div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-[10px]">
-                              {p.category}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center font-mono text-xs">
-                            {p.unitsSold}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-xs text-stone-900">
-                            {formatCurrency(p.totalRevenue)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-xs text-stone-600">
-                            {formatCurrency(p.estimatedMaterialCost)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-xs text-emerald-800">
-                            {formatCurrency(p.grossProfit)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-xs font-semibold text-wood-900">
-                            {p.grossMarginPercentage}%
-                          </TableCell>
-                        </TableRow>
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="h-6 w-6 rounded-full bg-wood-100 text-wood-900 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                                #{idx + 1}
+                              </span>
+                              <div>
+                                <div className="font-semibold text-stone-900 text-xs sm:text-sm">
+                                  {p.productName}
+                                </div>
+                                <div className="font-mono text-[10px] text-muted-foreground">
+                                  {p.sku}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <Badge variant="outline" className="text-[10px]">
+                                {p.category}
+                              </Badge>
+                              <Badge variant="wood" className="text-[10px]">
+                                {p.unitsSold} sold
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-dashed border-stone-200 text-xs">
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Revenue</span>
+                              <span className="font-mono font-bold text-stone-900 text-xs">
+                                {formatCurrency(p.totalRevenue)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">COGS</span>
+                              <span className="font-mono text-stone-600 text-xs">
+                                {formatCurrency(p.estimatedMaterialCost)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Gross Profit</span>
+                              <span className="font-mono font-bold text-emerald-800 text-xs">
+                                {formatCurrency(p.grossProfit)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Margin</span>
+                              <span className="font-mono font-bold text-wood-900 text-xs">
+                                {p.grossMarginPercentage}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+
+                    {/* Desktop Table View (hidden on mobile and tablet) */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-wood-50/50">
+                          <TableRow>
+                            <TableHead>Rank</TableHead>
+                            <TableHead>Furniture Model</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead className="text-center">Units Sold</TableHead>
+                            <TableHead className="text-right">Total Revenue</TableHead>
+                            <TableHead className="text-right">Allocated COGS</TableHead>
+                            <TableHead className="text-right">Gross Profit</TableHead>
+                            <TableHead className="text-right">Gross Margin</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {list.map((p, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-bold text-xs font-mono text-wood-800">
+                                #{idx + 1}
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-semibold text-stone-900 text-xs">{p.productName}</div>
+                                <div className="font-mono text-[10px] text-muted-foreground">{p.sku}</div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {p.category}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center font-mono text-xs">
+                                {p.unitsSold}
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-bold text-xs text-stone-900">
+                                {formatCurrency(p.totalRevenue)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono text-xs text-stone-600">
+                                {formatCurrency(p.estimatedMaterialCost)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-bold text-xs text-emerald-800">
+                                {formatCurrency(p.grossProfit)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono text-xs font-semibold text-wood-900">
+                                {p.grossMarginPercentage}%
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 );
               })()}
             </CardContent>
@@ -493,40 +570,87 @@ export const AnalyticsPage: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader className="bg-wood-50/50">
-                    <TableRow>
-                      <TableHead>Branch</TableHead>
-                      <TableHead className="text-center">Orders</TableHead>
-                      <TableHead className="text-right">Sales Revenue</TableHead>
-                      <TableHead className="text-right">Expenses</TableHead>
-                      <TableHead className="text-right">Net Contribution</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {analytics?.branchComparisons?.map((b) => (
-                      <TableRow key={b.branchId}>
-                        <TableCell className="font-semibold text-xs text-stone-900">
+                {/* Phone & Tablet Responsive Cards (sm:hidden) */}
+                <div className="sm:hidden space-y-3">
+                  {analytics?.branchComparisons?.map((b) => (
+                    <div
+                      key={b.branchId}
+                      className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-stone-900 text-sm">
                           {b.branchName}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-xs">
-                          {b.ordersCount}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-xs font-bold text-stone-900">
-                          {formatCurrency(b.totalRevenue)}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-xs text-rose-800">
-                          {formatCurrency(b.expenses)}
-                        </TableCell>
-                        <TableCell className={`text-right font-mono text-xs font-bold ${
-                          b.netProfitContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
-                        }`}>
-                          {formatCurrency(b.netProfitContribution)}
-                        </TableCell>
+                        </span>
+                        <Badge variant="wood" className="text-[10px]">
+                          {b.ordersCount} Orders
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-dashed border-stone-200 text-xs">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Sales</span>
+                          <span className="font-mono font-bold text-stone-900 text-[11px]">
+                            {formatCurrency(b.totalRevenue)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Expenses</span>
+                          <span className="font-mono text-rose-800 text-[11px]">
+                            {formatCurrency(b.expenses)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Net Profit</span>
+                          <span
+                            className={`font-mono font-bold text-[11px] ${
+                              b.netProfitContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
+                            }`}
+                          >
+                            {formatCurrency(b.netProfitContribution)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop/Tablet Table View */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-wood-50/50">
+                      <TableRow>
+                        <TableHead>Branch</TableHead>
+                        <TableHead className="text-center">Orders</TableHead>
+                        <TableHead className="text-right">Sales Revenue</TableHead>
+                        <TableHead className="text-right">Expenses</TableHead>
+                        <TableHead className="text-right">Net Contribution</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics?.branchComparisons?.map((b) => (
+                        <TableRow key={b.branchId}>
+                          <TableCell className="font-semibold text-xs text-stone-900">
+                            {b.branchName}
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-xs">
+                            {b.ordersCount}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs font-bold text-stone-900">
+                            {formatCurrency(b.totalRevenue)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-xs text-rose-800">
+                            {formatCurrency(b.expenses)}
+                          </TableCell>
+                          <TableCell className={`text-right font-mono text-xs font-bold ${
+                            b.netProfitContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
+                          }`}>
+                            {formatCurrency(b.netProfitContribution)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
 
@@ -543,34 +667,72 @@ export const AnalyticsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {prefs?.topLoyalCustomers && prefs.topLoyalCustomers.length > 0 ? (
-                  <Table>
-                    <TableHeader className="bg-wood-50/50">
-                      <TableRow>
-                        <TableHead>Client Name</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead className="text-center">Orders Placed</TableHead>
-                        <TableHead className="text-right">Lifetime Value (ETB)</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Phone & Tablet Responsive Cards (sm:hidden) */}
+                    <div className="sm:hidden space-y-3">
                       {prefs.topLoyalCustomers.map((c) => (
-                        <TableRow key={c.customerId}>
-                          <TableCell className="font-semibold text-xs text-stone-900">
-                            {c.fullName}
-                          </TableCell>
-                          <TableCell className="font-mono text-xs text-stone-600">
-                            {c.phone}
-                          </TableCell>
-                          <TableCell className="text-center font-mono text-xs">
-                            {c.ordersCount}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-bold text-xs text-emerald-800">
-                            {formatCurrency(c.totalSpent)}
-                          </TableCell>
-                        </TableRow>
+                        <div
+                          key={c.customerId}
+                          className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-semibold text-stone-900 text-sm">
+                                {c.fullName}
+                              </div>
+                              <div className="font-mono text-xs text-stone-600">
+                                {c.phone}
+                              </div>
+                            </div>
+                            <Badge variant="wood" className="text-[10px]">
+                              {c.ordersCount} Orders
+                            </Badge>
+                          </div>
+
+                          <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                              Lifetime Value
+                            </span>
+                            <span className="font-mono font-bold text-emerald-800 text-sm">
+                              {formatCurrency(c.totalSpent)}
+                            </span>
+                          </div>
+                        </div>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+
+                    {/* Desktop/Tablet Table View */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-wood-50/50">
+                          <TableRow>
+                            <TableHead>Client Name</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead className="text-center">Orders Placed</TableHead>
+                            <TableHead className="text-right">Lifetime Value (ETB)</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {prefs.topLoyalCustomers.map((c) => (
+                            <TableRow key={c.customerId}>
+                              <TableCell className="font-semibold text-xs text-stone-900">
+                                {c.fullName}
+                              </TableCell>
+                              <TableCell className="font-mono text-xs text-stone-600">
+                                {c.phone}
+                              </TableCell>
+                              <TableCell className="text-center font-mono text-xs">
+                                {c.ordersCount}
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-bold text-xs text-emerald-800">
+                                {formatCurrency(c.totalSpent)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 ) : (
                   <p className="text-xs text-muted-foreground italic text-center py-8">
                     No customer purchase data available.
