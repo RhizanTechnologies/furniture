@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "cd ../.. && pnpm run vercel-build",
   "installCommand": "cd ../.. && pnpm install",
-  "framework": null,
+  "outputDirectory": "public",
   "rewrites": [
     {
       "source": "/(.*)",
