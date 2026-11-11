@@ -110,6 +110,7 @@ export const createProductSchema = z.object({
   basePrice: z.coerce.number().positive('Base price must be greater than 0'),
   estimatedProductionDays: z.coerce.number().int().min(1, 'Lead days must be at least 1 day').optional().nullable(),
   isActive: z.boolean().default(true),
+  branchIds: z.array(z.string()).optional(),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
@@ -122,6 +123,7 @@ export const updateProductSchema = z.object({
   basePrice: z.coerce.number().positive('Base price must be greater than 0').optional(),
   estimatedProductionDays: z.coerce.number().int().min(1).optional().nullable(),
   isActive: z.boolean().optional(),
+  branchIds: z.array(z.string()).optional(),
 });
 
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;

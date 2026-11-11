@@ -185,6 +185,14 @@ export interface ProductImageDto {
   createdAt: string;
 }
 
+export interface ProductBranchDto {
+  id: string;
+  name: string;
+  code: string;
+  address: string;
+  phone?: string | null;
+}
+
 export interface ProductDto {
   id: string;
   sku: string;
@@ -196,6 +204,7 @@ export interface ProductDto {
   estimatedProductionDays?: number | null;
   isActive: boolean;
   images: ProductImageDto[];
+  branches?: ProductBranchDto[];
   createdAt: string;
   updatedAt: string;
 }
@@ -209,6 +218,7 @@ export interface CreateProductDto {
   basePrice: number;
   estimatedProductionDays?: number | null;
   isActive?: boolean;
+  branchIds?: string[];
 }
 
 export interface UpdateProductDto {
@@ -219,6 +229,7 @@ export interface UpdateProductDto {
   basePrice?: number;
   estimatedProductionDays?: number | null;
   isActive?: boolean;
+  branchIds?: string[];
 }
 
 export interface AssignBranchAdminDto {

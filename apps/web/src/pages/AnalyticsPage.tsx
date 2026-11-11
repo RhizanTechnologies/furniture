@@ -392,12 +392,12 @@ export const AnalyticsPage: React.FC = () => {
                   </CardDescription>
                 </div>
 
-                <div className="flex space-x-1.5">
+                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
                   <Button
                     size="sm"
                     variant={productView === 'revenue' ? 'default' : 'outline'}
                     onClick={() => setProductView('revenue')}
-                    className="text-xs h-8"
+                    className="flex-1 sm:flex-none text-xs h-8 px-2.5 whitespace-nowrap"
                   >
                     Top by Revenue
                   </Button>
@@ -405,7 +405,7 @@ export const AnalyticsPage: React.FC = () => {
                     size="sm"
                     variant={productView === 'profit' ? 'default' : 'outline'}
                     onClick={() => setProductView('profit')}
-                    className="text-xs h-8"
+                    className="flex-1 sm:flex-none text-xs h-8 px-2.5 whitespace-nowrap"
                   >
                     Top by Profit
                   </Button>
@@ -413,7 +413,7 @@ export const AnalyticsPage: React.FC = () => {
                     size="sm"
                     variant={productView === 'low' ? 'default' : 'outline'}
                     onClick={() => setProductView('low')}
-                    className="text-xs h-8"
+                    className="flex-1 sm:flex-none text-xs h-8 px-2.5 whitespace-nowrap"
                   >
                     Low Performing
                   </Button>

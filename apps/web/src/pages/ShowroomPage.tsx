@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ProductDto } from '@furniture/shared';
+import { ProductDto, BranchDto } from '@furniture/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +13,12 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
-import { Armchair, Sparkles, Eye, Search, Clock, CheckCircle } from 'lucide-react';
+import { Armchair, Sparkles, Eye, Search, Clock, CheckCircle, MapPin, Building2 } from 'lucide-react';
 
 export const ShowroomPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const PAGE_SIZE = 12;
   const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
@@ -28,18 +29,29 @@ export const ShowroomPage: React.FC = () => {
     queryFn: () => apiClient<ProductDto[]>('/products'),
   });
 
+  const { data: branches = [] } = useQuery<BranchDto[]>({
+    queryKey: ['branches'],
+    queryFn: () => apiClient<BranchDto[]>('/branches'),
+  });
+
   const categories = ['ALL', 'Living Room', 'Dining Room', 'Bedroom', 'Office'];
 
   const filteredProducts = (products || []).filter((p) => {
     const matchesCategory =
       selectedCategory === 'ALL' ||
       p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesBranch =
+      selectedBranchId === 'ALL' ||
+      !p.branches ||
+      p.branches.length === 0 ||
+      p.branches.some((b) => b.id === selectedBranchId);
     const matchesSearch =
       !searchTerm ||
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch && p.isActive;
+      p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.branches && p.branches.some((b) => b.name.toLowerCase().includes(searchTerm.toLowerCase())));
+    return matchesCategory && matchesBranch && matchesSearch && p.isActive;
   });
 
   const paginatedProducts = filteredProducts.slice(
@@ -68,21 +80,44 @@ export const ShowroomPage: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <Card className="border-wood-200/90">
-        <CardContent className="p-4 flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search showroom models..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-9 h-9"
-            />
+        <CardContent className="p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-2 flex-1 max-w-xl">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search showroom models, SKUs, or locations..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-9 h-9"
+              />
+            </div>
+
+            {branches.length > 0 && (
+              <div className="flex items-center space-x-1.5 bg-wood-50 border border-wood-200/90 rounded-lg px-2.5 h-9 shrink-0 shadow-xs">
+                <MapPin className="h-3.5 w-3.5 text-wood-700 shrink-0" />
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => {
+                    setSelectedBranchId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Showrooms</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 md:pb-0">
             {categories.map((cat) => (
               <Button
                 key={cat}
@@ -165,6 +200,27 @@ export const ShowroomPage: React.FC = () => {
                       <p className="text-xs text-charcoal-600 line-clamp-2">
                         {prod.description || 'Custom handcrafted piece built to client specifications.'}
                       </p>
+
+                      {/* Showroom & Display Locations */}
+                      <div className="pt-1 flex flex-wrap items-center gap-1">
+                        {prod.branches && prod.branches.length > 0 ? (
+                          prod.branches.map((b) => (
+                            <span
+                              key={b.id}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-wood-100/90 text-wood-950 border border-wood-200/90"
+                            >
+                              <MapPin className="w-2.5 h-2.5 text-wood-700 shrink-0" />
+                              <span>{b.name}</span>
+                            </span>
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <Building2 className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
+                            <span>All Showroom Branches</span>
+                          </span>
+                        )}
+                      </div>
+
                       <div className="pt-2 flex items-baseline justify-between border-t border-wood-100">
                         <span className="text-xs uppercase text-muted-foreground font-semibold">
                           Base Price
@@ -305,6 +361,45 @@ export const ShowroomPage: React.FC = () => {
                   <span>Standard Lead Time:</span>
                   <span className="font-semibold">{selectedProduct.estimatedProductionDays || 7} Days</span>
                 </div>
+              </div>
+
+              {/* Showroom & Display Locations Box */}
+              <div className="p-3.5 rounded-lg bg-wood-50/80 border border-wood-200 space-y-2">
+                <div className="flex items-center space-x-1.5 text-xs font-semibold text-wood-950">
+                  <MapPin className="h-4 w-4 text-wood-700" />
+                  <span>Available Showrooms & Display Locations</span>
+                </div>
+                {selectedProduct.branches && selectedProduct.branches.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {selectedProduct.branches.map((b) => (
+                      <div
+                        key={b.id}
+                        className="p-2.5 rounded-lg bg-white border border-wood-200/80 text-xs space-y-1 shadow-2xs"
+                      >
+                        <div className="font-semibold text-stone-900 flex items-center justify-between">
+                          <span>{b.name}</span>
+                          <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                            On Display
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">{b.address}</div>
+                        {b.phone && (
+                          <div className="text-[10.5px] font-mono text-wood-800 font-medium">
+                            {b.phone}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-lg bg-white border border-emerald-200 text-xs text-emerald-800 flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>
+                      This piece is an Enterprise Standard model displayed and available across{' '}
+                      <strong>all branch showrooms</strong>.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {selectedProduct.description && (

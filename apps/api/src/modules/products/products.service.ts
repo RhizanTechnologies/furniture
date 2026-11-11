@@ -39,11 +39,22 @@ export class ProductsService {
       ];
     }
 
+    if (query.branchId && query.branchId !== 'ALL') {
+      where.OR = [
+        ...(where.OR || []),
+        { branches: { some: { id: query.branchId } } },
+        { branches: { none: {} } }, // Items without explicit branch restriction are enterprise-wide
+      ];
+    }
+
     const products = await this.prisma.product.findMany({
       where,
       include: {
         images: {
           orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+        branches: {
+          select: { id: true, name: true, code: true, address: true, phone: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -58,6 +69,9 @@ export class ProductsService {
       include: {
         images: {
           orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+        branches: {
+          select: { id: true, name: true, code: true, address: true, phone: true },
         },
       },
     });
@@ -88,9 +102,16 @@ export class ProductsService {
         basePrice: new Prisma.Decimal(dto.basePrice),
         estimatedProductionDays: dto.estimatedProductionDays || null,
         isActive: dto.isActive !== undefined ? dto.isActive : true,
+        branches:
+          dto.branchIds && dto.branchIds.length > 0
+            ? { connect: dto.branchIds.map((id) => ({ id })) }
+            : undefined,
       },
       include: {
         images: true,
+        branches: {
+          select: { id: true, name: true, code: true, address: true, phone: true },
+        },
       },
     });
 
@@ -100,22 +121,33 @@ export class ProductsService {
   async updateProduct(id: string, dto: UpdateProductDto): Promise<ProductDto> {
     await this.getProduct(id);
 
+    const updateData: Prisma.ProductUpdateInput = {
+      ...(dto.name && { name: dto.name.trim() }),
+      ...(dto.category && { category: dto.category.trim() }),
+      ...(dto.description !== undefined && { description: dto.description?.trim() || null }),
+      ...(dto.dimensions !== undefined && { dimensions: dto.dimensions?.trim() || null }),
+      ...(dto.basePrice !== undefined && { basePrice: new Prisma.Decimal(dto.basePrice) }),
+      ...(dto.estimatedProductionDays !== undefined && {
+        estimatedProductionDays: dto.estimatedProductionDays,
+      }),
+      ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+    };
+
+    if (dto.branchIds !== undefined) {
+      updateData.branches = {
+        set: dto.branchIds.map((id) => ({ id })),
+      };
+    }
+
     const updated = await this.prisma.product.update({
       where: { id },
-      data: {
-        ...(dto.name && { name: dto.name.trim() }),
-        ...(dto.category && { category: dto.category.trim() }),
-        ...(dto.description !== undefined && { description: dto.description?.trim() || null }),
-        ...(dto.dimensions !== undefined && { dimensions: dto.dimensions?.trim() || null }),
-        ...(dto.basePrice !== undefined && { basePrice: new Prisma.Decimal(dto.basePrice) }),
-        ...(dto.estimatedProductionDays !== undefined && {
-          estimatedProductionDays: dto.estimatedProductionDays,
-        }),
-        ...(dto.isActive !== undefined && { isActive: dto.isActive }),
-      },
+      data: updateData,
       include: {
         images: {
           orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+        },
+        branches: {
+          select: { id: true, name: true, code: true, address: true, phone: true },
         },
       },
     });
@@ -227,6 +259,13 @@ export class ProductsService {
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
       images: (p.images || []).map((img: any) => this.mapImageToDto(img)),
+      branches: (p.branches || []).map((b: any) => ({
+        id: b.id,
+        name: b.name,
+        code: b.code,
+        address: b.address,
+        phone: b.phone,
+      })),
     };
   }
 

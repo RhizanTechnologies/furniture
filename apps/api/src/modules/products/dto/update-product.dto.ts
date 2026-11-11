@@ -50,4 +50,9 @@ export class UpdateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ example: ['uuid-1'], description: 'Branch location IDs stocking/displaying this piece' })
+  @IsOptional()
+  @IsString({ each: true })
+  branchIds?: string[];
 }

@@ -18,4 +18,9 @@ export class ProductQueryDto {
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'Filter by branch location' })
+  @IsOptional()
+  @IsString()
+  branchId?: string;
 }

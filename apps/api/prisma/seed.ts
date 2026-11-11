@@ -178,6 +178,13 @@ async function main() {
   ];
 
   for (const prod of initialProducts) {
+    const branchConnections =
+      prod.sku === 'SKU-DSK-001'
+        ? [centralBranch.id]
+        : prod.sku === 'SKU-COF-001'
+        ? [boleBranch.id]
+        : [centralBranch.id, boleBranch.id];
+
     await prisma.product.upsert({
       where: { sku: prod.sku },
       update: {
@@ -187,10 +194,16 @@ async function main() {
         dimensions: prod.dimensions,
         basePrice: prod.basePrice,
         estimatedProductionDays: prod.estimatedProductionDays,
+        branches: {
+          set: branchConnections.map((id) => ({ id })),
+        },
       },
       create: {
         ...prod,
         isActive: true,
+        branches: {
+          connect: branchConnections.map((id) => ({ id })),
+        },
       },
     });
   }

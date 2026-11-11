@@ -160,9 +160,6 @@ export const BottomNav: React.FC = () => {
                 <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none truncate max-w-full">
                   {tab.label}
                 </span>
-                {isActive && (
-                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-wood-800" />
-                )}
               </Link>
             );
           })}
@@ -186,9 +183,6 @@ export const BottomNav: React.FC = () => {
             <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none">
               More
             </span>
-            {isSecondaryActive && (
-              <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-wood-800" />
-            )}
           </button>
         </div>
       </nav>

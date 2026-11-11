@@ -4,6 +4,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ProductDto,
+  BranchDto,
   createProductSchema,
   CreateProductInput,
   updateProductSchema,
@@ -30,6 +31,8 @@ import {
   Edit2,
   Armchair,
   Filter,
+  MapPin,
+  Building2,
 } from 'lucide-react';
 
 export const CatalogPage: React.FC = () => {
@@ -48,6 +51,12 @@ export const CatalogPage: React.FC = () => {
     queryFn: () => apiClient<ProductDto[]>('/products'),
   });
 
+  // Fetch all branches for location assignment
+  const { data: branches = [] } = useQuery<BranchDto[]>({
+    queryKey: ['branches'],
+    queryFn: () => apiClient<BranchDto[]>('/branches'),
+  });
+
   // Create Product Form
   const createForm = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema),
@@ -60,6 +69,7 @@ export const CatalogPage: React.FC = () => {
       basePrice: 10000,
       estimatedProductionDays: 7,
       isActive: true,
+      branchIds: [],
     },
   });
 
@@ -103,6 +113,7 @@ export const CatalogPage: React.FC = () => {
       basePrice: prod.basePrice,
       estimatedProductionDays: prod.estimatedProductionDays || undefined,
       isActive: prod.isActive,
+      branchIds: (prod.branches || []).map((b) => b.id),
     });
   };
 
@@ -215,6 +226,27 @@ export const CatalogPage: React.FC = () => {
                   </p>
                 )}
 
+                {/* Showroom Branch Locations */}
+                {prod.branches && prod.branches.length > 0 ? (
+                  <div className="flex flex-wrap items-center gap-1 pt-1 text-[11px] text-wood-800">
+                    <MapPin className="h-3 w-3 text-wood-600 shrink-0" />
+                    <span className="font-semibold text-stone-600 text-[10px] uppercase tracking-wider">Showrooms:</span>
+                    {prod.branches.map((b) => (
+                      <span
+                        key={b.id}
+                        className="bg-wood-50 border border-wood-200 px-1.5 py-0.5 rounded text-[10px] font-semibold text-wood-900"
+                      >
+                        {b.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 pt-1 text-[11px] text-stone-500">
+                    <Building2 className="h-3 w-3 shrink-0 text-stone-400" />
+                    <span className="text-[10px]">All Branch Showrooms</span>
+                  </div>
+                )}
+
                 <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] uppercase text-muted-foreground block font-bold">Base Price</span>
@@ -284,6 +316,24 @@ export const CatalogPage: React.FC = () => {
                       <div>{prod.name}</div>
                       <div className="text-[11px] text-muted-foreground sm:hidden">
                         {prod.category} • {prod.dimensions}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {prod.branches && prod.branches.length > 0 ? (
+                          prod.branches.map((b) => (
+                            <span
+                              key={b.id}
+                              className="inline-flex items-center text-[10px] bg-wood-50 border border-wood-200 text-wood-900 px-1.5 py-0.5 rounded font-medium"
+                            >
+                              <MapPin className="h-2.5 w-2.5 mr-0.5 text-wood-600" />
+                              {b.name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="inline-flex items-center text-[10px] bg-stone-50 border border-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
+                            <Building2 className="h-2.5 w-2.5 mr-0.5 text-stone-400" />
+                            All Showrooms
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -386,6 +436,52 @@ export const CatalogPage: React.FC = () => {
 
               <FormInput name="description" label="Detailed Specifications & Materials" placeholder="Wood type, foam density, upholstery fabric..." />
 
+              {/* Showroom Branch Selection */}
+              {branches.length > 0 && (
+                <div className="space-y-1.5 pt-2 border-t border-wood-100">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 text-wood-700" />
+                    Assigned Showroom Branches (Optional)
+                  </label>
+                  <p className="text-[11px] text-stone-500">
+                    Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {branches.map((branch) => {
+                      const selected = createForm.watch('branchIds') || [];
+                      const isChecked = selected.includes(branch.id);
+                      return (
+                        <label
+                          key={branch.id}
+                          className={`flex items-center space-x-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                            isChecked
+                              ? 'border-wood-600 bg-wood-50/80 font-medium text-wood-950 shadow-2xs'
+                              : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                createForm.setValue('branchIds', [...selected, branch.id]);
+                              } else {
+                                createForm.setValue(
+                                  'branchIds',
+                                  selected.filter((id) => id !== branch.id)
+                                );
+                              }
+                            }}
+                            className="rounded border-stone-300 text-wood-700 focus:ring-wood-500"
+                          />
+                          <span className="truncate">{branch.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {createMutation.isError && (
                 <p className="text-xs text-red-600 font-medium">
                   {(createMutation.error as any)?.message || 'Failed to create product.'}
@@ -443,6 +539,52 @@ export const CatalogPage: React.FC = () => {
                 </div>
 
                 <FormInput name="description" label="Specifications & Details" />
+
+                {/* Showroom Branch Selection */}
+                {branches.length > 0 && (
+                  <div className="space-y-1.5 pt-2 border-t border-wood-100">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5 text-wood-700" />
+                      Assigned Showroom Branches (Optional)
+                    </label>
+                    <p className="text-[11px] text-stone-500">
+                      Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {branches.map((branch) => {
+                        const selected = editForm.watch('branchIds') || [];
+                        const isChecked = selected.includes(branch.id);
+                        return (
+                          <label
+                            key={branch.id}
+                            className={`flex items-center space-x-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                              isChecked
+                                ? 'border-wood-600 bg-wood-50/80 font-medium text-wood-950 shadow-2xs'
+                                : 'border-stone-200 hover:bg-stone-50 text-stone-700'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  editForm.setValue('branchIds', [...selected, branch.id]);
+                                } else {
+                                  editForm.setValue(
+                                    'branchIds',
+                                    selected.filter((id) => id !== branch.id)
+                                  );
+                                }
+                              }}
+                              className="rounded border-stone-300 text-wood-700 focus:ring-wood-500"
+                            />
+                            <span className="truncate">{branch.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {editMutation.isError && (
                   <p className="text-xs text-red-600 font-medium">

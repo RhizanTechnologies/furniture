@@ -56,4 +56,9 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ example: ['uuid-1', 'uuid-2'], description: 'Branch location IDs stocking/displaying this piece' })
+  @IsOptional()
+  @IsString({ each: true })
+  branchIds?: string[];
 }

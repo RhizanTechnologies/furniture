@@ -62,10 +62,9 @@ export class CustomersService {
   async listCustomers(query: CustomerQueryDto, user: any): Promise<CustomerDto[]> {
     const where: Prisma.CustomerWhereInput = {};
 
-    // Branch tenancy restriction
-    if (user.role === UserRole.BRANCH_ADMIN) {
-      where.branchId = user.branchId;
-    } else if (query.branchId) {
+    // Customer contact profiles are enterprise-wide so any branch can see and select registered clients.
+    // If Owner explicitly filters by branch, respect query.branchId.
+    if (user.role === UserRole.OWNER && query.branchId && query.branchId !== 'ALL') {
       where.branchId = query.branchId;
     }
 
@@ -83,6 +82,7 @@ export class CustomersService {
       include: {
         orders: {
           select: {
+            branchId: true,
             totalAgreedPrice: true,
             totalPaid: true,
             outstandingBalance: true,
@@ -92,7 +92,7 @@ export class CustomersService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return customers.map((c) => this.mapCustomerToDto(c));
+    return customers.map((c) => this.mapCustomerToDto(c, user));
   }
 
   async getCustomer(id: string, user: any): Promise<CustomerDto & { orders: any[] }> {
@@ -113,15 +113,24 @@ export class CustomersService {
       throw new NotFoundException(`Customer with ID "${id}" not found`);
     }
 
-    // Tenancy validation
-    if (user.role === UserRole.BRANCH_ADMIN && customer.branchId !== user.branchId) {
-      throw new ForbiddenException('Forbidden: You are not authorized to view customers from another branch');
-    }
+    // Branch Admin can view customer profile information enterprise-wide,
+    // but customer orders are strictly scoped: Branch Admin only sees orders placed in their own branch.
+    const visibleOrders =
+      user.role === UserRole.BRANCH_ADMIN
+        ? customer.orders.filter((o) => o.branchId === user.branchId)
+        : customer.orders;
 
-    const dto = this.mapCustomerToDto(customer);
+    const dto = this.mapCustomerToDto(
+      {
+        ...customer,
+        orders: visibleOrders,
+      },
+      user,
+    );
+
     return {
       ...dto,
-      orders: customer.orders.map((o) => ({
+      orders: visibleOrders.map((o) => ({
         id: o.id,
         orderNumber: o.orderNumber,
         totalAgreedPrice: Number(o.totalAgreedPrice),
@@ -175,8 +184,13 @@ export class CustomersService {
     return this.mapCustomerToDto(updated);
   }
 
-  private mapCustomerToDto(c: any): CustomerDto {
-    const orders = c.orders || [];
+  private mapCustomerToDto(c: any, user?: any): CustomerDto {
+    const rawOrders = c.orders || [];
+    const orders =
+      user && user.role === UserRole.BRANCH_ADMIN
+        ? rawOrders.filter((o: any) => o.branchId === user.branchId)
+        : rawOrders;
+
     const totalSpent = orders.reduce((sum: number, o: any) => sum + Number(o.totalPaid || 0), 0);
     const outstandingBalance = orders.reduce(
       (sum: number, o: any) => sum + Number(o.outstandingBalance || 0),

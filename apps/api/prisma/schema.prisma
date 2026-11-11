@@ -63,6 +63,7 @@ model Branch {
   stockIns            MaterialStockIn[]
   consumptions        MaterialConsumption[]
   expenses            Expense[]
+  products            Product[]
 
   @@map("branches")
 }
@@ -82,6 +83,7 @@ model Product {
 
   images     ProductImage[]
   orderItems OrderItem[]
+  branches   Branch[]
 
   @@index([name])
   @@index([category])
