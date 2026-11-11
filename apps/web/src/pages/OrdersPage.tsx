@@ -468,8 +468,8 @@ export const OrdersPage: React.FC = () => {
         </Card>
       ) : (
         <>
-          {/* Mobile Card-Based View (PWA Responsive) */}
-          <div className="md:hidden space-y-3">
+          {/* Phone & Tablet Card-Based View (PWA Responsive) */}
+          <div className="lg:hidden space-y-3">
             {filteredOrders.map((ord) => {
               const deadlinePassed = new Date(ord.deadlineDate).getTime() < Date.now();
               return (
@@ -553,8 +553,8 @@ export const OrdersPage: React.FC = () => {
             })}
           </div>
 
-          {/* Desktop Table View */}
-          <Card className="hidden md:block border-wood-200">
+          {/* Desktop Table View (lg screens and wider only) */}
+          <Card className="hidden lg:block border-wood-200">
             <Table>
               <TableHeader>
                 <TableRow className="bg-wood-50/50">

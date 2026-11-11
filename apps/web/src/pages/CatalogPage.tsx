@@ -177,77 +177,148 @@ export const CatalogPage: React.FC = () => {
               <CardDescription>All furniture lines currently configured.</CardDescription>
             </div>
           </CardHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>SKU</TableHead>
-                <TableHead>Product Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="hidden md:table-cell">Dimensions</TableHead>
-                <TableHead>Base Price</TableHead>
-                <TableHead className="hidden sm:table-cell">Lead Days</TableHead>
-                <TableHead>Gallery</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((prod) => (
-                <TableRow key={prod.id}>
-                  <TableCell className="font-mono text-xs font-semibold text-wood-900">
-                    {prod.sku}
-                  </TableCell>
-                  <TableCell className="font-medium text-charcoal-900">
-                    <div>{prod.name}</div>
-                    <div className="text-[11px] text-muted-foreground sm:hidden">
-                      {prod.category} • {prod.dimensions}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="wood" className="text-[11px]">
-                      {prod.category}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
-                    {prod.dimensions || '—'}
-                  </TableCell>
-                  <TableCell className="font-semibold text-charcoal-900">
-                    {formatCurrency(prod.basePrice)}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-xs text-charcoal-600">
-                    {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} days` : '—'}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setImageManagingProduct(prod)}
-                      className="h-7 text-xs space-x-1 border-wood-300"
-                    >
-                      <ImageIcon className="h-3 w-3 text-wood-700" />
-                      <span>{prod.images.length} Photos</span>
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleStartEdit(prod)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredProducts.length === 0 && (
+
+          {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+          <div className="lg:hidden space-y-3 p-3">
+            {filteredProducts.map((prod) => (
+              <div
+                key={prod.id}
+                className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5 text-xs"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-stone-900 text-sm leading-snug break-words">{prod.name}</div>
+                    <div className="font-mono text-xs text-wood-700">{prod.sku}</div>
+                  </div>
+                  <Badge variant="wood" className="text-[11px] shrink-0">
+                    {prod.category}
+                  </Badge>
+                </div>
+
+                {prod.dimensions && (
+                  <p className="text-stone-600 text-[11px]">
+                    Dimensions: {prod.dimensions}
+                  </p>
+                )}
+
+                <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">Base Price</span>
+                    <span className="font-semibold text-charcoal-900 font-mono text-sm">
+                      {formatCurrency(prod.basePrice)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">Lead Time</span>
+                    <span className="font-mono text-stone-700">
+                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} days` : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-1 flex items-center justify-end space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setImageManagingProduct(prod)}
+                    className="h-7 text-xs space-x-1 border-wood-300 flex-1"
+                  >
+                    <ImageIcon className="h-3 w-3 text-wood-700" />
+                    <span>{prod.images.length} Photos</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleStartEdit(prod)}
+                    className="h-7 text-xs space-x-1 border-wood-300"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                    <span>Edit</span>
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {filteredProducts.length === 0 && (
+              <p className="text-center py-6 text-muted-foreground">
+                No products found matching your search and category filter.
+              </p>
+            )}
+          </div>
+
+          {/* Desktop Table View (lg:block) */}
+          <div className="hidden lg:block">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    No products found matching your search and category filter.
-                  </TableCell>
+                  <TableHead>SKU</TableHead>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="hidden md:table-cell">Dimensions</TableHead>
+                  <TableHead>Base Price</TableHead>
+                  <TableHead className="hidden sm:table-cell">Lead Days</TableHead>
+                  <TableHead>Gallery</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.map((prod) => (
+                  <TableRow key={prod.id}>
+                    <TableCell className="font-mono text-xs font-semibold text-wood-900">
+                      {prod.sku}
+                    </TableCell>
+                    <TableCell className="font-medium text-charcoal-900">
+                      <div>{prod.name}</div>
+                      <div className="text-[11px] text-muted-foreground sm:hidden">
+                        {prod.category} • {prod.dimensions}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="wood" className="text-[11px]">
+                        {prod.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
+                      {prod.dimensions || '—'}
+                    </TableCell>
+                    <TableCell className="font-semibold text-charcoal-900">
+                      {formatCurrency(prod.basePrice)}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs text-charcoal-600">
+                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} days` : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setImageManagingProduct(prod)}
+                        className="h-7 text-xs space-x-1 border-wood-300"
+                      >
+                        <ImageIcon className="h-3 w-3 text-wood-700" />
+                        <span>{prod.images.length} Photos</span>
+                      </Button>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleStartEdit(prod)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredProducts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      No products found matching your search and category filter.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
       )}
 

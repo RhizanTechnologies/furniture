@@ -359,44 +359,23 @@ export const InventoryPage: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="border-wood-200 overflow-hidden shadow-sm">
-          <Table>
-            <TableHeader className="bg-wood-50/50">
-              <TableRow>
-                <TableHead>Material</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Available Qty</TableHead>
-                <TableHead className="text-right">Unit Cost (WAC)</TableHead>
-                <TableHead className="text-right">Stock Value</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {materials.map((mat) => (
-                <TableRow key={mat.id} className="hover:bg-wood-50/30">
-                  <TableCell>
-                    <div>
-                      <div className="font-semibold text-stone-900 text-sm">{mat.name}</div>
-                      <div className="font-mono text-xs text-wood-700">{mat.code}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
+        <>
+          {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+          <div className="lg:hidden space-y-3">
+            {materials.map((mat) => (
+              <div
+                key={mat.id}
+                className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-stone-900 text-sm leading-snug break-words">{mat.name}</div>
+                    <div className="font-mono text-xs text-wood-700">{mat.code}</div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
                     <Badge variant="outline" className="text-xs">
                       {mat.category}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    <span className="font-mono text-sm">{mat.currentStockQuantity.toLocaleString()}</span>{' '}
-                    <span className="text-xs text-muted-foreground">{mat.unitOfMeasurement}</span>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm text-stone-700">
-                    {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
-                  </TableCell>
-                  <TableCell className="text-right font-mono font-bold text-sm text-wood-900">
-                    {formatCurrency(mat.stockValue)}
-                  </TableCell>
-                  <TableCell className="text-center">
                     {mat.currentStockQuantity <= 0 ? (
                       <Badge variant="destructive" className="text-[10px]">
                         Out of Stock
@@ -411,32 +390,134 @@ export const InventoryPage: React.FC = () => {
                         In Stock
                       </Badge>
                     )}
-                  </TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openStockInModal(mat)}
-                      className="h-8 text-xs text-wood-800 hover:bg-wood-50"
-                    >
-                      <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
-                      Stock In
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedMaterialHistoryId(mat.id)}
-                      className="h-8 text-xs text-stone-600"
-                      title="View replenishment and consumption history"
-                    >
-                      <History className="w-3.5 h-3.5" />
-                    </Button>
-                  </TableCell>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-lg bg-stone-50 text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">Available Stock</span>
+                    <span className="font-mono font-bold text-stone-900 text-sm">
+                      {mat.currentStockQuantity.toLocaleString()}
+                    </span>{' '}
+                    <span className="text-stone-500 text-[11px]">{mat.unitOfMeasurement}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">Stock Valuation</span>
+                    <span className="font-mono font-bold text-wood-950 text-sm">
+                      {formatCurrency(mat.stockValue)}
+                    </span>
+                  </div>
+                  <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px]">
+                    <span className="text-stone-500">Unit WAC Cost:</span>
+                    <span className="font-mono font-medium text-stone-800">
+                      {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end space-x-2 pt-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedMaterialHistoryId(mat.id)}
+                    className="h-8 text-xs text-stone-600 space-x-1"
+                  >
+                    <History className="w-3.5 h-3.5" />
+                    <span>Audit Log</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => openStockInModal(mat)}
+                    className="h-8 text-xs bg-wood-700 hover:bg-wood-800 text-white space-x-1"
+                  >
+                    <ArrowDownToLine className="w-3.5 h-3.5" />
+                    <span>Stock In</span>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View (lg:block) */}
+          <Card className="hidden lg:block border-wood-200 overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader className="bg-wood-50/50">
+                <TableRow>
+                  <TableHead>Material</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Available Qty</TableHead>
+                  <TableHead className="text-right">Unit Cost (WAC)</TableHead>
+                  <TableHead className="text-right">Stock Value</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableHeader>
+              <TableBody>
+                {materials.map((mat) => (
+                  <TableRow key={mat.id} className="hover:bg-wood-50/30">
+                    <TableCell>
+                      <div>
+                        <div className="font-semibold text-stone-900 text-sm">{mat.name}</div>
+                        <div className="font-mono text-xs text-wood-700">{mat.code}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {mat.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      <span className="font-mono text-sm">{mat.currentStockQuantity.toLocaleString()}</span>{' '}
+                      <span className="text-xs text-muted-foreground">{mat.unitOfMeasurement}</span>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm text-stone-700">
+                      {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-bold text-sm text-wood-900">
+                      {formatCurrency(mat.stockValue)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {mat.currentStockQuantity <= 0 ? (
+                        <Badge variant="destructive" className="text-[10px]">
+                          Out of Stock
+                        </Badge>
+                      ) : mat.isLowStock ? (
+                        <Badge className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] space-x-1">
+                          <AlertTriangle className="w-2.5 h-2.5 text-amber-600 inline mr-0.5" />
+                          <span>Low Stock</span>
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
+                          In Stock
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openStockInModal(mat)}
+                        className="h-8 text-xs text-wood-800 hover:bg-wood-50"
+                      >
+                        <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
+                        Stock In
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedMaterialHistoryId(mat.id)}
+                        className="h-8 text-xs text-stone-600"
+                        title="View replenishment and consumption history"
+                      >
+                        <History className="w-3.5 h-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </>
       )}
 
       {/* Stock-In Modal */}
@@ -784,40 +865,66 @@ export const InventoryPage: React.FC = () => {
                   {materialHistory.stockIns.length === 0 ? (
                     <p className="text-xs text-stone-500 italic">No replenishment records.</p>
                   ) : (
-                    <div className="border rounded-md overflow-hidden text-xs">
-                      <Table>
-                        <TableHeader className="bg-stone-50">
-                          <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Location</TableHead>
-                            <TableHead className="text-right">Qty Received</TableHead>
-                            <TableHead className="text-right">Unit Cost</TableHead>
-                            <TableHead className="text-right">Total Batch Cost</TableHead>
-                            <TableHead>Invoice Ref</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {materialHistory.stockIns.map((s) => (
-                            <TableRow key={s.id}>
-                              <TableCell>{new Date(s.receivedDate).toLocaleDateString()}</TableCell>
-                              <TableCell>{s.branchName}</TableCell>
-                              <TableCell className="text-right font-mono font-medium">
-                                {s.receivedQuantity} {s.unitOfMeasurement}
-                              </TableCell>
-                              <TableCell className="text-right font-mono">
-                                {formatCurrency(s.unitCost)}
-                              </TableCell>
-                              <TableCell className="text-right font-mono font-bold text-wood-900">
-                                {formatCurrency(s.totalCost)}
-                              </TableCell>
-                              <TableCell className="text-stone-600">
-                                {s.supplierInvoiceRef || '—'}
-                              </TableCell>
+                    <>
+                      {/* Mobile & Tablet Card View */}
+                      <div className="lg:hidden space-y-2">
+                        {materialHistory.stockIns.map((s) => (
+                          <div
+                            key={s.id}
+                            className="p-3 rounded-lg border border-wood-100 bg-stone-50/60 text-xs space-y-1.5"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-stone-900">{s.branchName || 'Central'}</span>
+                              <span className="text-[11px] text-muted-foreground">{new Date(s.receivedDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center justify-between font-mono">
+                              <span className="text-stone-700">Received: <strong>{s.receivedQuantity} {s.unitOfMeasurement}</strong></span>
+                              <span className="text-wood-900 font-bold">{formatCurrency(s.totalCost)}</span>
+                            </div>
+                            <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
+                              <span>Unit Cost: {formatCurrency(s.unitCost)} / {s.unitOfMeasurement}</span>
+                              {s.supplierInvoiceRef && <span>Inv: {s.supplierInvoiceRef}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop Table View */}
+                      <div className="hidden lg:block border rounded-md overflow-hidden text-xs">
+                        <Table>
+                          <TableHeader className="bg-stone-50">
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Location</TableHead>
+                              <TableHead className="text-right">Qty Received</TableHead>
+                              <TableHead className="text-right">Unit Cost</TableHead>
+                              <TableHead className="text-right">Total Batch Cost</TableHead>
+                              <TableHead>Invoice Ref</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                          </TableHeader>
+                          <TableBody>
+                            {materialHistory.stockIns.map((s) => (
+                              <TableRow key={s.id}>
+                                <TableCell>{new Date(s.receivedDate).toLocaleDateString()}</TableCell>
+                                <TableCell>{s.branchName}</TableCell>
+                                <TableCell className="text-right font-mono font-medium">
+                                  {s.receivedQuantity} {s.unitOfMeasurement}
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                  {formatCurrency(s.unitCost)}
+                                </TableCell>
+                                <TableCell className="text-right font-mono font-bold text-wood-900">
+                                  {formatCurrency(s.totalCost)}
+                                </TableCell>
+                                <TableCell className="text-stone-600">
+                                  {s.supplierInvoiceRef || '—'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   )}
                 </div>
 
@@ -830,40 +937,66 @@ export const InventoryPage: React.FC = () => {
                   {materialHistory.consumptions.length === 0 ? (
                     <p className="text-xs text-stone-500 italic">No order consumption records.</p>
                   ) : (
-                    <div className="border rounded-md overflow-hidden text-xs">
-                      <Table>
-                        <TableHeader className="bg-stone-50">
-                          <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Order #</TableHead>
-                            <TableHead>Workshop</TableHead>
-                            <TableHead className="text-right">Qty Consumed</TableHead>
-                            <TableHead className="text-right">Allocated WAC Cost</TableHead>
-                            <TableHead className="text-right">Total Cost Contribution</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {materialHistory.consumptions.map((c) => (
-                            <TableRow key={c.id}>
-                              <TableCell>{new Date(c.consumedAt).toLocaleDateString()}</TableCell>
-                              <TableCell className="font-mono font-bold text-wood-800">
-                                {c.orderNumber}
-                              </TableCell>
-                              <TableCell>{c.branchName}</TableCell>
-                              <TableCell className="text-right font-mono font-medium">
-                                {c.consumedQuantity} {c.unitOfMeasurement}
-                              </TableCell>
-                              <TableCell className="text-right font-mono">
-                                {formatCurrency(c.unitCostAllocated)}
-                              </TableCell>
-                              <TableCell className="text-right font-mono font-bold text-wood-900">
-                                {formatCurrency(c.totalMaterialCost)}
-                              </TableCell>
+                    <>
+                      {/* Mobile & Tablet Card View */}
+                      <div className="lg:hidden space-y-2">
+                        {materialHistory.consumptions.map((c) => (
+                          <div
+                            key={c.id}
+                            className="p-3 rounded-lg border border-wood-100 bg-stone-50/60 text-xs space-y-1.5"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono font-bold text-wood-900">{c.orderNumber}</span>
+                              <span className="text-[11px] text-muted-foreground">{new Date(c.consumedAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center justify-between font-mono">
+                              <span className="text-stone-700">Consumed: <strong>{c.consumedQuantity} {c.unitOfMeasurement}</strong></span>
+                              <span className="text-wood-900 font-bold">{formatCurrency(c.totalMaterialCost)}</span>
+                            </div>
+                            <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
+                              <span>Allocated WAC: {formatCurrency(c.unitCostAllocated)} / {c.unitOfMeasurement}</span>
+                              <span>{c.branchName || 'Central'}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop Table View */}
+                      <div className="hidden lg:block border rounded-md overflow-hidden text-xs">
+                        <Table>
+                          <TableHeader className="bg-stone-50">
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Order #</TableHead>
+                              <TableHead>Workshop</TableHead>
+                              <TableHead className="text-right">Qty Consumed</TableHead>
+                              <TableHead className="text-right">Allocated WAC Cost</TableHead>
+                              <TableHead className="text-right">Total Cost Contribution</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                          </TableHeader>
+                          <TableBody>
+                            {materialHistory.consumptions.map((c) => (
+                              <TableRow key={c.id}>
+                                <TableCell>{new Date(c.consumedAt).toLocaleDateString()}</TableCell>
+                                <TableCell className="font-mono font-bold text-wood-800">
+                                  {c.orderNumber}
+                                </TableCell>
+                                <TableCell>{c.branchName}</TableCell>
+                                <TableCell className="text-right font-mono font-medium">
+                                  {c.consumedQuantity} {c.unitOfMeasurement}
+                                </TableCell>
+                                <TableCell className="text-right font-mono">
+                                  {formatCurrency(c.unitCostAllocated)}
+                                </TableCell>
+                                <TableCell className="text-right font-mono font-bold text-wood-900">
+                                  {formatCurrency(c.totalMaterialCost)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

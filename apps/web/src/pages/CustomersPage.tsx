@@ -227,69 +227,139 @@ export const CustomersPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-wood-50/50">
-                  <TableHead>Customer Name</TableHead>
-                  <TableHead>Phone Number</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Address</TableHead>
-                  <TableHead className="hidden sm:table-cell">Orders</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Outstanding Balance</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+              <div className="lg:hidden space-y-3 p-3">
                 {customers.map((cust) => (
-                  <TableRow key={cust.id}>
-                    <TableCell className="font-semibold text-charcoal-900">
-                      <div>{cust.fullName}</div>
-                      {cust.email && (
-                        <div className="text-[11px] text-muted-foreground">{cust.email}</div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">{cust.phone}</TableCell>
-                    <TableCell>
-                      <RecordSyncBadge isPendingSync={cust.isPendingSync} />
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
-                      {cust.address || '—'}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge variant="wood" className="text-[10px]">
-                        {cust.ordersCount || 0} Orders
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {formatCurrency(cust.totalSpent || 0)}
-                    </TableCell>
-                    <TableCell>
-                      {(cust.outstandingBalance || 0) > 0 ? (
-                        <span className="font-semibold text-amber-700">
-                          {formatCurrency(cust.outstandingBalance || 0)}
-                        </span>
-                      ) : (
-                        <Badge variant="success" className="text-[10px]">
-                          Cleared
+                  <div
+                    key={cust.id}
+                    className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-charcoal-900 text-sm">{cust.fullName}</div>
+                        <div className="font-mono text-xs text-wood-700">{cust.phone}</div>
+                        {cust.email && (
+                          <div className="text-[11px] text-muted-foreground">{cust.email}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-1.5 shrink-0">
+                        <RecordSyncBadge isPendingSync={cust.isPendingSync} />
+                        <Badge variant="wood" className="text-[10px]">
+                          {cust.ordersCount || 0} Orders
                         </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
+                      </div>
+                    </div>
+
+                    {cust.address && (
+                      <p className="text-xs text-stone-600 line-clamp-1">
+                        📍 {cust.address}
+                      </p>
+                    )}
+
+                    <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Total Spent</span>
+                        <span className="font-semibold text-charcoal-900 font-mono">
+                          {formatCurrency(cust.totalSpent || 0)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Balance</span>
+                        {(cust.outstandingBalance || 0) > 0 ? (
+                          <span className="font-semibold text-amber-700 font-mono text-xs">
+                            {formatCurrency(cust.outstandingBalance || 0)}
+                          </span>
+                        ) : (
+                          <Badge variant="success" className="text-[10px]">
+                            Cleared
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-1 flex justify-end">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedCustomerId(cust.id)}
-                        className="h-7 text-xs space-x-1 border-wood-300"
+                        className="h-7 text-xs space-x-1 border-wood-300 w-full"
                       >
                         <Eye className="h-3 w-3" />
-                        <span>History</span>
+                        <span>View Client Details & History</span>
                       </Button>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop Table View (lg:block) */}
+              <div className="hidden lg:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-wood-50/50">
+                      <TableHead>Customer Name</TableHead>
+                      <TableHead>Phone Number</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden md:table-cell">Address</TableHead>
+                      <TableHead className="hidden sm:table-cell">Orders</TableHead>
+                      <TableHead>Total Spent</TableHead>
+                      <TableHead>Outstanding Balance</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customers.map((cust) => (
+                      <TableRow key={cust.id}>
+                        <TableCell className="font-semibold text-charcoal-900">
+                          <div>{cust.fullName}</div>
+                          {cust.email && (
+                            <div className="text-[11px] text-muted-foreground">{cust.email}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{cust.phone}</TableCell>
+                        <TableCell>
+                          <RecordSyncBadge isPendingSync={cust.isPendingSync} />
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
+                          {cust.address || '—'}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <Badge variant="wood" className="text-[10px]">
+                            {cust.ordersCount || 0} Orders
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency(cust.totalSpent || 0)}
+                        </TableCell>
+                        <TableCell>
+                          {(cust.outstandingBalance || 0) > 0 ? (
+                            <span className="font-semibold text-amber-700">
+                              {formatCurrency(cust.outstandingBalance || 0)}
+                            </span>
+                          ) : (
+                            <Badge variant="success" className="text-[10px]">
+                              Cleared
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedCustomerId(cust.id)}
+                            className="h-7 text-xs space-x-1 border-wood-300"
+                          >
+                            <Eye className="h-3 w-3" />
+                            <span>History</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

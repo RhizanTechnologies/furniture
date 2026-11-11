@@ -210,59 +210,125 @@ export const DashboardPage: React.FC = () => {
               No orders recorded yet. Click "Create Order" to record an order.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  {isOwner && <TableHead className="hidden md:table-cell">Branch</TableHead>}
-                  <TableHead className="text-right">Agreed Total</TableHead>
-                  <TableHead className="text-right">Remaining Balance</TableHead>
-                  <TableHead className="text-center">Current Stage</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+              <div className="lg:hidden space-y-3">
                 {recentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-semibold text-wood-900 font-mono text-xs">
-                      {order.orderNumber}
-                    </TableCell>
-                    <TableCell className="font-medium text-xs">
-                      <div>{order.customer?.fullName || 'Walk-In Customer'}</div>
-                      <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
-                    </TableCell>
-                    {isOwner && (
-                      <TableCell className="hidden md:table-cell text-charcoal-600 text-xs">
-                        {order.branch?.name}
-                      </TableCell>
-                    )}
-                    <TableCell className="text-right font-medium font-mono text-xs">
-                      {formatCurrency(order.totalAgreedPrice)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs font-semibold">
-                      {order.outstandingBalance > 0 ? (
-                        <span className="text-amber-800">{formatCurrency(order.outstandingBalance)}</span>
-                      ) : (
-                        <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                          Fully Paid
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
+                  <Link
+                    key={order.id}
+                    to="/orders"
+                    className="block p-3.5 rounded-xl border border-wood-200/90 bg-white hover:border-wood-400 active:bg-wood-50/50 shadow-xs transition-all space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-wood-950">
+                        {order.orderNumber}
+                      </span>
                       <Badge
                         style={{
                           backgroundColor: order.currentStage?.color || '#8B5A2B',
                           color: '#ffffff',
                         }}
-                        className="text-[10px]"
+                        className="text-[10px] font-medium"
                       >
                         {order.currentStage?.name || 'In Production'}
                       </Badge>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+
+                    <div className="flex items-start justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-charcoal-900">
+                          {order.customer?.fullName || 'Walk-In Customer'}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
+                      </div>
+                      {isOwner && order.branch?.name && (
+                        <span className="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
+                          {order.branch.name}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Agreed Total</span>
+                        <span className="font-semibold text-charcoal-900 font-mono">
+                          {formatCurrency(order.totalAgreedPrice)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Balance</span>
+                        {order.outstandingBalance > 0 ? (
+                          <span className="font-semibold text-amber-800 font-mono text-xs">
+                            {formatCurrency(order.outstandingBalance)}
+                          </span>
+                        ) : (
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
+                            Fully Paid
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop Table View (hidden on phone and tablet) */}
+              <div className="hidden lg:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order #</TableHead>
+                      <TableHead>Customer</TableHead>
+                      {isOwner && <TableHead className="hidden md:table-cell">Branch</TableHead>}
+                      <TableHead className="text-right">Agreed Total</TableHead>
+                      <TableHead className="text-right">Remaining Balance</TableHead>
+                      <TableHead className="text-center">Current Stage</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-semibold text-wood-900 font-mono text-xs">
+                          {order.orderNumber}
+                        </TableCell>
+                        <TableCell className="font-medium text-xs">
+                          <div>{order.customer?.fullName || 'Walk-In Customer'}</div>
+                          <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
+                        </TableCell>
+                        {isOwner && (
+                          <TableCell className="hidden md:table-cell text-charcoal-600 text-xs">
+                            {order.branch?.name}
+                          </TableCell>
+                        )}
+                        <TableCell className="text-right font-medium font-mono text-xs">
+                          {formatCurrency(order.totalAgreedPrice)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs font-semibold">
+                          {order.outstandingBalance > 0 ? (
+                            <span className="text-amber-800">{formatCurrency(order.outstandingBalance)}</span>
+                          ) : (
+                            <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
+                              Fully Paid
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            style={{
+                              backgroundColor: order.currentStage?.color || '#8B5A2B',
+                              color: '#ffffff',
+                            }}
+                            className="text-[10px]"
+                          >
+                            {order.currentStage?.name || 'In Production'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

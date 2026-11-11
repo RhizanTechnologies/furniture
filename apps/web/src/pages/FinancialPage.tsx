@@ -531,65 +531,121 @@ export const FinancialPage: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-wood-200 overflow-hidden shadow-sm">
-              <Table>
-                <TableHeader className="bg-wood-50/50">
-                  <TableRow>
-                    <TableHead>Payment Date</TableHead>
-                    <TableHead>Order #</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Amount (ETB)</TableHead>
-                    <TableHead className="text-center">Type</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Reference / Txn #</TableHead>
-                    <TableHead>Logged By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPayments.map((p) => (
-                    <TableRow key={p.id} className="hover:bg-wood-50/30">
-                      <TableCell className="text-xs">
-                        {new Date(p.paymentDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs font-bold text-wood-800">
-                        {p.orderNumber}
-                      </TableCell>
-                      <TableCell className="font-medium text-xs text-stone-900">
-                        {p.customerName}
-                      </TableCell>
-                      <TableCell>
+            <>
+              {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+              <div className="lg:hidden space-y-3">
+                {filteredPayments.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono text-xs font-bold text-wood-800">
+                          {p.orderNumber}
+                        </span>
                         <RecordSyncBadge isPendingSync={p.isPendingSync} />
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-bold text-sm text-emerald-800">
-                        {formatCurrency(p.amount)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] ${
-                            p.paymentType === PaymentType.FINAL_SETTLEMENT
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                              : p.paymentType === PaymentType.PREPAYMENT
-                              ? 'bg-wood-50 text-wood-800 border-wood-300'
-                              : 'bg-stone-50 text-stone-800 border-stone-300'
-                          }`}
-                        >
-                          {p.paymentType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs">{p.paymentMethod}</TableCell>
-                      <TableCell className="font-mono text-xs text-stone-600">
-                        {p.referenceNumber || '—'}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {p.recordedByUserName}
-                      </TableCell>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${
+                          p.paymentType === PaymentType.FINAL_SETTLEMENT
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                            : p.paymentType === PaymentType.PREPAYMENT
+                            ? 'bg-wood-50 text-wood-800 border-wood-300'
+                            : 'bg-stone-50 text-stone-800 border-stone-300'
+                        }`}
+                      >
+                        {p.paymentType}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-start justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-stone-900">{p.customerName}</div>
+                        <div className="text-[11px] text-muted-foreground">{new Date(p.paymentDate).toLocaleDateString()}</div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Amount Paid</span>
+                        <span className="font-mono font-bold text-sm text-emerald-800">
+                          {formatCurrency(p.amount)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-[11px] text-stone-600">
+                      <span>Method: <strong className="font-medium text-stone-800">{p.paymentMethod}</strong></span>
+                      {p.referenceNumber && <span className="font-mono">Ref: {p.referenceNumber}</span>}
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground flex justify-between">
+                      <span>Recorded by: {p.recordedByUserName || 'Staff'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (lg:block) */}
+              <Card className="hidden lg:block border-wood-200 overflow-hidden shadow-sm">
+                <Table>
+                  <TableHeader className="bg-wood-50/50">
+                    <TableRow>
+                      <TableHead>Payment Date</TableHead>
+                      <TableHead>Order #</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Amount (ETB)</TableHead>
+                      <TableHead className="text-center">Type</TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead>Reference / Txn #</TableHead>
+                      <TableHead>Logged By</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPayments.map((p) => (
+                      <TableRow key={p.id} className="hover:bg-wood-50/30">
+                        <TableCell className="text-xs">
+                          {new Date(p.paymentDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-bold text-wood-800">
+                          {p.orderNumber}
+                        </TableCell>
+                        <TableCell className="font-medium text-xs text-stone-900">
+                          {p.customerName}
+                        </TableCell>
+                        <TableCell>
+                          <RecordSyncBadge isPendingSync={p.isPendingSync} />
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold text-sm text-emerald-800">
+                          {formatCurrency(p.amount)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${
+                              p.paymentType === PaymentType.FINAL_SETTLEMENT
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : p.paymentType === PaymentType.PREPAYMENT
+                                ? 'bg-wood-50 text-wood-800 border-wood-300'
+                                : 'bg-stone-50 text-stone-800 border-stone-300'
+                            }`}
+                          >
+                            {p.paymentType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">{p.paymentMethod}</TableCell>
+                        <TableCell className="font-mono text-xs text-stone-600">
+                          {p.referenceNumber || '—'}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {p.recordedByUserName}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </>
           )}
         </div>
       )}
@@ -644,54 +700,100 @@ export const FinancialPage: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-wood-200 overflow-hidden shadow-sm">
-              <Table>
-                <TableHeader className="bg-wood-50/50">
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Location / Branch</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount (ETB)</TableHead>
-                    <TableHead>Receipt / Voucher Ref</TableHead>
-                    <TableHead>Logged By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredExpenses.map((e) => (
-                    <TableRow key={e.id} className="hover:bg-wood-50/30">
-                      <TableCell className="text-xs">
-                        {new Date(e.expenseDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-xs font-medium text-stone-900">
-                        {e.branchName}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {e.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
+            <>
+              {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+              <div className="lg:hidden space-y-3">
+                {filteredExpenses.map((e) => (
+                  <div
+                    key={e.id}
+                    className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-stone-900 text-xs">
+                          {e.branchName || 'Central'}
+                        </span>
                         <RecordSyncBadge isPendingSync={e.isPendingSync} />
-                      </TableCell>
-                      <TableCell className="text-xs text-stone-800 max-w-xs truncate">
+                      </div>
+                      <Badge variant="outline" className="text-[10px]">
+                        {e.category}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-start justify-between text-xs">
+                      <div className="text-stone-800 line-clamp-2 max-w-[70%]">
                         {e.description}
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-bold text-sm text-rose-800">
-                        {formatCurrency(e.amount)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-stone-600">
-                        {e.receiptRef || '—'}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {e.recordedByUserName}
-                      </TableCell>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Expense</span>
+                        <span className="font-mono font-bold text-sm text-rose-800">
+                          {formatCurrency(e.amount)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-[11px] text-stone-500">
+                      <span>Date: {new Date(e.expenseDate).toLocaleDateString()}</span>
+                      {e.receiptRef && <span className="font-mono">Ref: {e.receiptRef}</span>}
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground flex justify-between">
+                      <span>Logged by: {e.recordedByUserName || 'Staff'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (lg:block) */}
+              <Card className="hidden lg:block border-wood-200 overflow-hidden shadow-sm">
+                <Table>
+                  <TableHeader className="bg-wood-50/50">
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Location / Branch</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Amount (ETB)</TableHead>
+                      <TableHead>Receipt / Voucher Ref</TableHead>
+                      <TableHead>Logged By</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredExpenses.map((e) => (
+                      <TableRow key={e.id} className="hover:bg-wood-50/30">
+                        <TableCell className="text-xs">
+                          {new Date(e.expenseDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium text-stone-900">
+                          {e.branchName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">
+                            {e.category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <RecordSyncBadge isPendingSync={e.isPendingSync} />
+                        </TableCell>
+                        <TableCell className="text-xs text-stone-800 max-w-xs truncate">
+                          {e.description}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold text-sm text-rose-800">
+                          {formatCurrency(e.amount)}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-stone-600">
+                          {e.receiptRef || '—'}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {e.recordedByUserName}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </>
           )}
         </div>
       )}
@@ -709,40 +811,77 @@ export const FinancialPage: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader className="bg-wood-50/50">
-                  <TableRow>
-                    <TableHead>Branch Name</TableHead>
-                    <TableHead className="text-right">Contracted Orders Value</TableHead>
-                    <TableHead className="text-right">Cash Inflow Collected</TableHead>
-                    <TableHead className="text-right">Branch Expenses</TableHead>
-                    <TableHead className="text-right">Net Operating Contribution</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {summary?.branchBreakdown?.map((b) => (
-                    <TableRow key={b.branchId}>
-                      <TableCell className="font-semibold text-stone-900 text-sm">
-                        {b.branchName}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm">
-                        {formatCurrency(b.totalOrdersValue)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm text-emerald-800 font-bold">
-                        {formatCurrency(b.totalCashCollected)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm text-rose-800">
-                        {formatCurrency(b.totalExpenses)}
-                      </TableCell>
-                      <TableCell className={`text-right font-mono font-bold text-sm ${
+              {/* Phone & Tablet Responsive Cards (lg:hidden) */}
+              <div className="lg:hidden space-y-3">
+                {summary?.branchBreakdown?.map((b) => (
+                  <div
+                    key={b.branchId}
+                    className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5 text-xs"
+                  >
+                    <div className="flex items-center justify-between font-semibold text-stone-900 text-sm">
+                      <span>{b.branchName}</span>
+                      <span className={`font-mono font-bold ${
                         b.netContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
                       }`}>
-                        {formatCurrency(b.netContribution)}
-                      </TableCell>
+                        Net: {formatCurrency(b.netContribution)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-stone-50 font-mono">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">Cash Inflow</span>
+                        <span className="text-emerald-800 font-bold">{formatCurrency(b.totalCashCollected)}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">Branch Expenses</span>
+                        <span className="text-rose-800 font-bold">{formatCurrency(b.totalExpenses)}</span>
+                      </div>
+                      <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] font-sans">
+                        <span className="text-stone-500">Contracted Orders:</span>
+                        <span className="font-mono text-stone-900 font-medium">{formatCurrency(b.totalOrdersValue)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (lg:block) */}
+              <div className="hidden lg:block overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-wood-50/50">
+                    <TableRow>
+                      <TableHead>Branch Name</TableHead>
+                      <TableHead className="text-right">Contracted Orders Value</TableHead>
+                      <TableHead className="text-right">Cash Inflow Collected</TableHead>
+                      <TableHead className="text-right">Branch Expenses</TableHead>
+                      <TableHead className="text-right">Net Operating Contribution</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {summary?.branchBreakdown?.map((b) => (
+                      <TableRow key={b.branchId}>
+                        <TableCell className="font-semibold text-stone-900 text-sm">
+                          {b.branchName}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">
+                          {formatCurrency(b.totalOrdersValue)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm text-emerald-800 font-bold">
+                          {formatCurrency(b.totalCashCollected)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm text-rose-800">
+                          {formatCurrency(b.totalExpenses)}
+                        </TableCell>
+                        <TableCell className={`text-right font-mono font-bold text-sm ${
+                          b.netContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
+                        }`}>
+                          {formatCurrency(b.netContribution)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>
