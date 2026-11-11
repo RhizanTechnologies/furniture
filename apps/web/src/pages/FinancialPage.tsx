@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { RecordSyncBadge } from '@/components/ui/RecordSyncBadge';
@@ -52,6 +53,9 @@ export const FinancialPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'payments' | 'expenses' | 'breakdown'>('payments');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [paymentsPage, setPaymentsPage] = useState<number>(1);
+  const [expensesPage, setExpensesPage] = useState<number>(1);
+  const PAGE_SIZE = 10;
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
@@ -322,6 +326,16 @@ export const FinancialPage: React.FC = () => {
     );
   });
 
+  const paginatedPayments = filteredPayments.slice(
+    (paymentsPage - 1) * PAGE_SIZE,
+    paymentsPage * PAGE_SIZE
+  );
+
+  const paginatedExpenses = filteredExpenses.slice(
+    (expensesPage - 1) * PAGE_SIZE,
+    expensesPage * PAGE_SIZE
+  );
+
   const expenseCategories = [
     'ALL',
     'Workshop Supplies',
@@ -504,7 +518,10 @@ export const FinancialPage: React.FC = () => {
                 <Input
                   placeholder="Search by order #, customer or ref..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPaymentsPage(1);
+                  }}
                   className="pl-9 h-9"
                 />
               </div>
@@ -534,7 +551,7 @@ export const FinancialPage: React.FC = () => {
             <>
               {/* Phone & Tablet Responsive Cards (lg:hidden) */}
               <div className="lg:hidden space-y-3">
-                {filteredPayments.map((p) => (
+                {paginatedPayments.map((p) => (
                   <div
                     key={p.id}
                     className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
@@ -602,7 +619,7 @@ export const FinancialPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPayments.map((p) => (
+                    {paginatedPayments.map((p) => (
                       <TableRow key={p.id} className="hover:bg-wood-50/30">
                         <TableCell className="text-xs">
                           {new Date(p.paymentDate).toLocaleDateString()}
@@ -645,6 +662,14 @@ export const FinancialPage: React.FC = () => {
                   </TableBody>
                 </Table>
               </Card>
+
+              {/* Payments Pagination Controls */}
+              <Pagination
+                currentPage={paymentsPage}
+                totalItems={filteredPayments.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPaymentsPage}
+              />
             </>
           )}
         </div>
@@ -660,7 +685,10 @@ export const FinancialPage: React.FC = () => {
                 <Input
                   placeholder="Search description, category or ref..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setExpensesPage(1);
+                  }}
                   className="pl-9 h-9"
                 />
               </div>
@@ -672,7 +700,10 @@ export const FinancialPage: React.FC = () => {
                     type="button"
                     variant={selectedCategory === cat ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setExpensesPage(1);
+                    }}
                     className="text-xs h-8 px-3"
                   >
                     {cat}
@@ -703,7 +734,7 @@ export const FinancialPage: React.FC = () => {
             <>
               {/* Phone & Tablet Responsive Cards (lg:hidden) */}
               <div className="lg:hidden space-y-3">
-                {filteredExpenses.map((e) => (
+                {paginatedExpenses.map((e) => (
                   <div
                     key={e.id}
                     className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
@@ -760,7 +791,7 @@ export const FinancialPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredExpenses.map((e) => (
+                    {paginatedExpenses.map((e) => (
                       <TableRow key={e.id} className="hover:bg-wood-50/30">
                         <TableCell className="text-xs">
                           {new Date(e.expenseDate).toLocaleDateString()}
@@ -793,6 +824,14 @@ export const FinancialPage: React.FC = () => {
                   </TableBody>
                 </Table>
               </Card>
+
+              {/* Expenses Pagination Controls */}
+              <Pagination
+                currentPage={expensesPage}
+                totalItems={filteredExpenses.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setExpensesPage}
+              />
             </>
           )}
         </div>

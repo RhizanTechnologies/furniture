@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { FormInput } from '@/components/forms/FormInput';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { OrderDetailModal } from '@/components/orders/OrderDetailModal';
@@ -46,8 +47,11 @@ export const OrdersPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStageId, setSelectedStageId] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderDto | null>(null);
+
+  const PAGE_SIZE = 10;
 
   // Quick Customer Registration Modal state
   const [isQuickCustomerOpen, setIsQuickCustomerOpen] = useState(false);
@@ -368,6 +372,10 @@ export const OrdersPage: React.FC = () => {
   };
 
   const filteredOrders = orders || [];
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="space-y-6">
@@ -416,7 +424,10 @@ export const OrdersPage: React.FC = () => {
             <Input
               placeholder="Search by order #, client name, or phone..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-9 bg-background/50 border-wood-200"
             />
           </div>
@@ -426,7 +437,10 @@ export const OrdersPage: React.FC = () => {
             <Button
               size="sm"
               variant={selectedStageId === 'ALL' ? 'default' : 'outline'}
-              onClick={() => setSelectedStageId('ALL')}
+              onClick={() => {
+                setSelectedStageId('ALL');
+                setCurrentPage(1);
+              }}
               className="text-xs h-8"
             >
               All Orders
@@ -436,7 +450,10 @@ export const OrdersPage: React.FC = () => {
                 key={stage.id}
                 size="sm"
                 variant={selectedStageId === stage.id ? 'default' : 'outline'}
-                onClick={() => setSelectedStageId(stage.id)}
+                onClick={() => {
+                  setSelectedStageId(stage.id);
+                  setCurrentPage(1);
+                }}
                 className="text-xs h-8 space-x-1"
                 style={{
                   borderColor: stage.color,
@@ -470,7 +487,7 @@ export const OrdersPage: React.FC = () => {
         <>
           {/* Phone & Tablet Card-Based View (PWA Responsive) */}
           <div className="lg:hidden space-y-3">
-            {filteredOrders.map((ord) => {
+            {paginatedOrders.map((ord) => {
               const deadlinePassed = new Date(ord.deadlineDate).getTime() < Date.now();
               return (
                 <div
@@ -569,7 +586,7 @@ export const OrdersPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrders.map((ord) => {
+                {paginatedOrders.map((ord) => {
                   const deadlinePassed =
                     new Date(ord.deadlineDate).getTime() < Date.now();
 
@@ -643,6 +660,14 @@ export const OrdersPage: React.FC = () => {
               </TableBody>
             </Table>
           </Card>
+
+          {/* Pagination Controls */}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredOrders.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
 

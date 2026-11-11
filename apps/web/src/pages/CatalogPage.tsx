@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { FormInput } from '@/components/forms/FormInput';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { ImageUploader } from '@/components/products/ImageUploader';
@@ -35,6 +36,8 @@ export const CatalogPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 10;
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductDto | null>(null);
   const [imageManagingProduct, setImageManagingProduct] = useState<ProductDto | null>(null);
@@ -115,6 +118,11 @@ export const CatalogPage: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -136,7 +144,10 @@ export const CatalogPage: React.FC = () => {
             <Input
               placeholder="Search products by SKU, name..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-9 h-9"
             />
           </div>
@@ -148,7 +159,10 @@ export const CatalogPage: React.FC = () => {
                 type="button"
                 variant={selectedCategory === cat ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setCurrentPage(1);
+                }}
                 className="text-xs h-8 px-3 shrink-0"
               >
                 {cat}
@@ -180,7 +194,7 @@ export const CatalogPage: React.FC = () => {
 
           {/* Phone & Tablet Responsive Cards (lg:hidden) */}
           <div className="lg:hidden space-y-3 p-3">
-            {filteredProducts.map((prod) => (
+            {paginatedProducts.map((prod) => (
               <div
                 key={prod.id}
                 className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5 text-xs"
@@ -261,7 +275,7 @@ export const CatalogPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((prod) => (
+                {paginatedProducts.map((prod) => (
                   <TableRow key={prod.id}>
                     <TableCell className="font-mono text-xs font-semibold text-wood-900">
                       {prod.sku}
@@ -318,6 +332,16 @@ export const CatalogPage: React.FC = () => {
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="px-4 pb-4">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredProducts.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </Card>
       )}

@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useAuth } from '@/context/AuthContext';
@@ -49,6 +50,8 @@ export const InventoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [onlyLowStock, setOnlyLowStock] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 10;
 
   const [isAddMaterialOpen, setIsAddMaterialOpen] = useState(false);
   const [isStockInOpen, setIsStockInOpen] = useState(false);
@@ -68,6 +71,11 @@ export const InventoryPage: React.FC = () => {
     },
     enabled: isBranchStock,
   });
+
+  const paginatedMaterials = materials.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   // 2. Fetch Stock Valuation (Executive & Owner only - hidden for Branch Admin)
   const { data: valuation, isLoading: isValuationLoading } = useQuery<StockValuationDto>({
@@ -299,7 +307,10 @@ export const InventoryPage: React.FC = () => {
             <Input
               placeholder="Search by material code or name..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-9 h-9"
             />
           </div>
@@ -311,7 +322,10 @@ export const InventoryPage: React.FC = () => {
                 type="button"
                 variant={selectedCategory === cat ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setCurrentPage(1);
+                }}
                 className="text-xs h-8 px-3"
               >
                 {cat}
@@ -322,7 +336,10 @@ export const InventoryPage: React.FC = () => {
               type="button"
               variant={onlyLowStock ? 'destructive' : 'outline'}
               size="sm"
-              onClick={() => setOnlyLowStock(!onlyLowStock)}
+              onClick={() => {
+                setOnlyLowStock(!onlyLowStock);
+                setCurrentPage(1);
+              }}
               className="text-xs h-8 px-2.5 space-x-1"
             >
               <AlertTriangle className="h-3.5 w-3.5" />
@@ -362,7 +379,7 @@ export const InventoryPage: React.FC = () => {
         <>
           {/* Phone & Tablet Responsive Cards (lg:hidden) */}
           <div className="lg:hidden space-y-3">
-            {materials.map((mat) => (
+            {paginatedMaterials.map((mat) => (
               <div
                 key={mat.id}
                 className="p-3.5 rounded-xl border border-wood-200/90 bg-white shadow-xs space-y-2.5"
@@ -453,7 +470,7 @@ export const InventoryPage: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {materials.map((mat) => (
+                {paginatedMaterials.map((mat) => (
                   <TableRow key={mat.id} className="hover:bg-wood-50/30">
                     <TableCell>
                       <div>
@@ -517,6 +534,14 @@ export const InventoryPage: React.FC = () => {
               </TableBody>
             </Table>
           </Card>
+
+          {/* Pagination Controls */}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={materials.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
 
