@@ -387,62 +387,62 @@ export const FinancialPage: React.FC = () => {
       )}
 
       {/* Authoritative Financial Executive Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
               Cash Inflow Collected
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-emerald-800 font-mono">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalCashCollected || 0)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
             Total payments received across prepayments and progress settlements
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
               Outstanding Receivables
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-amber-800 font-mono">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalReceivables || 0)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
             Remaining unpaid balances owed by customers on active orders
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
               Operating Expenses
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-rose-800 font-mono">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-rose-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalOperatingExpenses || 0)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
             Overhead, workshop supplies, utilities and branch expenses
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
               <span>Gross Profit</span>
               <span className="font-mono text-[10px] text-wood-700 font-bold">
                 {summary?.grossMarginPercentage || 0}% margin
               </span>
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-wood-950 font-mono">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-wood-950 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.grossProfit || 0)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
             Order revenue minus frozen material costs (COGS)
           </CardContent>
         </Card>
@@ -450,62 +450,64 @@ export const FinancialPage: React.FC = () => {
         <Card className={`border-wood-200/80 ${
           (summary?.netProfit || 0) >= 0 ? 'bg-gradient-to-br from-white to-emerald-50/40' : 'bg-rose-50/60'
         }`}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
               <span>Net Business Profit</span>
               <span className="font-mono text-[10px] text-emerald-700 font-bold">
                 {summary?.netMarginPercentage || 0}% net
               </span>
             </CardDescription>
-            <CardTitle className={`text-2xl font-bold font-mono ${
+            <CardTitle className={`text-lg sm:text-xl lg:text-2xl font-bold font-mono tracking-tight leading-snug sm:leading-normal ${
               (summary?.netProfit || 0) >= 0 ? 'text-emerald-900' : 'text-rose-900'
             }`}>
               {formatCurrency(summary?.netProfit || 0)}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs text-charcoal-600">
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
             Gross profit minus total operating overhead
           </CardContent>
         </Card>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-wood-200 flex space-x-6 text-sm font-medium">
-        <button
-          onClick={() => setActiveTab('payments')}
-          className={`pb-3 flex items-center space-x-2 border-b-2 transition-colors ${
-            activeTab === 'payments'
-              ? 'border-wood-800 text-wood-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-wood-700'
-          }`}
-        >
-          <CreditCard className="w-4 h-4" />
-          <span>Payments Ledger ({payments.length})</span>
-        </button>
+      <div className="border-b border-wood-200 overflow-x-auto no-scrollbar">
+        <div className="flex space-x-3 sm:space-x-6 min-w-max pb-px">
+          <button
+            onClick={() => setActiveTab('payments')}
+            className={`pb-2.5 pt-1 px-1 sm:px-0 flex items-center space-x-1.5 sm:space-x-2 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-semibold shrink-0 ${
+              activeTab === 'payments'
+                ? 'border-wood-800 text-wood-950 font-bold'
+                : 'border-transparent text-charcoal-500 hover:text-wood-700'
+            }`}
+          >
+            <CreditCard className="w-4 h-4 shrink-0" />
+            <span>Payments Ledger ({payments.length})</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('expenses')}
-          className={`pb-3 flex items-center space-x-2 border-b-2 transition-colors ${
-            activeTab === 'expenses'
-              ? 'border-wood-800 text-wood-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-wood-700'
-          }`}
-        >
-          <Receipt className="w-4 h-4" />
-          <span>Expenses Ledger ({expenses.length})</span>
-        </button>
+          <button
+            onClick={() => setActiveTab('expenses')}
+            className={`pb-2.5 pt-1 px-1 sm:px-0 flex items-center space-x-1.5 sm:space-x-2 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-semibold shrink-0 ${
+              activeTab === 'expenses'
+                ? 'border-wood-800 text-wood-950 font-bold'
+                : 'border-transparent text-charcoal-500 hover:text-wood-700'
+            }`}
+          >
+            <Receipt className="w-4 h-4 shrink-0" />
+            <span>Expenses Ledger ({expenses.length})</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('breakdown')}
-          className={`pb-3 flex items-center space-x-2 border-b-2 transition-colors ${
-            activeTab === 'breakdown'
-              ? 'border-wood-800 text-wood-900 font-bold'
-              : 'border-transparent text-charcoal-500 hover:text-wood-700'
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          <span>Branch Contributions</span>
-        </button>
+          <button
+            onClick={() => setActiveTab('breakdown')}
+            className={`pb-2.5 pt-1 px-1 sm:px-0 flex items-center space-x-1.5 sm:space-x-2 border-b-2 transition-all whitespace-nowrap text-xs sm:text-sm font-semibold shrink-0 ${
+              activeTab === 'breakdown'
+                ? 'border-wood-800 text-wood-950 font-bold'
+                : 'border-transparent text-charcoal-500 hover:text-wood-700'
+            }`}
+          >
+            <Building2 className="w-4 h-4 shrink-0" />
+            <span>Branch Contributions</span>
+          </button>
+        </div>
       </div>
 
       {/* TAB 1: PAYMENTS LEDGER */}

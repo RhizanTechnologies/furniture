@@ -267,31 +267,31 @@ export const InventoryPage: React.FC = () => {
 
       {/* Stock Valuation Metric Cards (Executive Owner Only - hidden for Branch Admin) */}
       {!isBranchAdmin && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
                 Total Stock Valuation
               </CardDescription>
-              <CardTitle className="text-2xl font-bold text-wood-900 font-mono">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-wood-900 font-mono tracking-tight leading-snug sm:leading-normal">
                 {formatCurrency(valuation?.totalStockValue || 0)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-charcoal-600">
+            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
               Weighted average cost valuation across all active materials
             </CardContent>
           </Card>
 
           <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
                 Active Materials
               </CardDescription>
-              <CardTitle className="text-2xl font-bold text-charcoal-900 font-mono">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-charcoal-900 font-mono tracking-tight leading-snug sm:leading-normal">
                 {valuation?.totalItemsInStock || 0}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-charcoal-600">
+            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
               Catalog materials with positive on-hand quantity
             </CardContent>
           </Card>
@@ -299,34 +299,34 @@ export const InventoryPage: React.FC = () => {
           <Card className={`border-wood-200/80 ${
             (valuation?.lowStockCount || 0) > 0 ? 'bg-amber-50/60 border-amber-300' : 'bg-gradient-to-br from-white to-wood-50/40'
           }`}>
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
+            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
                 <span>Reorder Alerts</span>
                 {(valuation?.lowStockCount || 0) > 0 && (
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
                 )}
               </CardDescription>
-              <CardTitle className={`text-2xl font-bold font-mono ${
+              <CardTitle className={`text-lg sm:text-xl lg:text-2xl font-bold font-mono tracking-tight leading-snug sm:leading-normal ${
                 (valuation?.lowStockCount || 0) > 0 ? 'text-amber-800' : 'text-charcoal-900'
               }`}>
                 {valuation?.lowStockCount || 0}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-charcoal-600">
+            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
               Materials at or below minimum threshold
             </CardContent>
           </Card>
 
           <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
                 Stock Location
               </CardDescription>
-              <CardTitle className="text-sm font-bold text-wood-900 truncate">
+              <CardTitle className="text-xs sm:text-sm font-bold text-wood-900 truncate">
                 {valuation?.stockLocation || 'Central Main Warehouse'}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs text-charcoal-600">
+            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
               Authoritative warehouse pool
             </CardContent>
           </Card>

@@ -167,48 +167,48 @@ export const AnalyticsPage: React.FC = () => {
       ) : (
         <>
           {/* Executive KPI Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+              <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+                <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
                   Contracted Sales Pipeline
                 </CardDescription>
-                <CardTitle className="text-2xl font-bold text-wood-950 font-mono">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-wood-950 font-mono tracking-tight leading-snug sm:leading-normal">
                   {formatCurrency(fin?.contractedRevenue || 0)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-charcoal-600 flex justify-between items-center">
+              <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600 flex justify-between items-center">
                 <span>Earned (Fulfilled):</span>
                 <span className="font-mono font-bold text-wood-800">{formatCurrency(fin?.earnedRevenue || 0)}</span>
               </CardContent>
             </Card>
 
             <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500">
+              <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+                <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
                   Cash Inflow Collected
                 </CardDescription>
-                <CardTitle className="text-2xl font-bold text-emerald-800 font-mono">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-800 font-mono tracking-tight leading-snug sm:leading-normal">
                   {formatCurrency(fin?.cashCollected || 0)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-charcoal-600 flex justify-between items-center">
+              <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600 flex justify-between items-center">
                 <span>Pending Receivables:</span>
                 <span className="font-mono font-bold text-amber-800">{formatCurrency(fin?.outstandingReceivables || 0)}</span>
               </CardContent>
             </Card>
 
             <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex justify-between">
+              <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+                <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex justify-between">
                   <span>Gross Profit</span>
                   <span className="font-mono font-bold text-wood-800 text-[10px]">{fin?.grossMarginPercentage || 0}% margin</span>
                 </CardDescription>
-                <CardTitle className="text-2xl font-bold text-wood-900 font-mono">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-wood-900 font-mono tracking-tight leading-snug sm:leading-normal">
                   {formatCurrency(fin?.grossProfit || 0)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-charcoal-600 flex justify-between items-center">
+              <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600 flex justify-between items-center">
                 <span>COGS Material Costs:</span>
                 <span className="font-mono font-medium text-stone-700">{formatCurrency(fin?.totalMaterialCosts || 0)}</span>
               </CardContent>
@@ -217,18 +217,18 @@ export const AnalyticsPage: React.FC = () => {
             <Card className={`border-wood-200/80 ${
               (fin?.netProfit || 0) >= 0 ? 'bg-gradient-to-br from-white to-emerald-50/40' : 'bg-rose-50/60'
             }`}>
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase font-medium tracking-wider text-charcoal-500 flex justify-between">
+              <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+                <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex justify-between">
                   <span>Net Business Profit</span>
                   <span className="font-mono font-bold text-emerald-800 text-[10px]">{fin?.netMarginPercentage || 0}% net</span>
                 </CardDescription>
-                <CardTitle className={`text-2xl font-bold font-mono ${
+                <CardTitle className={`text-lg sm:text-xl lg:text-2xl font-bold font-mono tracking-tight leading-snug sm:leading-normal ${
                   (fin?.netProfit || 0) >= 0 ? 'text-emerald-950' : 'text-rose-950'
                 }`}>
                   {formatCurrency(fin?.netProfit || 0)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-charcoal-600 flex justify-between items-center">
+              <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600 flex justify-between items-center">
                 <span>Operating Expenses:</span>
                 <span className="font-mono font-medium text-rose-800">{formatCurrency(fin?.totalExpenses || 0)}</span>
               </CardContent>
