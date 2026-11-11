@@ -388,37 +388,44 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </Button>
             </div>
 
-            {/* Costing & Profitability Pills (Owner sees Gross Profit/Margin) */}
-            <div className={`grid ${isOwner ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'} gap-2 pt-1`}>
-              <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
-                <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
-                  {formatCurrency(costing?.totalMaterialCost || 0)}
-                </span>
+            {/* Costing & Profitability Pills (Owner sees Material Costs, Gross Profit & Margin) */}
+            {isOwner ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
+                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
+                  <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
+                    {formatCurrency(costing?.totalMaterialCost || 0)}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
+                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Agreed Selling</span>
+                  <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
+                    {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
+                  <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
+                  <span className="font-mono font-bold text-emerald-900 text-xs sm:text-sm">
+                    {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
+                  </span>
+                </div>
+                <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
+                  <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
+                  <span className="font-mono font-bold text-wood-900 text-xs sm:text-sm">
+                    {costing?.grossMarginPercentage || 100}%
+                  </span>
+                </div>
               </div>
-              <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Agreed Selling</span>
-                <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
-                  {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
-                </span>
+            ) : (
+              <div className="pt-1">
+                <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-between">
+                  <span className="text-xs text-stone-600 font-medium">Contracted Agreed Price:</span>
+                  <span className="font-mono font-bold text-stone-900 text-sm">
+                    {formatCurrency(order.totalAgreedPrice)}
+                  </span>
+                </div>
               </div>
-              {isOwner && (
-                <>
-                  <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
-                    <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
-                    <span className="font-mono font-bold text-emerald-900 text-xs sm:text-sm">
-                      {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
-                    </span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
-                    <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
-                    <span className="font-mono font-bold text-wood-900 text-xs sm:text-sm">
-                      {costing?.grossMarginPercentage || 100}%
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
+            )}
 
             {/* Consumed Materials Cards (Card-based layout for full responsive PWA) */}
             {costing?.consumptions && costing.consumptions.length > 0 ? (
@@ -438,14 +445,16 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       </Badge>
                     </div>
 
-                    <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                      <div className="text-muted-foreground">
-                        Unit WAC Cost: <span className="font-mono text-stone-800">{formatCurrency(c.unitCostAllocated)}</span>
+                    {isOwner && (
+                      <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                        <div className="text-muted-foreground">
+                          Unit WAC Cost: <span className="font-mono text-stone-800">{formatCurrency(c.unitCostAllocated)}</span>
+                        </div>
+                        <div className="text-stone-800">
+                          Allocated Cost: <span className="font-mono font-bold text-wood-900">{formatCurrency(c.totalMaterialCost)}</span>
+                        </div>
                       </div>
-                      <div className="text-stone-800">
-                        Allocated Cost: <span className="font-mono font-bold text-wood-900">{formatCurrency(c.totalMaterialCost)}</span>
-                      </div>
-                    </div>
+                    )}
 
                     <div className="text-[10px] text-muted-foreground flex justify-between items-center pt-0.5">
                       <span>Logged by: {c.recordedByUserName || 'Staff'}</span>

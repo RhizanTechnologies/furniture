@@ -27,9 +27,11 @@ describe('Inventory & Raw Materials UI (Prompt 6)', () => {
 
     expect(screen.getByText('Inventory & Raw Materials')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Stock In/i })).toBeInTheDocument();
-    expect(screen.getByText('Total Stock Valuation')).toBeInTheDocument();
     expect(screen.getByText('Active Materials')).toBeInTheDocument();
     expect(screen.getByText('Reorder Alerts')).toBeInTheDocument();
+    expect(screen.getByText('Stock Location')).toBeInTheDocument();
+    // Total Stock Valuation is protected: admins/non-owners cannot see stock money value
+    expect(screen.queryByText('Total Stock Valuation')).not.toBeInTheDocument();
     expect(
       screen.getByPlaceholderText(/Search by material code or name.../i)
     ).toBeInTheDocument();

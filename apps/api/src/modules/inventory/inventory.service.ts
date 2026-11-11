@@ -98,22 +98,30 @@ export class InventoryService {
       }
     }
 
+    const isOwner = user?.role === UserRole.OWNER;
     const dtos = materials.map((m) => {
       const baseDto = this.mapRawMaterialToDto(m);
+      let currentStockQuantity = baseDto.currentStockQuantity;
+      let isLowStock = baseDto.isLowStock;
+
       if (branchStockMap) {
         const branchQty = branchStockMap.get(m.id) || 0;
-        const unitCost = baseDto.currentUnitCost;
         const alertQty = baseDto.reorderAlertQuantity;
-        const isLowStock = alertQty !== null ? branchQty <= alertQty : false;
-
-        return {
-          ...baseDto,
-          currentStockQuantity: branchQty,
-          stockValue: Math.round(branchQty * unitCost * 100) / 100,
-          isLowStock,
-        };
+        isLowStock = alertQty !== null ? branchQty <= alertQty : false;
+        currentStockQuantity = branchQty;
       }
-      return baseDto;
+
+      // Branch admins only track physical stock counts, not monetary valuation
+      const unitCost = isOwner ? baseDto.currentUnitCost : 0;
+      const stockValue = isOwner ? Math.round(currentStockQuantity * baseDto.currentUnitCost * 100) / 100 : 0;
+
+      return {
+        ...baseDto,
+        currentStockQuantity,
+        currentUnitCost: unitCost,
+        stockValue,
+        isLowStock,
+      };
     });
 
     if (query.onlyLowStock) {
@@ -126,7 +134,7 @@ export class InventoryService {
   /**
    * Get single raw material details with recent replenishment and consumption history
    */
-  async getMaterial(id: string): Promise<RawMaterialDto & { stockIns: MaterialStockInDto[]; consumptions: MaterialConsumptionDto[] }> {
+  async getMaterial(id: string, user?: any): Promise<RawMaterialDto & { stockIns: MaterialStockInDto[]; consumptions: MaterialConsumptionDto[] }> {
     const material = await this.prisma.rawMaterial.findUnique({
       where: { id },
       include: {
@@ -147,10 +155,35 @@ export class InventoryService {
       throw new NotFoundException(`Raw material with ID "${id}" not found`);
     }
 
+    const isOwner = user?.role === UserRole.OWNER;
+    const baseDto = this.mapRawMaterialToDto(material);
+
     return {
-      ...this.mapRawMaterialToDto(material),
-      stockIns: material.stockIns.map((s) => this.mapStockInToDto(s)),
-      consumptions: material.consumptions.map((c) => this.mapConsumptionToDto(c)),
+      ...baseDto,
+      currentUnitCost: isOwner ? baseDto.currentUnitCost : 0,
+      stockValue: isOwner ? baseDto.stockValue : 0,
+      stockIns: material.stockIns.map((s) => {
+        const dto = this.mapStockInToDto(s);
+        if (!isOwner) {
+          return {
+            ...dto,
+            unitCost: 0,
+            totalCost: 0,
+          };
+        }
+        return dto;
+      }),
+      consumptions: material.consumptions.map((c) => {
+        const dto = this.mapConsumptionToDto(c);
+        if (!isOwner) {
+          return {
+            ...dto,
+            unitCostAllocated: 0,
+            totalMaterialCost: 0,
+          };
+        }
+        return dto;
+      }),
     };
   }
 
@@ -527,11 +560,13 @@ export class InventoryService {
       categoryMap.set(m.category, existingCat);
     }
 
+    const isOwner = user?.role === UserRole.OWNER;
+
     const categories = Array.from(categoryMap.entries()).map(([category, stats]) => ({
       category,
       itemCount: stats.itemCount,
       totalQuantity: Math.round(stats.totalQuantity * 1000) / 1000,
-      totalStockValue: Math.round(stats.totalStockValue * 100) / 100,
+      totalStockValue: isOwner ? Math.round(stats.totalStockValue * 100) / 100 : 0,
     }));
 
     let stockLocation = 'Central Main Warehouse & Global Pool';
@@ -543,12 +578,16 @@ export class InventoryService {
     }
 
     return {
-      totalStockValue: Math.round(totalStockValue * 100) / 100,
+      totalStockValue: isOwner ? Math.round(totalStockValue * 100) / 100 : 0,
       totalItemsInStock: mappedMaterials.filter((m) => m.currentStockQuantity > 0).length,
       lowStockCount,
       stockLocation,
       categories,
-      materials: mappedMaterials,
+      materials: mappedMaterials.map((m) => ({
+        ...m,
+        currentUnitCost: isOwner ? m.currentUnitCost : 0,
+        stockValue: isOwner ? m.stockValue : 0,
+      })),
     };
   }
 

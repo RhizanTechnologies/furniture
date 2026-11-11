@@ -58,8 +58,9 @@ export class InventoryController {
   @ApiResponse({ status: 404, description: 'Material not found' })
   async getMaterial(
     @Param('id') id: string,
+    @Req() req?: any,
   ): Promise<ApiEnvelope<RawMaterialDto & { stockIns: MaterialStockInDto[]; consumptions: MaterialConsumptionDto[] }>> {
-    const material = await this.inventoryService.getMaterial(id);
+    const material = await this.inventoryService.getMaterial(id, req?.user);
     return {
       success: true,
       data: material,

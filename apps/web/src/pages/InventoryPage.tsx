@@ -265,9 +265,9 @@ export const InventoryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Stock Valuation Metric Cards (Executive Owner Only - hidden for Branch Admin) */}
-      {!isBranchAdmin && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* Stock Operational & Valuation Metric Cards */}
+      <div className={`grid grid-cols-1 ${isOwner ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'} gap-3 sm:gap-4`}>
+        {isOwner && (
           <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
             <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
               <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
@@ -281,57 +281,57 @@ export const InventoryPage: React.FC = () => {
               Weighted average cost valuation across all active materials
             </CardContent>
           </Card>
+        )}
 
-          <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
-              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-                Active Materials
-              </CardDescription>
-              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-charcoal-900 font-mono tracking-tight leading-snug sm:leading-normal">
-                {valuation?.totalItemsInStock || 0}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-              Catalog materials with positive on-hand quantity
-            </CardContent>
-          </Card>
+        <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
+              Active Materials
+            </CardDescription>
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-charcoal-900 font-mono tracking-tight leading-snug sm:leading-normal">
+              {valuation?.totalItemsInStock || 0}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
+            Catalog materials with positive on-hand quantity
+          </CardContent>
+        </Card>
 
-          <Card className={`border-wood-200/80 ${
-            (valuation?.lowStockCount || 0) > 0 ? 'bg-amber-50/60 border-amber-300' : 'bg-gradient-to-br from-white to-wood-50/40'
-          }`}>
-            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
-              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
-                <span>Reorder Alerts</span>
-                {(valuation?.lowStockCount || 0) > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                )}
-              </CardDescription>
-              <CardTitle className={`text-lg sm:text-xl lg:text-2xl font-bold font-mono tracking-tight leading-snug sm:leading-normal ${
-                (valuation?.lowStockCount || 0) > 0 ? 'text-amber-800' : 'text-charcoal-900'
-              }`}>
-                {valuation?.lowStockCount || 0}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-              Materials at or below minimum threshold
-            </CardContent>
-          </Card>
+        <Card className={`border-wood-200/80 ${
+          (valuation?.lowStockCount || 0) > 0 ? 'bg-amber-50/60 border-amber-300' : 'bg-gradient-to-br from-white to-wood-50/40'
+        }`}>
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
+              <span>Reorder Alerts</span>
+              {(valuation?.lowStockCount || 0) > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              )}
+            </CardDescription>
+            <CardTitle className={`text-lg sm:text-xl lg:text-2xl font-bold font-mono tracking-tight leading-snug sm:leading-normal ${
+              (valuation?.lowStockCount || 0) > 0 ? 'text-amber-800' : 'text-charcoal-900'
+            }`}>
+              {valuation?.lowStockCount || 0}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
+            Materials at or below minimum threshold
+          </CardContent>
+        </Card>
 
-          <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
-            <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
-              <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-                Stock Location
-              </CardDescription>
-              <CardTitle className="text-xs sm:text-sm font-bold text-wood-900 truncate">
-                {valuation?.stockLocation || 'Central Main Warehouse'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-              Authoritative warehouse pool
-            </CardContent>
-          </Card>
-        </div>
-      )}
+        <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
+          <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
+            <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
+              Stock Location
+            </CardDescription>
+            <CardTitle className="text-xs sm:text-sm font-bold text-wood-900 truncate">
+              {valuation?.stockLocation || 'Central Main Warehouse'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
+            Authoritative warehouse pool
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Notice for branches operating under Central Main Stock */}
       {isBranchAdmin && !isBranchStock && (
@@ -457,7 +457,7 @@ export const InventoryPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-lg bg-stone-50 text-xs">
+                <div className={`p-2.5 rounded-lg bg-stone-50 text-xs ${isOwner ? 'grid grid-cols-2 gap-2' : ''}`}>
                   <div>
                     <span className="text-[10px] uppercase font-bold text-muted-foreground block">Available Stock</span>
                     <span className="font-mono font-bold text-stone-900 text-sm">
@@ -465,18 +465,22 @@ export const InventoryPage: React.FC = () => {
                     </span>{' '}
                     <span className="text-stone-500 text-[11px]">{mat.unitOfMeasurement}</span>
                   </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">Stock Valuation</span>
-                    <span className="font-mono font-bold text-wood-950 text-sm">
-                      {formatCurrency(mat.stockValue)}
-                    </span>
-                  </div>
-                  <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px]">
-                    <span className="text-stone-500">Unit WAC Cost:</span>
-                    <span className="font-mono font-medium text-stone-800">
-                      {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
-                    </span>
-                  </div>
+                  {isOwner && (
+                    <>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">Stock Valuation</span>
+                        <span className="font-mono font-bold text-wood-950 text-sm">
+                          {formatCurrency(mat.stockValue)}
+                        </span>
+                      </div>
+                      <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px]">
+                        <span className="text-stone-500">Unit WAC Cost:</span>
+                        <span className="font-mono font-medium text-stone-800">
+                          {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-end space-x-2 pt-1">
@@ -510,8 +514,12 @@ export const InventoryPage: React.FC = () => {
                   <TableHead>Material</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right">Available Qty</TableHead>
-                  <TableHead className="text-right">Unit Cost (WAC)</TableHead>
-                  <TableHead className="text-right">Stock Value</TableHead>
+                  {isOwner && (
+                    <>
+                      <TableHead className="text-right">Unit Cost (WAC)</TableHead>
+                      <TableHead className="text-right">Stock Value</TableHead>
+                    </>
+                  )}
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -534,12 +542,16 @@ export const InventoryPage: React.FC = () => {
                       <span className="font-mono text-sm">{mat.currentStockQuantity.toLocaleString()}</span>{' '}
                       <span className="text-xs text-muted-foreground">{mat.unitOfMeasurement}</span>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-sm text-stone-700">
-                      {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
-                    </TableCell>
-                    <TableCell className="text-right font-mono font-bold text-sm text-wood-900">
-                      {formatCurrency(mat.stockValue)}
-                    </TableCell>
+                    {isOwner && (
+                      <>
+                        <TableCell className="text-right font-mono text-sm text-stone-700">
+                          {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-bold text-sm text-wood-900">
+                          {formatCurrency(mat.stockValue)}
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell className="text-center">
                       {mat.currentStockQuantity <= 0 ? (
                         <Badge variant="destructive" className="text-[10px]">
@@ -657,7 +669,7 @@ export const InventoryPage: React.FC = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className={`grid ${isOwner ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
                   Quantity Received ({selectedMaterialForStockIn?.unitOfMeasurement || 'Units'}) <span className="text-red-500">*</span>
@@ -684,24 +696,26 @@ export const InventoryPage: React.FC = () => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Unit Cost per {selectedMaterialForStockIn?.unitOfMeasurement || 'Unit'} (ETB) <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  {...stockInForm.register('unitCost', { valueAsNumber: true })}
-                  className="font-mono"
-                />
-                {stockInForm.formState.errors.unitCost && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {stockInForm.formState.errors.unitCost.message}
-                  </p>
-                )}
-              </div>
+              {isOwner && (
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                    Unit Cost per {selectedMaterialForStockIn?.unitOfMeasurement || 'Unit'} (ETB) <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    {...stockInForm.register('unitCost', { valueAsNumber: true })}
+                    className="font-mono"
+                  />
+                  {stockInForm.formState.errors.unitCost && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {stockInForm.formState.errors.unitCost.message}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {selectedMaterialForStockIn && (
@@ -711,13 +725,15 @@ export const InventoryPage: React.FC = () => {
               </p>
             )}
 
-            {/* Total Batch Cost Preview */}
-            <div className="p-3 bg-wood-50 rounded-lg border border-wood-200 flex justify-between items-center text-sm">
-              <span className="text-wood-800 font-medium">Batch Purchase Value:</span>
-              <span className="font-mono font-bold text-wood-950 text-base">
-                {formatCurrency(computedStockInTotal)}
-              </span>
-            </div>
+            {/* Total Batch Cost Preview (Executive Owner Only) */}
+            {isOwner && (
+              <div className="p-3 bg-wood-50 rounded-lg border border-wood-200 flex justify-between items-center text-sm">
+                <span className="text-wood-800 font-medium">Batch Purchase Value:</span>
+                <span className="font-mono font-bold text-wood-950 text-base">
+                  {formatCurrency(computedStockInTotal)}
+                </span>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
@@ -935,7 +951,7 @@ export const InventoryPage: React.FC = () => {
                     {materialHistory?.unitOfMeasurement}
                   </DialogDescription>
                 </div>
-                {materialHistory && (
+                {materialHistory && isOwner && (
                   <Badge variant="wood" className="text-xs">
                     Current WAC: {formatCurrency(materialHistory.currentUnitCost)} /{' '}
                     {materialHistory.unitOfMeasurement}
@@ -973,12 +989,14 @@ export const InventoryPage: React.FC = () => {
                             </div>
                             <div className="flex items-center justify-between font-mono">
                               <span className="text-stone-700">Received: <strong>{s.receivedQuantity} {s.unitOfMeasurement}</strong></span>
-                              <span className="text-wood-900 font-bold">{formatCurrency(s.totalCost)}</span>
+                              {isOwner && <span className="text-wood-900 font-bold">{formatCurrency(s.totalCost)}</span>}
                             </div>
-                            <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
-                              <span>Unit Cost: {formatCurrency(s.unitCost)} / {s.unitOfMeasurement}</span>
-                              {s.supplierInvoiceRef && <span>Inv: {s.supplierInvoiceRef}</span>}
-                            </div>
+                            {(isOwner || s.supplierInvoiceRef) && (
+                              <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
+                                {isOwner && <span>Unit Cost: {formatCurrency(s.unitCost)} / {s.unitOfMeasurement}</span>}
+                                {s.supplierInvoiceRef && <span>Inv: {s.supplierInvoiceRef}</span>}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -991,8 +1009,12 @@ export const InventoryPage: React.FC = () => {
                               <TableHead>Date</TableHead>
                               <TableHead>Location</TableHead>
                               <TableHead className="text-right">Qty Received</TableHead>
-                              <TableHead className="text-right">Unit Cost</TableHead>
-                              <TableHead className="text-right">Total Batch Cost</TableHead>
+                              {isOwner && (
+                                <>
+                                  <TableHead className="text-right">Unit Cost</TableHead>
+                                  <TableHead className="text-right">Total Batch Cost</TableHead>
+                                </>
+                              )}
                               <TableHead>Invoice Ref</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -1004,12 +1026,16 @@ export const InventoryPage: React.FC = () => {
                                 <TableCell className="text-right font-mono font-medium">
                                   {s.receivedQuantity} {s.unitOfMeasurement}
                                 </TableCell>
-                                <TableCell className="text-right font-mono">
-                                  {formatCurrency(s.unitCost)}
-                                </TableCell>
-                                <TableCell className="text-right font-mono font-bold text-wood-900">
-                                  {formatCurrency(s.totalCost)}
-                                </TableCell>
+                                {isOwner && (
+                                  <>
+                                    <TableCell className="text-right font-mono">
+                                      {formatCurrency(s.unitCost)}
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono font-bold text-wood-900">
+                                      {formatCurrency(s.totalCost)}
+                                    </TableCell>
+                                  </>
+                                )}
                                 <TableCell className="text-stone-600">
                                   {s.supplierInvoiceRef || '—'}
                                 </TableCell>
@@ -1045,10 +1071,10 @@ export const InventoryPage: React.FC = () => {
                             </div>
                             <div className="flex items-center justify-between font-mono">
                               <span className="text-stone-700">Consumed: <strong>{c.consumedQuantity} {c.unitOfMeasurement}</strong></span>
-                              <span className="text-wood-900 font-bold">{formatCurrency(c.totalMaterialCost)}</span>
+                              {isOwner && <span className="text-wood-900 font-bold">{formatCurrency(c.totalMaterialCost)}</span>}
                             </div>
                             <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
-                              <span>Allocated WAC: {formatCurrency(c.unitCostAllocated)} / {c.unitOfMeasurement}</span>
+                              {isOwner && <span>Allocated WAC: {formatCurrency(c.unitCostAllocated)} / {c.unitOfMeasurement}</span>}
                               <span>{c.branchName || 'Central'}</span>
                             </div>
                           </div>
@@ -1064,8 +1090,12 @@ export const InventoryPage: React.FC = () => {
                               <TableHead>Order #</TableHead>
                               <TableHead>Workshop</TableHead>
                               <TableHead className="text-right">Qty Consumed</TableHead>
-                              <TableHead className="text-right">Allocated WAC Cost</TableHead>
-                              <TableHead className="text-right">Total Cost Contribution</TableHead>
+                              {isOwner && (
+                                <>
+                                  <TableHead className="text-right">Allocated WAC Cost</TableHead>
+                                  <TableHead className="text-right">Total Cost Contribution</TableHead>
+                                </>
+                              )}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1079,12 +1109,16 @@ export const InventoryPage: React.FC = () => {
                                 <TableCell className="text-right font-mono font-medium">
                                   {c.consumedQuantity} {c.unitOfMeasurement}
                                 </TableCell>
-                                <TableCell className="text-right font-mono">
-                                  {formatCurrency(c.unitCostAllocated)}
-                                </TableCell>
-                                <TableCell className="text-right font-mono font-bold text-wood-900">
-                                  {formatCurrency(c.totalMaterialCost)}
-                                </TableCell>
+                                {isOwner && (
+                                  <>
+                                    <TableCell className="text-right font-mono">
+                                      {formatCurrency(c.unitCostAllocated)}
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono font-bold text-wood-900">
+                                      {formatCurrency(c.totalMaterialCost)}
+                                    </TableCell>
+                                  </>
+                                )}
                               </TableRow>
                             ))}
                           </TableBody>
