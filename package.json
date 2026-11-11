@@ -17,6 +17,12 @@
     "db:seed": "pnpm --filter @furniture/api prisma:seed",
     "db:studio": "pnpm --filter @furniture/api prisma:studio"
   },
+  "dependencies": {
+    "@nestjs/core": "^10.4.15",
+    "@nestjs/common": "^10.4.15",
+    "@nestjs/platform-express": "^10.4.15",
+    "express": "^4.21.2"
+  },
   "devDependencies": {
     "typescript": "^5.7.3"
   },

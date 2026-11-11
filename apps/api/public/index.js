@@ -1,3 +1,5 @@
+// Vercel NestJS Serverless Entrypoint
+const { NestFactory } = require('@nestjs/core');
 const { bootstrapServer } = require('../dist/src/serverless');
 
 let cachedServer;
@@ -13,7 +15,7 @@ if (require.main === module) {
   bootstrapServer().then((app) => {
     const port = process.env.PORT || 3000;
     app.listen(port, () => {
-      console.log(`Furniture Business ERP API listening on port ${port}`);
+      console.log(`NestJS server listening on port ${port}`);
     });
   });
 }
