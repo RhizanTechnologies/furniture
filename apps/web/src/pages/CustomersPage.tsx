@@ -44,7 +44,12 @@ export const CustomersPage: React.FC = () => {
   const PAGE_SIZE = 10;
 
   // Fetch customers with Dexie cache & local pending sync records
-  const { data: customers, isLoading, error, refetch } = useQuery<Array<CustomerDto & { isPendingSync?: boolean }>>({
+  const {
+    data: customers = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<Array<CustomerDto & { isPendingSync?: boolean }>>({
     queryKey: ['customers', searchTerm],
     queryFn: async () => {
       try {
@@ -97,9 +102,10 @@ export const CustomersPage: React.FC = () => {
     },
   });
 
-  const paginatedCustomers = customers
-    ? customers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-    : [];
+  const paginatedCustomers = (customers || []).slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   // Fetch selected customer details
   const { data: customerDetails, isLoading: isDetailsLoading } = useQuery<{
@@ -375,7 +381,7 @@ export const CustomersPage: React.FC = () => {
               <div className="px-4 pb-4">
                 <Pagination
                   currentPage={currentPage}
-                  totalItems={customers.length}
+                  totalItems={(customers || []).length}
                   pageSize={PAGE_SIZE}
                   onPageChange={setCurrentPage}
                 />

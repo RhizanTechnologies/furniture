@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { RouteErrorBoundary } from '@/components/feedback/RouteErrorBoundary';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { BranchesPage } from '@/pages/BranchesPage';
 import { CatalogPage } from '@/pages/CatalogPage';
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+    errorElement: <RouteErrorBoundary />,
   },
   {
     path: '/',
@@ -28,6 +30,7 @@ export const router = createBrowserRouter([
         <AppLayout />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -100,6 +103,10 @@ export const router = createBrowserRouter([
       {
         path: 'system-health',
         element: <HealthPage />,
+      },
+      {
+        path: '*',
+        element: <RouteErrorBoundary />,
       },
     ],
   },
