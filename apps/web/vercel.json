@@ -1,4 +1,5 @@
 {
+  "buildCommand": "pnpm --filter @furniture/shared build && pnpm build",
   "rewrites": [
     {
       "source": "/(.*)",

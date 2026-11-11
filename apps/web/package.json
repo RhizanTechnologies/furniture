@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "prebuild": "pnpm --filter @furniture/shared build",
+    "build": "pnpm --filter @furniture/shared build && tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "tsc --noEmit"
