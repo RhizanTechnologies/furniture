@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { RecordPaymentModal } from './RecordPaymentModal';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Calendar,
   User,
@@ -49,6 +50,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const { isOwner } = useAuth();
+  const { t, translateStage } = useLanguage();
   const [targetStageId, setTargetStageId] = useState<string>('');
   const [transitionNotes, setTransitionNotes] = useState<string>('');
   const [transitionError, setTransitionError] = useState<string | null>(null);
@@ -174,19 +176,19 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   }}
                   className="text-[10px] sm:text-[11px]"
                 >
-                  {order.currentStage?.name || 'In Production'}
+                  {translateStage(order.currentStage?.name || 'In Production')}
                 </Badge>
               </div>
               <DialogTitle className="text-lg sm:text-xl font-bold mt-1 text-charcoal-900 break-words">
-                Order for {order.customer?.fullName || 'Walk-In Customer'}
+                {t('orderDetail.title', 'Order Details')}: {order.customer?.fullName || t('orders.customer', 'Customer')}
               </DialogTitle>
             </div>
 
             <div className="text-left sm:text-right text-xs text-muted-foreground flex sm:flex-col flex-wrap gap-x-3 gap-y-0.5">
-              <div>Created: {new Date(order.createdAt).toLocaleDateString()}</div>
+              <div>{t('common.created', 'Created')}: {new Date(order.createdAt).toLocaleDateString()}</div>
               <div className="flex items-center space-x-1 font-semibold text-charcoal-700">
                 <Calendar className="h-3.5 w-3.5 text-wood-700" />
-                <span>Deadline: {new Date(order.deadlineDate).toLocaleDateString()}</span>
+                <span>{t('orders.deadline', 'Deadline')}: {new Date(order.deadlineDate).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
@@ -198,25 +200,25 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1 break-words">
               <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <User className="h-3.5 w-3.5 text-wood-700" />
-                <span>Customer Contact Information</span>
+                <span>{t('orderDetail.customerInfo', 'Customer Contact Information')}</span>
               </div>
               <p className="text-charcoal-900 font-medium break-words">{order.customer?.fullName}</p>
-              <p className="text-charcoal-600 break-words">Phone: {order.customer?.phone}</p>
+              <p className="text-charcoal-600 break-words">{t('common.phone', 'Phone')}: {order.customer?.phone}</p>
               {order.customer?.address && (
-                <p className="text-charcoal-500 break-words">Address: {order.customer?.address}</p>
+                <p className="text-charcoal-500 break-words">{t('common.address', 'Address')}: {order.customer?.address}</p>
               )}
             </div>
 
             <div className="p-3 bg-wood-50/50 rounded-lg border border-wood-100 space-y-1 break-words">
               <div className="font-semibold text-charcoal-800 flex items-center space-x-1.5">
                 <MapPin className="h-3.5 w-3.5 text-wood-700" />
-                <span>Workshop Branch Tenancy</span>
+                <span>{t('common.branch', 'Branch')}</span>
               </div>
               <p className="text-charcoal-900 font-medium break-words">
                 {order.branch?.name} ({order.branch?.code})
               </p>
-              <p className="text-charcoal-600">Stock Mode: {order.branch?.stockMode}</p>
-              <p className="text-charcoal-500 break-words">Location: {order.branch?.address}</p>
+              <p className="text-charcoal-600">{t('branches.stockMode', 'Stock Mode')}: {order.branch?.stockMode}</p>
+              <p className="text-charcoal-500 break-words">{t('common.address', 'Location')}: {order.branch?.address}</p>
             </div>
           </div>
 
@@ -225,7 +227,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center space-x-1.5">
                 <DollarSign className="h-4 w-4 text-wood-700" />
-                <span>Authoritative Financial Summary</span>
+                <span>{t('finance.title', 'Financial Summary')}</span>
               </h4>
               {!isFullyPaid && (
                 <Button
@@ -234,7 +236,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   className="h-7 text-xs bg-emerald-700 hover:bg-emerald-800 text-white space-x-1.5 shadow-sm px-2.5"
                 >
                   <CreditCard className="h-3.5 w-3.5" />
-                  <span>Record Payment</span>
+                  <span>{t('orders.recordPayment', 'Record Payment')}</span>
                 </Button>
               )}
             </div>
@@ -242,7 +244,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-center">
               <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                  Agreed Price
+                  {t('orders.agreedPrice', 'Agreed Price')}
                 </span>
                 <span className="font-mono text-sm sm:text-base font-bold text-wood-950">
                   {formatCurrency(order.totalAgreedPrice)}
@@ -250,7 +252,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </div>
               <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                  Total Paid
+                  {t('orderDetail.totalPaid', 'Total Paid')}
                 </span>
                 <span className="font-mono text-sm sm:text-base font-bold text-emerald-700">
                   {formatCurrency(order.totalPaid)}
@@ -258,7 +260,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </div>
               <div className="p-2.5 bg-white/90 rounded-lg border border-wood-100 shadow-sm flex flex-row sm:flex-col justify-between sm:justify-center items-center">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                  Outstanding Balance
+                  {t('orders.balanceDue', 'Outstanding Balance')}
                 </span>
                 <span
                   className={`font-mono text-sm sm:text-base font-bold ${
@@ -274,7 +276,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             {!isFullyPaid ? (
               <div className="pt-2 border-t border-wood-200/60 flex flex-col sm:flex-row items-center justify-between gap-2">
                 <div className="text-xs text-amber-900 font-medium">
-                  Remaining to collect:{' '}
+                  {t('orderDetail.balanceRemaining', 'Remaining to collect')}:{' '}
                   <span className="font-mono font-bold text-sm text-amber-800">
                     {formatCurrency(order.outstandingBalance)}
                   </span>
@@ -285,17 +287,17 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   className="w-full sm:w-auto h-8 text-xs bg-emerald-700 hover:bg-emerald-800 text-white space-x-1.5 shadow"
                 >
                   <CreditCard className="h-3.5 w-3.5" />
-                  <span>Settle / Record Progress Payment</span>
+                  <span>{t('orderDetail.recordPaymentBtn', 'Settle / Record Progress Payment')}</span>
                 </Button>
               </div>
             ) : (
               <div className="pt-2 border-t border-emerald-200/60 flex items-center justify-between">
                 <div className="flex items-center space-x-1.5 text-xs text-emerald-800 font-semibold">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Order is fully paid and cleared</span>
+                  <span>{t('orderDetail.finalSettlement', 'Order is fully paid and cleared')}</span>
                 </div>
                 <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                  Zero Outstanding Balance
+                  {t('orderDetail.totalPaid', 'Zero Outstanding Balance')}
                 </Badge>
               </div>
             )}
@@ -306,7 +308,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-800 flex items-center space-x-1.5">
                 <Receipt className="h-4 w-4 text-wood-700" />
-                <span>Payment Receipts & Inflow Ledger ({orderPayments.length})</span>
+                <span>{t('finance.paymentsTab', 'Payment Receipts & Inflow Ledger')} ({orderPayments.length})</span>
               </h4>
               {!isFullyPaid && (
                 <Button
@@ -316,14 +318,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   className="h-7 text-xs text-emerald-800 border-emerald-300 hover:bg-emerald-50 space-x-1"
                 >
                   <Plus className="h-3 w-3" />
-                  <span>Add Payment</span>
+                  <span>{t('orders.recordPayment', 'Add Payment')}</span>
                 </Button>
               )}
             </div>
 
             {orderPayments.length === 0 ? (
               <p className="text-xs text-muted-foreground italic py-2 text-center">
-                No individual payment transactions recorded yet.
+                {t('orderDetail.noPaymentsYet', 'No individual payment transactions recorded yet.')}
               </p>
             ) : (
               <div className="space-y-2">
@@ -356,7 +358,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
                     <div className="text-[11px] text-muted-foreground sm:text-right">
                       <div>{new Date(p.paymentDate).toLocaleDateString()}</div>
-                      <div className="text-[10px]">Logged by {p.recordedByUserName || 'Staff'}</div>
+                      <div className="text-[10px]">{t('common.createdBy', 'Logged by')} {p.recordedByUserName || 'Staff'}</div>
                     </div>
                   </div>
                 ))}
@@ -370,10 +372,10 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-800 flex items-center space-x-1.5">
                   <Boxes className="h-4 w-4 text-wood-700" />
-                  <span>Production Material Costing & Margin</span>
+                  <span>{t('orderDetail.materialCostSummary', 'Production Material Costing & Margin')}</span>
                 </h4>
                 <p className="text-[11px] text-muted-foreground">
-                  Frozen historical raw material costs allocated to this furniture order.
+                  {t('orderDetail.materialsUsed', 'Frozen historical raw material costs allocated to this furniture order.')}
                 </p>
               </div>
 
@@ -384,7 +386,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 className="h-8 text-xs text-wood-800 border-wood-300 hover:bg-wood-50 space-x-1"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Log Material Usage</span>
+                <span>{t('inventory.recordUsedBtn', 'Log Material Usage')}</span>
               </Button>
             </div>
 
@@ -392,19 +394,19 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             {isOwner ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
-                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Material Cost</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">{t('inventory.unitCost', 'Material Cost')}</span>
                   <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
                     {formatCurrency(costing?.totalMaterialCost || 0)}
                   </span>
                 </div>
                 <div className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-center">
-                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">Agreed Selling</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-semibold block">{t('orders.agreedPrice', 'Agreed Selling')}</span>
                   <span className="font-mono font-bold text-stone-900 text-xs sm:text-sm">
                     {formatCurrency(costing?.totalAgreedPrice || order.totalAgreedPrice)}
                   </span>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 text-center">
-                  <span className="text-[10px] text-emerald-800 uppercase font-semibold block">Gross Profit</span>
+                  <span className="text-[10px] text-emerald-800 uppercase font-semibold block">{t('finance.grossProfit', 'Gross Profit')}</span>
                   <span className="font-mono font-bold text-emerald-900 text-xs sm:text-sm">
                     {formatCurrency(costing?.grossProfit || order.totalAgreedPrice)}
                   </span>
@@ -419,7 +421,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             ) : (
               <div className="pt-1">
                 <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-between">
-                  <span className="text-xs text-stone-600 font-medium">Contracted Agreed Price:</span>
+                  <span className="text-xs text-stone-600 font-medium">{t('orders.agreedPrice', 'Contracted Agreed Price')}:</span>
                   <span className="font-mono font-bold text-stone-900 text-sm">
                     {formatCurrency(order.totalAgreedPrice)}
                   </span>
@@ -457,7 +459,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     )}
 
                     <div className="text-[10px] text-muted-foreground flex justify-between items-center pt-0.5">
-                      <span>Logged by: {c.recordedByUserName || 'Staff'}</span>
+                      <span>{t('common.createdBy', 'Logged by')}: {c.recordedByUserName || 'Staff'}</span>
                       {c.consumedAt && <span>{new Date(c.consumedAt).toLocaleDateString()}</span>}
                     </div>
                   </div>
@@ -465,7 +467,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </div>
             ) : (
               <p className="text-xs text-muted-foreground italic bg-stone-50 p-2.5 rounded border text-center">
-                No materials logged yet for this order. Click "Log Material Usage" as workshop staff assemble this order.
+                {t('inventory.noMaterials', 'No materials logged yet for this order. Click "Log Material Usage" as workshop staff assemble this order.')}
               </p>
             )}
           </div>
@@ -473,10 +475,10 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           {/* Order Stage Pipeline & Transition Controls */}
           <div className="p-3.5 sm:p-4 rounded-xl border border-wood-200 bg-white space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex flex-wrap items-center justify-between gap-2">
-              <span>Production Workflow Pipeline</span>
+              <span>{t('orderDetail.orderTimeline', 'Production Workflow Pipeline')}</span>
               <div className="flex items-center space-x-2">
                 <span className="text-[10px] lowercase font-normal text-muted-foreground hidden sm:inline">
-                  Move order through configured stages
+                  {t('stages.reorderHint', 'Move order through configured stages')}
                 </span>
                 {isOwner && (
                   <Link
@@ -485,7 +487,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     className="inline-flex items-center space-x-1 text-[11px] font-semibold text-wood-700 hover:text-wood-950 bg-wood-50 hover:bg-wood-100 border border-wood-200 px-2 py-0.5 rounded transition-colors"
                   >
                     <Layers className="h-3 w-3" />
-                    <span>Customize Stages</span>
+                    <span>{t('stages.title', 'Customize Stages')}</span>
                   </Link>
                 )}
               </div>
@@ -508,7 +510,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                         className="w-2 h-2 rounded-full inline-block"
                         style={{ backgroundColor: st.color }}
                       />
-                      <span>{st.name}</span>
+                      <span>{translateStage(st.name)}</span>
                     </div>
                     {idx < stages.length - 1 && (
                       <ArrowRight className="h-3 w-3 text-wood-400 mx-1 shrink-0" />
@@ -525,17 +527,17 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 onChange={(e) => setTargetStageId(e.target.value)}
                 className="w-full sm:w-60 h-9 px-3 rounded-md border border-input bg-background text-xs font-medium"
               >
-                <option value="">-- Move to Next Stage --</option>
+                <option value="">{t('orderDetail.selectNextStage', '-- Move to Next Stage --')}</option>
                 {stages.map((st) => (
                   <option key={st.id} value={st.id} disabled={st.id === order.currentStageId}>
-                    {st.name} {st.id === order.currentStageId ? '(Current)' : ''}
+                    {translateStage(st.name)} {st.id === order.currentStageId ? `(${t('common.active', 'Current')})` : ''}
                   </option>
                 ))}
               </select>
 
               <input
                 type="text"
-                placeholder="Transition remarks (optional e.g. Quality checked)"
+                placeholder={t('orders.specialNotesPlaceholder', 'Transition remarks (optional e.g. Quality checked)')}
                 value={transitionNotes}
                 onChange={(e) => setTransitionNotes(e.target.value)}
                 className="w-full sm:flex-1 h-9 px-3 rounded-md border border-input bg-background text-xs"
@@ -547,7 +549,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 disabled={!targetStageId || stageMutation.isPending}
                 className="w-full sm:w-auto h-9 text-xs shrink-0"
               >
-                {stageMutation.isPending ? 'Updating...' : 'Advance Stage'}
+                {stageMutation.isPending ? t('common.loading', 'Updating...') : t('orderDetail.changeStageBtn', 'Advance Stage')}
               </Button>
             </div>
 
@@ -559,9 +561,9 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           {/* Ordered Furniture Items Cards (Card-based layout for full responsive PWA) */}
           <div className="space-y-2">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center justify-between">
-              <span>Contracted Furniture Products</span>
+              <span>{t('orders.itemsSection', 'Contracted Furniture Products')}</span>
               <span className="text-[11px] font-normal text-muted-foreground font-mono">
-                {order.items?.length || 0} item{order.items?.length === 1 ? '' : 's'}
+                {order.items?.length || 0} {t('common.details', 'items')}
               </span>
             </h4>
 
@@ -578,16 +580,16 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       </div>
                     </div>
                     <Badge variant="outline" className="font-mono text-xs shrink-0 bg-stone-50 border-stone-300">
-                      Qty: <span className="font-bold ml-1">{item.quantity}</span>
+                      {t('orders.quantity', 'Qty')}: <span className="font-bold ml-1">{item.quantity}</span>
                     </Badge>
                   </div>
 
                   <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="text-muted-foreground">
-                      Unit Price: <span className="font-mono text-stone-800">{formatCurrency(item.unitPrice)}</span>
+                      {t('orders.unitPrice', 'Unit Price')}: <span className="font-mono text-stone-800">{formatCurrency(item.unitPrice)}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-muted-foreground text-[11px] mr-1">Subtotal:</span>
+                      <span className="text-muted-foreground text-[11px] mr-1">{t('orders.subtotal', 'Subtotal')}:</span>
                       <span className="font-mono font-bold text-wood-950 text-xs sm:text-sm">
                         {formatCurrency(item.subtotal)}
                       </span>
@@ -602,7 +604,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 mb-2 flex items-center space-x-1.5">
               <History className="h-3.5 w-3.5 text-wood-700" />
-              <span>Immutable Stage Progression Audit Log</span>
+              <span>{t('stages.title', 'Immutable Stage Progression Audit Log')}</span>
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {order.stageHistories?.map((hist) => (
@@ -612,9 +614,9 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 >
                   <div className="space-y-0.5">
                     <div className="font-medium flex items-center space-x-1.5">
-                      <span>{hist.fromStageName || 'Initiation'}</span>
+                      <span>{hist.fromStageName ? translateStage(hist.fromStageName) : t('common.details', 'Initiation')}</span>
                       <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                      <strong className="text-wood-900">{hist.toStageName}</strong>
+                      <strong className="text-wood-900">{translateStage(hist.toStageName)}</strong>
                     </div>
                     {hist.notes && (
                       <div className="text-charcoal-600 italic text-[11px]">
@@ -634,7 +636,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
         <DialogFooter className="pt-2 border-t border-wood-100">
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t('common.close', 'Close')}
           </Button>
         </DialogFooter>
       </DialogContent>

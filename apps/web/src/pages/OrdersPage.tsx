@@ -30,6 +30,7 @@ import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
 import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Plus,
   Search,
@@ -46,6 +47,7 @@ import {
 
 export const OrdersPage: React.FC = () => {
   const { user, isOwner } = useAuth();
+  const { t, translateStage } = useLanguage();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStageId, setSelectedStageId] = useState<string>('ALL');
@@ -383,24 +385,22 @@ export const OrdersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Furniture Orders & Pipeline"
-        description="Track client bespoke commissions through customizable workshop stages from deposit intake to final delivery."
+        title={t('orders.title', 'Furniture Orders & Pipeline')}
+        description={t('orders.subtitle', 'Track client bespoke commissions through customizable workshop stages from deposit intake to final delivery.')}
         action={
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             {isOwner && (
               <Link to="/order-stages" className="flex-1 sm:flex-none">
                 <Button variant="outline" size="sm" className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9">
                   <Layers className="h-3.5 w-3.5 shrink-0" />
-                  <span className="hidden sm:inline">Customize Stages</span>
-                  <span className="sm:hidden">Stages</span>
+                  <span>{t('nav.stages', 'Customize Stages')}</span>
                 </Button>
               </Link>
             )}
             <Link to="/customers" className="flex-1 sm:flex-none">
               <Button variant="outline" size="sm" className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9">
                 <UserPlus className="h-3.5 w-3.5 shrink-0" />
-                <span className="hidden sm:inline">Register Customer</span>
-                <span className="sm:hidden">Customer</span>
+                <span>{t('customers.addCustomerBtn', 'Register Customer')}</span>
               </Button>
             </Link>
             <Button
@@ -412,8 +412,7 @@ export const OrdersPage: React.FC = () => {
               className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow text-xs px-2 sm:px-3 h-8 sm:h-9"
             >
               <Plus className="h-3.5 w-3.5 shrink-0" />
-              <span className="hidden sm:inline">Create Order</span>
-              <span className="sm:hidden">Order</span>
+              <span>{t('orders.newOrderBtn', 'Create Order')}</span>
             </Button>
           </div>
         }
@@ -425,7 +424,7 @@ export const OrdersPage: React.FC = () => {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by order #, client name, or phone..."
+              placeholder={t('orders.searchPlaceholder', 'Search by order #, client name, or phone...')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -446,7 +445,7 @@ export const OrdersPage: React.FC = () => {
               }}
               className="text-xs h-8"
             >
-              All Orders
+              {t('orders.allStages', 'All Orders')}
             </Button>
             {stages.map((stage) => (
               <Button
@@ -464,7 +463,7 @@ export const OrdersPage: React.FC = () => {
                   color: selectedStageId === stage.id ? '#ffffff' : undefined,
                 }}
               >
-                <span>{stage.name}</span>
+                <span>{translateStage(stage.name)}</span>
               </Button>
             ))}
           </div>
@@ -512,43 +511,43 @@ export const OrdersPage: React.FC = () => {
                       }}
                       className="text-[10px] font-medium"
                     >
-                      {ord.currentStage?.name || 'In Production'}
+                      {translateStage(ord.currentStage?.name || 'In Production')}
                     </Badge>
                   </div>
 
                   <div className="flex items-start justify-between text-xs">
                     <div>
-                      <div className="font-semibold text-charcoal-900">{ord.customer?.fullName || 'Walk-In'}</div>
+                      <div className="font-semibold text-charcoal-900">{ord.customer?.fullName || t('orders.customer', 'Customer')}</div>
                       <div className="text-[11px] text-muted-foreground">{ord.customer?.phone}</div>
                     </div>
                     <div className="text-right">
                       <div className={`flex items-center justify-end space-x-1 text-[11px] ${deadlinePassed ? 'text-red-700 font-semibold' : 'text-stone-500'}`}>
                         {deadlinePassed && <AlertTriangle className="h-3 w-3" />}
-                        <span>Due {new Date(ord.deadlineDate).toLocaleDateString()}</span>
+                        <span>{t('orders.deadline', 'Due')}: {new Date(ord.deadlineDate).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">Total Agreed</span>
+                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('orders.agreedPrice', 'Total Agreed')}</span>
                       <span className="font-semibold text-charcoal-900 font-mono">
                         {formatCurrency(ord.totalAgreedPrice)}
                       </span>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">Paid / Bal</span>
+                      <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('orders.paidAmount', 'Paid')} / {t('orders.balanceDue', 'Bal')}</span>
                       <span className="font-medium text-emerald-800 font-mono mr-1.5">
                         {formatCurrency(ord.totalPaid)}
                       </span>
                       {ord.outstandingBalance > 0 ? (
                         <span className="font-semibold text-amber-800 font-mono text-[11px]">
-                          (Bal: {formatCurrency(ord.outstandingBalance)})
+                          ({t('orders.balanceDue', 'Bal')}: {formatCurrency(ord.outstandingBalance)})
                         </span>
                       ) : (
                         <Badge variant="success" className="text-[9px] py-0">
-                          Paid
+                          {t('orderDetail.finalSettlement', 'Paid')}
                         </Badge>
                       )}
                     </div>
@@ -565,7 +564,7 @@ export const OrdersPage: React.FC = () => {
                         className="h-7 text-xs space-x-1 bg-emerald-700 hover:bg-emerald-800 text-white flex-1"
                       >
                         <CreditCard className="h-3 w-3" />
-                        <span>Pay Balance</span>
+                        <span>{t('orders.recordPayment', 'Pay Balance')}</span>
                       </Button>
                     )}
                     <Button
@@ -580,7 +579,7 @@ export const OrdersPage: React.FC = () => {
                       }`}
                     >
                       <Eye className="h-3 w-3" />
-                      <span>{ord.outstandingBalance > 0 ? 'Details' : 'View Order Details & Pipeline'}</span>
+                      <span>{t('orders.viewDetails', 'Details')}</span>
                     </Button>
                   </div>
                 </div>
@@ -593,14 +592,14 @@ export const OrdersPage: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-wood-50/50">
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Current Stage</TableHead>
-                  <TableHead className="hidden sm:table-cell">Deadline</TableHead>
-                  <TableHead>Total Agreed</TableHead>
-                  <TableHead>Paid / Balance</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t('orders.orderNumber', 'Order #')}</TableHead>
+                  <TableHead>{t('orders.customer', 'Customer')}</TableHead>
+                  <TableHead>{t('common.status', 'Status')}</TableHead>
+                  <TableHead>{t('orders.currentStage', 'Current Stage')}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t('orders.deadline', 'Deadline')}</TableHead>
+                  <TableHead>{t('orders.agreedPrice', 'Total Agreed')}</TableHead>
+                  <TableHead>{t('orders.paidAmount', 'Paid')} / {t('orders.balanceDue', 'Balance')}</TableHead>
+                  <TableHead className="text-right">{t('common.actions', 'Action')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -618,7 +617,7 @@ export const OrdersPage: React.FC = () => {
                         {ord.orderNumber}
                       </TableCell>
                       <TableCell className="font-medium text-charcoal-900">
-                        <div>{ord.customer?.fullName || 'Walk-In'}</div>
+                        <div>{ord.customer?.fullName || t('orders.customer', 'Customer')}</div>
                         <div className="text-[11px] text-muted-foreground">{ord.customer?.phone}</div>
                       </TableCell>
                       <TableCell>
@@ -632,7 +631,7 @@ export const OrdersPage: React.FC = () => {
                           }}
                           className="text-[10px]"
                         >
-                          {ord.currentStage?.name || 'In Production'}
+                          {translateStage(ord.currentStage?.name || 'In Production')}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-xs">
@@ -649,11 +648,11 @@ export const OrdersPage: React.FC = () => {
                           <div className="text-emerald-800 font-medium">{formatCurrency(ord.totalPaid)}</div>
                           {ord.outstandingBalance > 0 ? (
                             <div className="text-amber-800 font-semibold">
-                              Bal: {formatCurrency(ord.outstandingBalance)}
+                              {t('orders.balanceDue', 'Bal')}: {formatCurrency(ord.outstandingBalance)}
                             </div>
                           ) : (
                             <Badge variant="success" className="text-[9px] mt-0.5">
-                              Fully Paid
+                              {t('orderDetail.finalSettlement', 'Fully Paid')}
                             </Badge>
                           )}
                         </div>
@@ -669,7 +668,7 @@ export const OrdersPage: React.FC = () => {
                             className="h-7 text-xs space-x-1 bg-emerald-700 hover:bg-emerald-800 text-white"
                           >
                             <CreditCard className="h-3 w-3" />
-                            <span>Record Payment</span>
+                            <span>{t('orders.recordPayment', 'Record Payment')}</span>
                           </Button>
                         )}
                         <Button
@@ -682,7 +681,7 @@ export const OrdersPage: React.FC = () => {
                           className="h-7 text-xs space-x-1 border-wood-300"
                         >
                           <Eye className="h-3 w-3" />
-                          <span>Inspect</span>
+                          <span>{t('common.viewDetails', 'Details')}</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -706,9 +705,9 @@ export const OrdersPage: React.FC = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="w-[95vw] sm:w-full max-w-2xl max-h-[92vh] overflow-y-auto p-3.5 sm:p-6">
           <DialogHeader className="pr-6">
-            <DialogTitle className="text-lg sm:text-xl">Create New Furniture Order</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">{t('orders.modalTitle', 'Create New Furniture Order')}</DialogTitle>
             <DialogDescription className="text-xs">
-              Record the client contract, catalog or custom specifications, initial prepayment, and deadline. Offline creation is preserved locally.
+              {t('orders.subtitle', 'Record client contract, custom specifications, initial prepayment, and deadline.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -721,7 +720,7 @@ export const OrdersPage: React.FC = () => {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                    Select Registered Customer
+                    {t('orders.selectCustomer', 'Select Registered Customer')}
                   </label>
                   <Button
                     type="button"
@@ -731,14 +730,14 @@ export const OrdersPage: React.FC = () => {
                     onClick={() => setIsQuickCustomerOpen(true)}
                   >
                     <UserPlus className="h-3.5 w-3.5" />
-                    <span>+ Quick Register New</span>
+                    <span>{t('orders.quickAddCustomer', '+ Quick Register New')}</span>
                   </Button>
                 </div>
                 <select
                   {...orderForm.register('customerId')}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-medium"
                 >
-                  <option value="">-- Choose Walk-In Customer --</option>
+                  <option value="">-- {t('orders.selectCustomer', 'Choose Walk-In Customer')} --</option>
                   {customers.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.fullName} ({c.phone})
@@ -756,7 +755,7 @@ export const OrdersPage: React.FC = () => {
               <div className="space-y-3 pt-2 border-t border-wood-200">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                    Order Items & Custom Specifications
+                    {t('orders.itemsSection', 'Order Items & Custom Specifications')}
                   </h4>
                   <Button
                     type="button"
@@ -773,7 +772,7 @@ export const OrdersPage: React.FC = () => {
                     className="h-7 text-xs space-x-1"
                   >
                     <Plus className="h-3.5 w-3.5" />
-                    <span>Add Item</span>
+                    <span>{t('orders.addItem', 'Add Item')}</span>
                   </Button>
                 </div>
 
@@ -798,13 +797,13 @@ export const OrdersPage: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="text-[11px] font-medium text-muted-foreground block mb-1">
-                          Catalog Product (Optional)
+                          {t('orders.product', 'Catalog Product (Optional)')}
                         </label>
                         <select
                           className="w-full h-9 px-2 text-xs rounded border border-input bg-background"
                           onChange={(e) => handleSelectProduct(idx, e.target.value)}
                         >
-                          <option value="">-- Custom Bespoke Item --</option>
+                          <option value="">-- {t('orders.selectProduct', 'Custom Bespoke Item')} --</option>
                           {products.map((p) => (
                             <option key={p.id} value={p.id}>
                               {p.name} ({formatCurrency(p.basePrice)})
@@ -816,7 +815,7 @@ export const OrdersPage: React.FC = () => {
                       <div>
                         <FormInput
                           name={`items.${idx}.itemDescription`}
-                          label="Description / Specifications"
+                          label={t('showroom.description', 'Description / Specifications')}
                           placeholder="e.g. 8-Seater Wanza Dining Table"
                           required
                           className="h-9 text-xs"
@@ -828,7 +827,7 @@ export const OrdersPage: React.FC = () => {
                       <FormInput
                         type="number"
                         name={`items.${idx}.quantity`}
-                        label="Quantity"
+                        label={t('orders.quantity', 'Quantity')}
                         required
                         className="h-9 text-xs"
                         onChange={handleItemChange}
@@ -836,7 +835,7 @@ export const OrdersPage: React.FC = () => {
                       <FormInput
                         type="number"
                         name={`items.${idx}.unitPrice`}
-                        label="Unit Price (ETB)"
+                        label={t('orders.unitPrice', 'Unit Price (ETB)')}
                         required
                         className="h-9 text-xs"
                         onChange={handleItemChange}
@@ -851,16 +850,16 @@ export const OrdersPage: React.FC = () => {
                 <FormInput
                   type="number"
                   name="totalAgreedPrice"
-                  label="Agreed Contract Price (ETB)"
-                  description="Total binding agreement price"
+                  label={t('orders.totalAgreedPrice', 'Agreed Contract Price (ETB)')}
+                  description={t('orders.agreedPrice', 'Total binding agreement price')}
                   required
                 />
 
                 <FormInput
                   type="number"
                   name="prepaymentAmount"
-                  label="Prepayment / Initial Deposit (ETB)"
-                  description="Initial customer deposit"
+                  label={t('orders.advancePayment', 'Prepayment / Initial Deposit (ETB)')}
+                  description={t('orders.advancePayment', 'Initial customer deposit')}
                   required
                 />
               </div>
@@ -869,20 +868,20 @@ export const OrdersPage: React.FC = () => {
                 <FormInput
                   type="date"
                   name="deadlineDate"
-                  label="Delivery Deadline"
+                  label={t('orders.deadlineDate', 'Delivery Deadline')}
                   required
                 />
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                    Prepayment Method
+                    {t('orders.initialPaymentType', 'Prepayment Method')}
                   </label>
                   <select
                     {...orderForm.register('paymentMethod')}
                     className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-medium"
                   >
-                    <option value="Cash">Cash Receipt</option>
-                    <option value="Bank Transfer">Bank Transfer (Telebirr/CBE/Awash)</option>
+                    <option value="Cash">{t('paymentModal.cash', 'Cash')}</option>
+                    <option value="Bank Transfer">{t('paymentModal.telebirr', 'Telebirr')} / {t('paymentModal.cbeBank', 'CBE')}</option>
                     <option value="Check">Business Check</option>
                   </select>
                 </div>
@@ -890,8 +889,8 @@ export const OrdersPage: React.FC = () => {
 
               <FormInput
                 name="notes"
-                label="Manufacturing & Delivery Notes"
-                placeholder="e.g. Customer requested natural beeswax finish and delivery to 3rd floor"
+                label={t('orders.specialNotes', 'Manufacturing & Delivery Notes')}
+                placeholder={t('orders.specialNotesPlaceholder', 'e.g. Red fabric, dark oak varnish, extra firm foam...')}
               />
 
               <DialogFooter className="pt-3">
@@ -900,10 +899,10 @@ export const OrdersPage: React.FC = () => {
                   variant="outline"
                   onClick={() => setIsCreateOpen(false)}
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button type="submit" disabled={createOrderMutation.isPending}>
-                  {createOrderMutation.isPending ? 'Logging Order...' : 'Confirm Order'}
+                  {createOrderMutation.isPending ? t('orders.creatingOrder', 'Logging Order...') : t('orders.saveOrderBtn', 'Confirm Order')}
                 </Button>
               </DialogFooter>
             </form>
@@ -915,15 +914,15 @@ export const OrdersPage: React.FC = () => {
       <Dialog open={isQuickCustomerOpen} onOpenChange={setIsQuickCustomerOpen}>
         <DialogContent className="w-[94vw] sm:w-full sm:max-w-[425px] p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pr-6">
-            <DialogTitle className="text-base sm:text-lg">Quick Register Walk-In Client</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">{t('customers.newCustomerModalTitle', 'Quick Register Walk-In Client')}</DialogTitle>
             <DialogDescription className="text-xs">
-              Register client info and immediately assign them to the current order.
+              {t('customers.subtitle', 'Register client info and immediately assign them to the current order.')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleQuickRegisterCustomer} className="space-y-4 py-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Full Name *
+                {t('customers.fullName', 'Full Name')} *
               </label>
               <Input
                 required
@@ -935,7 +934,7 @@ export const OrdersPage: React.FC = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Phone Number *
+                {t('customers.phone', 'Phone Number')} *
               </label>
               <Input
                 required
@@ -947,7 +946,7 @@ export const OrdersPage: React.FC = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Delivery Address (Optional)
+                {t('customers.cityAddress', 'Delivery Address (Optional)')}
               </label>
               <Input
                 placeholder="e.g. Bole Atlas, Addis Ababa"
@@ -962,10 +961,10 @@ export const OrdersPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsQuickCustomerOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button type="submit" disabled={isSubmittingQuickCustomer}>
-                {isSubmittingQuickCustomer ? 'Saving...' : 'Save & Select Client'}
+                {isSubmittingQuickCustomer ? t('common.loading', 'Saving...') : t('customers.saveCustomer', 'Save & Select Client')}
               </Button>
             </DialogFooter>
           </form>

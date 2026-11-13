@@ -10,12 +10,12 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Plus,
   TrendingUp,
   Layers,
   DollarSign,
-  Store,
   Boxes,
   ArrowRight,
   BarChart3,
@@ -29,6 +29,7 @@ import { ExecutiveDashboardAnalyticsDto, OrderDto } from '@furniture/shared';
 
 export const DashboardPage: React.FC = () => {
   const { user, isOwner } = useAuth();
+  const { t, translateStage } = useLanguage();
 
   // 1. Fetch Live Analytics (Only for Owner)
   const { data: analytics, isLoading: isAnalyticsLoading } = useQuery<ExecutiveDashboardAnalyticsDto>({
@@ -49,28 +50,28 @@ export const DashboardPage: React.FC = () => {
   // Executive stats for Owner only
   const ownerStats = [
     {
-      title: 'Monthly Sales Pipeline',
+      title: t('analytics.salesRevenue', 'Sales Revenue Pipeline'),
       value: formatCurrency(fin?.contractedRevenue || 0),
       icon: DollarSign,
-      sub: `Earned: ${formatCurrency(fin?.earnedRevenue || 0)}`,
+      sub: `${t('dashboard.todayRevenueCard', 'Earned')}: ${formatCurrency(fin?.earnedRevenue || 0)}`,
     },
     {
-      title: 'Cash Collected (Inflow)',
+      title: t('finance.totalCollected', 'Cash Collected'),
       value: formatCurrency(fin?.cashCollected || 0),
       icon: CreditCard,
-      sub: `Receivables: ${formatCurrency(fin?.outstandingReceivables || 0)}`,
+      sub: `${t('finance.pendingReceivables', 'Receivables')}: ${formatCurrency(fin?.outstandingReceivables || 0)}`,
     },
     {
-      title: 'Net Business Profit',
+      title: t('finance.netBalance', 'Net Profit'),
       value: formatCurrency(fin?.netProfit || 0),
       icon: TrendingUp,
       sub: `${fin?.netMarginPercentage || 0}% Net Margin`,
     },
     {
-      title: 'Raw Material Stock Value',
+      title: t('inventory.totalStockCost', 'Stock Material Cost'),
       value: formatCurrency(stock?.totalStockValue || 0),
       icon: Boxes,
-      sub: `${stock?.activeMaterialsCount || 0} active materials`,
+      sub: `${stock?.activeMaterialsCount || 0} ${t('inventory.totalItemsInStock', 'items')}`,
     },
   ];
 
@@ -81,28 +82,28 @@ export const DashboardPage: React.FC = () => {
 
   const branchStats = [
     {
-      title: 'Total Branch Orders',
+      title: t('dashboard.activeOrdersCard', 'Branch Orders'),
       value: `${orders.length}`,
       icon: ShoppingBag,
-      sub: `${orders.length} orders recorded`,
+      sub: `${orders.length} ${t('orders.title', 'orders')}`,
     },
     {
-      title: 'In Production / Framing',
+      title: t('stages.woodworkFraming', 'In Production'),
       value: `${inProductionOrders.length}`,
       icon: Layers,
-      sub: 'Active workshop workflows',
+      sub: t('dashboard.activeOrdersCard', 'Active orders in workshop'),
     },
     {
-      title: 'Fulfilled / Delivered',
+      title: t('stages.delivered', 'Delivered'),
       value: `${completedOrders.length}`,
       icon: CheckCircle2,
-      sub: 'Completed deliveries',
+      sub: t('dashboard.deliveredCard', 'Completed deliveries'),
     },
     {
-      title: 'Registered Clients',
+      title: t('nav.customers', 'Clients'),
       value: `${uniqueCustomersCount}`,
       icon: Users,
-      sub: 'Branch customer accounts',
+      sub: t('customers.title', 'Customer accounts'),
     },
   ];
 
@@ -111,11 +112,11 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={isOwner ? 'Executive Overview' : `${user?.branch?.name || 'Branch'} Operations`}
+        title={isOwner ? t('nav.ownerConsole', 'Executive Overview') : `${user?.branch?.name || t('nav.myBranch', 'Branch')} ${t('dashboard.title', 'Overview')}`}
         description={
           isOwner
-            ? 'Unified operations monitoring across business branches, workshops, inventory and financials.'
-            : 'Track branch orders, update production stages, register customers and manage local fulfillments.'
+            ? t('dashboard.welcomeBack', 'Unified operations monitoring across business branches, workshops, inventory and financials.')
+            : t('orders.subtitle', 'Track branch orders, update production stages, register customers and manage local fulfillments.')
         }
         action={
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
@@ -127,8 +128,7 @@ export const DashboardPage: React.FC = () => {
                   className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9"
                 >
                   <BarChart3 className="h-3.5 w-3.5 shrink-0" />
-                  <span className="hidden sm:inline">Deep Analytics</span>
-                  <span className="sm:hidden">Analytics</span>
+                  <span>{t('nav.analytics', 'Analytics')}</span>
                 </Button>
               </Link>
             )}
@@ -139,8 +139,7 @@ export const DashboardPage: React.FC = () => {
                 className="w-full space-x-1 sm:space-x-1.5 border-wood-300 text-xs px-2 sm:px-3 h-8 sm:h-9"
               >
                 <UserPlus className="h-3.5 w-3.5 shrink-0" />
-                <span className="hidden sm:inline">Register Customer</span>
-                <span className="sm:hidden">Customer</span>
+                <span>{t('customers.addCustomerBtn', 'Add Customer')}</span>
               </Button>
             </Link>
             <Link to="/orders" className="flex-1 sm:flex-none">
@@ -149,8 +148,7 @@ export const DashboardPage: React.FC = () => {
                 className="w-full space-x-1 sm:space-x-1.5 bg-wood-700 hover:bg-wood-800 text-white shadow text-xs px-2 sm:px-3 h-8 sm:h-9"
               >
                 <Plus className="h-3.5 w-3.5 shrink-0" />
-                <span className="hidden sm:inline">Create Order</span>
-                <span className="sm:hidden">Order</span>
+                <span>{t('orders.newOrderBtn', 'New Order')}</span>
               </Button>
             </Link>
           </div>
@@ -188,15 +186,15 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg">
-                {isOwner ? 'Recent Business Orders' : 'Recent Branch Orders'}
+                {t('dashboard.recentOrders', 'Recent Orders')}
               </CardTitle>
               <CardDescription>
-                Live order stage progression, customer details and payment balances.
+                {t('orders.subtitle', 'Live order stage progression, customer details and payment balances.')}
               </CardDescription>
             </div>
             <Link to="/orders">
               <Button variant="ghost" size="sm" className="text-xs text-wood-800 space-x-1">
-                <span>View All</span>
+                <span>{t('dashboard.viewAllOrders', 'View All')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
@@ -204,10 +202,10 @@ export const DashboardPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isOrdersLoading ? (
-            <LoadingState message="Loading recent orders..." />
+            <LoadingState message={t('common.loading', 'Loading recent orders...')} />
           ) : recentOrders.length === 0 ? (
             <p className="text-xs text-muted-foreground italic text-center py-6">
-              No orders recorded yet. Click "Create Order" to record an order.
+              {t('dashboard.noRecentOrders', 'No orders recorded yet.')}
             </p>
           ) : (
             <>
@@ -230,14 +228,14 @@ export const DashboardPage: React.FC = () => {
                         }}
                         className="text-[10px] font-medium"
                       >
-                        {order.currentStage?.name || 'In Production'}
+                        {translateStage(order.currentStage?.name || 'In Production')}
                       </Badge>
                     </div>
 
                     <div className="flex items-start justify-between text-xs">
                       <div>
                         <div className="font-semibold text-charcoal-900">
-                          {order.customer?.fullName || 'Walk-In Customer'}
+                          {order.customer?.fullName || t('orders.customer', 'Customer')}
                         </div>
                         <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
                       </div>
@@ -250,20 +248,24 @@ export const DashboardPage: React.FC = () => {
 
                     <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Agreed Total</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">
+                          {t('orders.agreedPrice', 'Agreed Total')}
+                        </span>
                         <span className="font-semibold text-charcoal-900 font-mono">
                           {formatCurrency(order.totalAgreedPrice)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Balance</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">
+                          {t('orders.balanceDue', 'Balance')}
+                        </span>
                         {order.outstandingBalance > 0 ? (
                           <span className="font-semibold text-amber-800 font-mono text-xs">
                             {formatCurrency(order.outstandingBalance)}
                           </span>
                         ) : (
                           <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                            Fully Paid
+                            {t('orderDetail.finalSettlement', 'Fully Paid')}
                           </Badge>
                         )}
                       </div>
@@ -272,17 +274,17 @@ export const DashboardPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* Desktop Table View (hidden on phone and tablet) */}
+              {/* Desktop Table View */}
               <div className="hidden lg:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Order #</TableHead>
-                      <TableHead>Customer</TableHead>
-                      {isOwner && <TableHead className="hidden md:table-cell">Branch</TableHead>}
-                      <TableHead className="text-right">Agreed Total</TableHead>
-                      <TableHead className="text-right">Remaining Balance</TableHead>
-                      <TableHead className="text-center">Current Stage</TableHead>
+                      <TableHead>{t('orders.orderNumber', 'Order #')}</TableHead>
+                      <TableHead>{t('orders.customer', 'Customer')}</TableHead>
+                      {isOwner && <TableHead className="hidden md:table-cell">{t('common.branch', 'Branch')}</TableHead>}
+                      <TableHead className="text-right">{t('orders.agreedPrice', 'Agreed Total')}</TableHead>
+                      <TableHead className="text-right">{t('orders.balanceDue', 'Remaining Balance')}</TableHead>
+                      <TableHead className="text-center">{t('orders.currentStage', 'Current Stage')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -292,7 +294,7 @@ export const DashboardPage: React.FC = () => {
                           {order.orderNumber}
                         </TableCell>
                         <TableCell className="font-medium text-xs">
-                          <div>{order.customer?.fullName || 'Walk-In Customer'}</div>
+                          <div>{order.customer?.fullName || t('orders.customer', 'Customer')}</div>
                           <div className="text-[11px] text-muted-foreground">{order.customer?.phone}</div>
                         </TableCell>
                         {isOwner && (
@@ -308,7 +310,7 @@ export const DashboardPage: React.FC = () => {
                             <span className="text-amber-800">{formatCurrency(order.outstandingBalance)}</span>
                           ) : (
                             <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                              Fully Paid
+                              {t('orderDetail.finalSettlement', 'Fully Paid')}
                             </Badge>
                           )}
                         </TableCell>
@@ -320,7 +322,7 @@ export const DashboardPage: React.FC = () => {
                             }}
                             className="text-[10px]"
                           >
-                            {order.currentStage?.name || 'In Production'}
+                            {translateStage(order.currentStage?.name || 'In Production')}
                           </Badge>
                         </TableCell>
                       </TableRow>

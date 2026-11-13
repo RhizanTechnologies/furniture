@@ -23,6 +23,7 @@ import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
 import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   UserPlus,
   Search,
@@ -36,6 +37,7 @@ import {
 
 export const CustomersPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t, translateStage } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -188,12 +190,12 @@ export const CustomersPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Walk-In Customers Registry"
-        description="Register showroom visitors, record client specifications, and review lifetime purchase history."
+        title={t('customers.title', 'Walk-In Customers Registry')}
+        description={t('customers.subtitle', 'Register showroom visitors, record client specifications, and review lifetime purchase history.')}
         action={
           <Button size="sm" onClick={() => setIsCreateOpen(true)} className="space-x-1.5 shadow">
             <UserPlus className="h-4 w-4" />
-            <span>Register Customer</span>
+            <span>{t('customers.addCustomerBtn', 'Register Customer')}</span>
           </Button>
         }
       />
@@ -204,7 +206,7 @@ export const CustomersPage: React.FC = () => {
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by customer name or phone..."
+              placeholder={t('customers.searchPlaceholder', 'Search by customer name or phone...')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -219,27 +221,27 @@ export const CustomersPage: React.FC = () => {
       {/* Customer Registry Table */}
       <Card className="border-wood-200">
         <CardHeader className="pb-3 border-b border-wood-100">
-          <CardTitle className="text-lg">Registered Clients Directory</CardTitle>
+          <CardTitle className="text-lg">{t('customers.directory', 'Registered Clients Directory')}</CardTitle>
           <CardDescription>
-            Master client record for quotation delivery, progress updates, and payment reconciliation.
+            {t('customers.directoryDesc', 'Master client record for quotation delivery, progress updates, and payment reconciliation.')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <LoadingState message="Loading registered showroom customers..." />
+            <LoadingState message={t('common.loading', 'Loading registered showroom customers...')} />
           ) : !customers || customers.length === 0 ? (
             <div className="text-center py-12">
               <ShoppingBag className="mx-auto h-12 w-12 text-wood-300" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No Customers Found</h3>
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">{t('customers.noCustomers', 'No Customers Found')}</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {searchTerm
-                  ? 'No clients match your filter criteria.'
-                  : 'Start by registering your first showroom walk-in client.'}
+                  ? t('common.noData', 'No clients match your filter criteria.')
+                  : t('customers.subtitle', 'Start by registering your first showroom walk-in client.')}
               </p>
               <div className="mt-6">
                 <Button size="sm" onClick={() => setIsCreateOpen(true)}>
                   <UserPlus className="mr-1.5 h-4 w-4" />
-                  Register Customer
+                  {t('customers.addCustomerBtn', 'Register Customer')}
                 </Button>
               </div>
             </div>
@@ -263,7 +265,7 @@ export const CustomersPage: React.FC = () => {
                       <div className="flex items-center space-x-1.5 shrink-0">
                         <RecordSyncBadge isPendingSync={cust.isPendingSync} />
                         <Badge variant="wood" className="text-[10px]">
-                          {cust.ordersCount || 0} Orders
+                          {cust.ordersCount || 0} {t('customers.ordersCount', 'Orders')}
                         </Badge>
                       </div>
                     </div>
@@ -276,20 +278,20 @@ export const CustomersPage: React.FC = () => {
 
                     <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
                       <div>
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Total Spent</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('common.total', 'Total Spent')}</span>
                         <span className="font-semibold text-charcoal-900 font-mono">
                           {formatCurrency(cust.totalSpent || 0)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Balance</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('customers.balance', 'Balance')}</span>
                         {(cust.outstandingBalance || 0) > 0 ? (
                           <span className="font-semibold text-amber-700 font-mono text-xs">
                             {formatCurrency(cust.outstandingBalance || 0)}
                           </span>
                         ) : (
                           <Badge variant="success" className="text-[10px]">
-                            Cleared
+                            {t('common.active', 'Cleared')}
                           </Badge>
                         )}
                       </div>
@@ -303,7 +305,7 @@ export const CustomersPage: React.FC = () => {
                         className="h-7 text-xs space-x-1 border-wood-300 w-full"
                       >
                         <Eye className="h-3 w-3" />
-                        <span>View Client Details & History</span>
+                        <span>{t('common.viewDetails', 'View Client Details & History')}</span>
                       </Button>
                     </div>
                   </div>
@@ -315,14 +317,14 @@ export const CustomersPage: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-wood-50/50">
-                      <TableHead>Customer Name</TableHead>
-                      <TableHead>Phone Number</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="hidden md:table-cell">Address</TableHead>
-                      <TableHead className="hidden sm:table-cell">Orders</TableHead>
-                      <TableHead>Total Spent</TableHead>
-                      <TableHead>Outstanding Balance</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
+                      <TableHead>{t('customers.customerName', 'Customer Name')}</TableHead>
+                      <TableHead>{t('customers.phoneNumber', 'Phone Number')}</TableHead>
+                      <TableHead>{t('common.status', 'Status')}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t('customers.address', 'Address')}</TableHead>
+                      <TableHead className="hidden sm:table-cell">{t('customers.ordersCount', 'Orders')}</TableHead>
+                      <TableHead>{t('common.total', 'Total Spent')}</TableHead>
+                      <TableHead>{t('customers.balance', 'Outstanding Balance')}</TableHead>
+                      <TableHead className="text-right">{t('common.actions', 'Action')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -343,7 +345,7 @@ export const CustomersPage: React.FC = () => {
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
                           <Badge variant="wood" className="text-[10px]">
-                            {cust.ordersCount || 0} Orders
+                            {cust.ordersCount || 0} {t('customers.ordersCount', 'Orders')}
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">
@@ -356,7 +358,7 @@ export const CustomersPage: React.FC = () => {
                             </span>
                           ) : (
                             <Badge variant="success" className="text-[10px]">
-                              Cleared
+                              {t('common.active', 'Cleared')}
                             </Badge>
                           )}
                         </TableCell>
@@ -368,7 +370,7 @@ export const CustomersPage: React.FC = () => {
                             className="h-7 text-xs space-x-1 border-wood-300"
                           >
                             <Eye className="h-3 w-3" />
-                            <span>History</span>
+                            <span>{t('common.details', 'History')}</span>
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -395,9 +397,9 @@ export const CustomersPage: React.FC = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Register Showroom Customer</DialogTitle>
+            <DialogTitle>{t('customers.newCustomerModalTitle', 'Register Showroom Customer')}</DialogTitle>
             <DialogDescription>
-              Record client identity, contact information, and delivery location. Offline entries are preserved automatically.
+              {t('customers.subtitle', 'Record client identity, contact information, and delivery location.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -405,14 +407,14 @@ export const CustomersPage: React.FC = () => {
             <form onSubmit={createForm.handleSubmit(handleFormSubmit)} className="space-y-4">
               <FormInput
                 name="fullName"
-                label="Full Name"
+                label={t('customers.fullName', 'Full Name')}
                 placeholder="e.g., Almaz Ayana"
                 required
               />
 
               <FormInput
                 name="phone"
-                label="Phone Number"
+                label={t('customers.phone', 'Phone Number')}
                 placeholder="e.g., +251 911 234567"
                 required
                 description="Unique identifier used for customer profile identification"
@@ -420,19 +422,19 @@ export const CustomersPage: React.FC = () => {
 
               <FormInput
                 name="email"
-                label="Email Address"
+                label={t('common.email', 'Email Address')}
                 placeholder="e.g., almaz@example.com (optional)"
               />
 
               <FormInput
                 name="address"
-                label="Physical Address / Sub-city"
+                label={t('customers.cityAddress', 'Physical Address / Sub-city')}
                 placeholder="e.g., Bole Subcity, Woreda 03, Addis Ababa"
               />
 
               <FormInput
                 name="notes"
-                label="Client Notes"
+                label={t('customers.notes', 'Client Notes')}
                 placeholder="e.g., Prefers solid walnut wood finish, referred by interior architect"
               />
 
@@ -442,10 +444,10 @@ export const CustomersPage: React.FC = () => {
                   variant="outline"
                   onClick={() => setIsCreateOpen(false)}
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Saving...' : 'Save Customer'}
+                  {createMutation.isPending ? t('common.loading', 'Saving...') : t('customers.saveCustomer', 'Save Customer')}
                 </Button>
               </DialogFooter>
             </form>
@@ -462,42 +464,42 @@ export const CustomersPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>{customerDetails?.fullName}</span>
-              <Badge variant="wood">Profile Record</Badge>
+              <Badge variant="wood">{t('customers.title', 'Profile Record')}</Badge>
             </DialogTitle>
             <DialogDescription>
-              Customer purchase summary and complete order progression history.
+              {t('customers.subtitle', 'Customer purchase summary and complete order progression history.')}
             </DialogDescription>
           </DialogHeader>
 
           {isDetailsLoading ? (
-            <LoadingState message="Fetching client details..." />
+            <LoadingState message={t('common.loading', 'Fetching client details...')} />
           ) : customerDetails ? (
             <div className="space-y-6 pt-2">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-wood-50/50 p-4 rounded-lg border border-wood-100 text-xs">
                 <div>
-                  <span className="text-muted-foreground block">Phone</span>
+                  <span className="text-muted-foreground block">{t('customers.phoneNumber', 'Phone')}</span>
                   <span className="font-semibold">{customerDetails.phone}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Email</span>
+                  <span className="text-muted-foreground block">{t('common.email', 'Email')}</span>
                   <span className="font-medium">{customerDetails.email || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Address</span>
+                  <span className="text-muted-foreground block">{t('customers.address', 'Address')}</span>
                   <span className="font-medium">{customerDetails.address || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Total Orders</span>
+                  <span className="text-muted-foreground block">{t('customers.ordersCount', 'Total Orders')}</span>
                   <span className="font-semibold">{customerDetails.ordersCount || 0}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Total Revenue</span>
+                  <span className="text-muted-foreground block">{t('common.total', 'Total Revenue')}</span>
                   <span className="font-semibold text-emerald-800">
                     {formatCurrency(customerDetails.totalSpent || 0)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block">Outstanding</span>
+                  <span className="text-muted-foreground block">{t('customers.balance', 'Outstanding')}</span>
                   <span className="font-semibold text-amber-800">
                     {formatCurrency(customerDetails.outstandingBalance || 0)}
                   </span>
@@ -506,18 +508,18 @@ export const CustomersPage: React.FC = () => {
 
               {customerDetails.notes && (
                 <div className="p-3 bg-amber-50/50 rounded border border-amber-200/50 text-xs">
-                  <span className="font-semibold text-amber-900 block mb-0.5">Client Preferences & Notes:</span>
+                  <span className="font-semibold text-amber-900 block mb-0.5">{t('customers.notes', 'Client Preferences & Notes')}:</span>
                   <p className="text-amber-800">{customerDetails.notes}</p>
                 </div>
               )}
 
               <div>
                 <h4 className="text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2">
-                  Order History ({customerDetails.orders?.length || 0})
+                  {t('orders.title', 'Order History')} ({customerDetails.orders?.length || 0})
                 </h4>
                 {(!customerDetails.orders || customerDetails.orders.length === 0) ? (
                   <p className="text-xs text-muted-foreground italic py-4 text-center border border-dashed rounded">
-                    No orders logged for this customer yet.
+                    {t('orders.noOrders', 'No orders logged for this customer yet.')}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -529,14 +531,14 @@ export const CustomersPage: React.FC = () => {
                         <div>
                           <div className="font-mono font-bold text-wood-900">{ord.orderNumber}</div>
                           <div className="text-muted-foreground text-[11px]">
-                            {new Date(ord.createdAt).toLocaleDateString()} • {ord.items?.length || 0} items
+                            {new Date(ord.createdAt).toLocaleDateString()} • {ord.items?.length || 0} {t('common.details', 'items')}
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-right">
                             <div className="font-medium">{formatCurrency(ord.totalAgreedPrice)}</div>
                             <div className="text-[10px] text-muted-foreground">
-                              Paid: {formatCurrency(ord.totalPaid)}
+                              {t('orderDetail.totalPaid', 'Paid')}: {formatCurrency(ord.totalPaid)}
                             </div>
                           </div>
                           <Badge
@@ -547,7 +549,7 @@ export const CustomersPage: React.FC = () => {
                             }}
                             className="border text-[10px]"
                           >
-                            {ord.currentStage?.name || 'In Progress'}
+                            {translateStage(ord.currentStage?.name || 'In Progress')}
                           </Badge>
                         </div>
                       </div>
@@ -560,7 +562,7 @@ export const CustomersPage: React.FC = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedCustomerId(null)}>
-              Close
+              {t('common.close', 'Close')}
             </Button>
           </DialogFooter>
         </DialogContent>

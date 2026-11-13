@@ -8,10 +8,12 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { apiClient } from '@/lib/api-client';
 import { BranchDto, StockMode } from '@furniture/shared';
+import { useLanguage } from '@/context/LanguageContext';
 import { Building2, MapPin, Phone, Layers, ShieldCheck, UserCheck } from 'lucide-react';
 
 export const MyBranchPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: branch, isLoading, error, refetch } = useQuery<BranchDto>({
     queryKey: ['my-branch', user?.branchId],
@@ -22,9 +24,9 @@ export const MyBranchPage: React.FC = () => {
   if (!user?.branchId) {
     return (
       <div className="p-8 text-center">
-        <h2 className="text-xl font-bold text-amber-800">No Branch Assigned</h2>
+        <h2 className="text-xl font-bold text-amber-800">{t('myBranch.title', 'No Branch Assigned')}</h2>
         <p className="text-sm text-charcoal-600 mt-2">
-          Your administrator account has not been assigned to a specific branch yet. Please contact the Business Owner.
+          {t('myBranch.subtitle', 'Your administrator account has not been assigned to a specific branch yet. Please contact the Business Owner.')}
         </p>
       </div>
     );
@@ -33,8 +35,8 @@ export const MyBranchPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="My Assigned Branch"
-        description="Operational settings and inventory configuration for your local workshop / showroom."
+        title={t('myBranch.title', 'My Assigned Branch')}
+        description={t('myBranch.subtitle', 'Operational settings and inventory configuration for your local workshop / showroom.')}
       />
 
       {isLoading && <LoadingState message="Fetching your branch details..." />}

@@ -8,9 +8,11 @@ import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { apiClient } from '@/lib/api-client';
 import { HealthCheckResponse } from '@furniture/shared';
+import { useLanguage } from '@/context/LanguageContext';
 import { Server, Database, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
 
 export const HealthPage: React.FC = () => {
+  const { t } = useLanguage();
   const { data, isLoading, error, refetch, isFetching } = useQuery<HealthCheckResponse>({
     queryKey: ['system-health'],
     queryFn: () => apiClient<HealthCheckResponse>('/health'),
@@ -20,7 +22,7 @@ export const HealthPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="System Architecture & Health"
+        title={t('nav.health', 'System Architecture & Health')}
         description="Live operational verification between React PWA, NestJS backend, and PostgreSQL database."
         action={
           <Button
@@ -31,7 +33,7 @@ export const HealthPage: React.FC = () => {
             className="space-x-1.5"
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-            <span>Re-verify</span>
+            <span>{t('common.refresh', 'Re-verify')}</span>
           </Button>
         }
       />

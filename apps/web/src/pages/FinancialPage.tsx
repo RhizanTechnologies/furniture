@@ -30,6 +30,7 @@ import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
 import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   DollarSign,
   Plus,
@@ -49,6 +50,7 @@ import {
 export const FinancialPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { isOwner } = useAuth();
+  const { t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'payments' | 'expenses' | 'breakdown'>('payments');
   const [searchTerm, setSearchTerm] = useState('');
@@ -350,8 +352,8 @@ export const FinancialPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Financial Management & Accounting"
-        description="Monitor cash inflows, record order payments and progress disbursements, log operational expenses, and track net enterprise profit."
+        title={t('finance.title', 'Financial Management & Accounting')}
+        description={t('finance.subtitle', 'Monitor cash inflows, record order payments and progress disbursements, log operational expenses, and track net enterprise profit.')}
         action={
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <Button
@@ -359,7 +361,7 @@ export const FinancialPage: React.FC = () => {
               className="flex-1 sm:flex-none bg-wood-700 hover:bg-wood-800 text-white space-x-1 sm:space-x-1.5 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
               <CreditCard className="h-3.5 w-3.5 shrink-0" />
-              <span>Record Payment</span>
+              <span>{t('orders.recordPayment', 'Record Payment')}</span>
             </Button>
             <Button
               variant="outline"
@@ -367,7 +369,7 @@ export const FinancialPage: React.FC = () => {
               className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 border-wood-300 text-wood-900 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
               <Receipt className="h-3.5 w-3.5 shrink-0" />
-              <span>Record Expense</span>
+              <span>{t('finance.recordExpenseBtn', 'Record Expense')}</span>
             </Button>
           </div>
         }
@@ -377,11 +379,11 @@ export const FinancialPage: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3 text-red-800 text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium">Financial Alert</p>
+            <p className="font-medium">{t('common.warning', 'Financial Alert')}</p>
             <p>{actionError}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setActionError(null)}>
-            Dismiss
+            {t('common.close', 'Dismiss')}
           </Button>
         </div>
       )}
@@ -391,35 +393,35 @@ export const FinancialPage: React.FC = () => {
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Cash Inflow Collected
+              {t('finance.totalCollected', 'Cash Inflow Collected')}
             </CardDescription>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-emerald-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalCashCollected || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Total payments received across prepayments and progress settlements
+            {t('finance.subtitle', 'Total payments received across prepayments and progress settlements')}
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Outstanding Receivables
+              {t('finance.pendingReceivables', 'Outstanding Receivables')}
             </CardDescription>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalReceivables || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Remaining unpaid balances owed by customers on active orders
+            {t('orderDetail.balanceRemaining', 'Remaining unpaid balances owed by customers on active orders')}
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Operating Expenses
+              {t('finance.totalExpenses', 'Operating Expenses')}
             </CardDescription>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-rose-800 font-mono tracking-tight leading-snug sm:leading-normal">
               {formatCurrency(summary?.totalOperatingExpenses || 0)}
@@ -433,7 +435,7 @@ export const FinancialPage: React.FC = () => {
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
-              <span>Gross Profit</span>
+              <span>{t('finance.grossProfit', 'Gross Profit')}</span>
               <span className="font-mono text-[10px] text-wood-700 font-bold">
                 {summary?.grossMarginPercentage || 0}% margin
               </span>
@@ -443,7 +445,7 @@ export const FinancialPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Order revenue minus frozen material costs (COGS)
+            {t('orderDetail.materialCostSummary', 'Order revenue minus frozen material costs (COGS)')}
           </CardContent>
         </Card>
 
@@ -452,7 +454,7 @@ export const FinancialPage: React.FC = () => {
         }`}>
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
-              <span>Net Business Profit</span>
+              <span>{t('finance.netProfit', 'Net Business Profit')}</span>
               <span className="font-mono text-[10px] text-emerald-700 font-bold">
                 {summary?.netMarginPercentage || 0}% net
               </span>
@@ -464,7 +466,7 @@ export const FinancialPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Gross profit minus total operating overhead
+            {t('finance.subtitle', 'Gross profit minus total operating overhead')}
           </CardContent>
         </Card>
       </div>
@@ -481,7 +483,7 @@ export const FinancialPage: React.FC = () => {
             }`}
           >
             <CreditCard className="w-4 h-4 shrink-0" />
-            <span>Payments Ledger ({payments.length})</span>
+            <span>{t('finance.paymentsTab', 'Payments Ledger')} ({payments.length})</span>
           </button>
 
           <button
@@ -493,7 +495,7 @@ export const FinancialPage: React.FC = () => {
             }`}
           >
             <Receipt className="w-4 h-4 shrink-0" />
-            <span>Expenses Ledger ({expenses.length})</span>
+            <span>{t('finance.expensesTab', 'Expenses Ledger')} ({expenses.length})</span>
           </button>
 
           <button
@@ -505,7 +507,7 @@ export const FinancialPage: React.FC = () => {
             }`}
           >
             <Building2 className="w-4 h-4 shrink-0" />
-            <span>Branch Contributions</span>
+            <span>{t('finance.branchesTab', 'Branch Contributions')}</span>
           </button>
         </div>
       </div>

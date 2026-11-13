@@ -9,6 +9,7 @@ import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
 import { syncEngine } from '@/lib/sync-engine';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import { CreditCard, DollarSign, CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
 
 interface RecordPaymentModalProps {
@@ -25,6 +26,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   onSuccess,
 }) => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   const [amount, setAmount] = useState<number>(0);
   const [paymentType, setPaymentType] = useState<PaymentType>(PaymentType.FINAL_SETTLEMENT);
@@ -184,10 +186,10 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             </div>
             <div>
               <DialogTitle className="text-base sm:text-lg font-bold text-stone-900">
-                Record Payment for {order.orderNumber}
+                {t('paymentModal.title', 'Record Order Payment')}: {order.orderNumber}
               </DialogTitle>
               <DialogDescription className="text-xs text-stone-500">
-                Client: <strong>{order.customer?.fullName || 'Walk-In Customer'}</strong> • {order.branch?.name}
+                {t('orders.customer', 'Customer')}: <strong>{order.customer?.fullName || t('orders.selectCustomer', 'Customer')}</strong> • {order.branch?.name}
               </DialogDescription>
             </div>
           </div>
@@ -197,7 +199,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         <div className="grid grid-cols-3 gap-2 p-3 bg-wood-50/60 rounded-xl border border-wood-200/80 text-center text-xs">
           <div>
             <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-              Agreed Total
+              {t('orders.agreedPrice', 'Agreed Total')}
             </span>
             <span className="font-mono font-bold text-stone-800 text-xs sm:text-sm">
               {formatCurrency(order.totalAgreedPrice)}
@@ -205,7 +207,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-              Already Paid
+              {t('orderDetail.totalPaid', 'Already Paid')}
             </span>
             <span className="font-mono font-bold text-emerald-700 text-xs sm:text-sm">
               {formatCurrency(order.totalPaid)}
@@ -213,7 +215,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-              Remaining
+              {t('orders.balanceDue', 'Remaining')}
             </span>
             <span className="font-mono font-bold text-amber-800 text-xs sm:text-sm">
               {formatCurrency(currentOutstanding)}
@@ -233,7 +235,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Payment Amount (ETB) <span className="text-red-500">*</span>
+                {t('paymentModal.paymentAmount', 'Payment Amount')} (ETB) <span className="text-red-500">*</span>
               </label>
               {currentOutstanding > 0 && amount !== currentOutstanding && (
                 <button
@@ -244,7 +246,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                   }}
                   className="text-[11px] text-emerald-800 font-semibold hover:underline"
                 >
-                  Pay Full Balance ({formatCurrency(currentOutstanding)})
+                  {t('orderDetail.finalSettlement', 'Pay Full Balance')} ({formatCurrency(currentOutstanding)})
                 </button>
               )}
             </div>
@@ -278,23 +280,23 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             {/* Payment Type */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Payment Type
+                {t('paymentModal.paymentType', 'Payment Type')}
               </label>
               <select
                 value={paymentType}
                 onChange={(e) => setPaymentType(e.target.value as PaymentType)}
                 className="w-full h-9 rounded-md border border-wood-200 bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-wood-400"
               >
-                <option value={PaymentType.FINAL_SETTLEMENT}>Final Settlement (Closing Balance)</option>
-                <option value={PaymentType.PROGRESS_PAYMENT}>Progress Payment (Milestone)</option>
-                <option value={PaymentType.PREPAYMENT}>Prepayment / Deposit</option>
+                <option value={PaymentType.FINAL_SETTLEMENT}>{t('orderDetail.finalSettlement', 'Final Settlement (Closing Balance)')}</option>
+                <option value={PaymentType.PROGRESS_PAYMENT}>{t('orderDetail.progressPayment', 'Progress Payment (Milestone)')}</option>
+                <option value={PaymentType.PREPAYMENT}>{t('orderDetail.depositPrepayment', 'Prepayment / Deposit')}</option>
               </select>
             </div>
 
             {/* Payment Method */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Payment Method
+                {t('paymentModal.paymentMethod', 'Payment Method')}
               </label>
               <select
                 value={paymentMethod}
@@ -303,7 +305,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               >
                 {paymentMethods.map((m) => (
                   <option key={m} value={m}>
-                    {m}
+                    {m === 'Cash' ? t('paymentModal.cash', 'Cash') : m === 'Telebirr' ? t('paymentModal.telebirr', 'Telebirr') : m === 'CBE Birr' ? t('paymentModal.cbeBank', 'CBE Birr') : m}
                   </option>
                 ))}
               </select>
@@ -314,10 +316,10 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             {/* Reference Number */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Transaction / Receipt Ref (Optional)
+                {t('paymentModal.referenceNumber', 'Transaction / Receipt Ref (Optional)')}
               </label>
               <Input
-                placeholder="e.g. CBE-TXN-98402, Telebirr #, Receipt"
+                placeholder={t('paymentModal.referencePlaceholder', 'e.g. CBE-TXN-98402, Telebirr #, Receipt')}
                 value={referenceNumber}
                 onChange={(e) => setReferenceNumber(e.target.value)}
                 className="h-9 text-xs font-mono bg-background/50 border-wood-200"
@@ -327,7 +329,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             {/* Payment Date */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                Payment Date
+                {t('common.date', 'Payment Date')}
               </label>
               <Input
                 type="date"
@@ -347,7 +349,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               disabled={paymentMutation.isPending}
               className="w-full sm:w-auto text-xs"
             >
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button
               type="submit"
@@ -358,8 +360,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               <CheckCircle2 className="h-4 w-4" />
               <span>
                 {paymentMutation.isPending
-                  ? 'Recording Payment...'
-                  : `Confirm Payment of ${formatCurrency(amount || 0)}`}
+                  ? t('paymentModal.recording', 'Recording Payment...')
+                  : `${t('paymentModal.recordPaymentBtn', 'Confirm Payment')} (${formatCurrency(amount || 0)})`}
               </span>
             </Button>
           </DialogFooter>

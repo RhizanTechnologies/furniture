@@ -24,12 +24,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useSync } from '@/context/SyncContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 export const BottomNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isOwner, isAuthenticated, logout } = useAuth();
   const { isOnline } = useSync();
+  const { t } = useLanguage();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const canAccessStock = isOwner || user?.branch?.stockMode === 'BRANCH_STOCK';
@@ -37,33 +40,33 @@ export const BottomNav: React.FC = () => {
   // Role-customized primary tabs (5 core items + 1 More hub on a single 6-column row)
   const primaryTabs = isOwner
     ? [
-        { to: '/', label: 'Home', icon: Activity },
-        { to: '/orders', label: 'Orders', icon: ShoppingBag },
-        { to: '/inventory', label: 'Stock', icon: Boxes },
-        { to: '/branches', label: 'Branches', icon: Building2 },
-        { to: '/finance', label: 'Finance', icon: DollarSign },
+        { to: '/', label: t('nav.home', 'Home'), icon: Activity },
+        { to: '/orders', label: t('nav.orders', 'Orders'), icon: ShoppingBag },
+        { to: '/inventory', label: t('nav.stock', 'Stock'), icon: Boxes },
+        { to: '/branches', label: t('nav.branches', 'Branches'), icon: Building2 },
+        { to: '/finance', label: t('nav.finance', 'Finance'), icon: DollarSign },
       ]
     : [
-        { to: '/', label: 'Home', icon: Activity },
-        { to: '/orders', label: 'Orders', icon: ShoppingBag },
-        { to: '/customers', label: 'Customers', icon: Users },
-        { to: '/inventory', label: 'Stock', icon: Boxes },
-        { to: '/my-branch', label: 'Branch', icon: MapPin },
+        { to: '/', label: t('nav.home', 'Home'), icon: Activity },
+        { to: '/orders', label: t('nav.orders', 'Orders'), icon: ShoppingBag },
+        { to: '/customers', label: t('nav.customers', 'Customers'), icon: Users },
+        { to: '/inventory', label: t('nav.stock', 'Stock'), icon: Boxes },
+        { to: '/my-branch', label: t('nav.myBranch', 'Branch'), icon: MapPin },
       ];
 
   // Secondary modules accessible via the "More Hub"
   const secondaryModules = [
     {
       to: '/customers',
-      label: 'Client Registry',
+      label: t('nav.customers', 'Customers'),
       description: 'Customer contact records & purchase history',
       icon: Users,
       color: 'bg-blue-50 text-blue-800 border-blue-200',
-      show: isOwner, // Shown in More for owner because Orders/Stock/Branches/Finance are on the main bar
+      show: isOwner,
     },
     {
       to: '/showroom',
-      label: 'Digital Showroom',
+      label: t('nav.showroom', 'Showroom'),
       description: 'High-res gallery for client consultations',
       icon: Store,
       color: 'bg-wood-50 text-wood-800 border-wood-200',
@@ -71,7 +74,7 @@ export const BottomNav: React.FC = () => {
     },
     {
       to: '/catalog',
-      label: 'Product Catalog',
+      label: t('nav.catalog', 'Catalog'),
       description: 'Furniture models, dimensions & base prices',
       icon: Armchair,
       color: 'bg-amber-50 text-amber-900 border-amber-200',
@@ -79,7 +82,7 @@ export const BottomNav: React.FC = () => {
     },
     {
       to: '/order-stages',
-      label: 'Custom Stages',
+      label: t('nav.stages', 'Stages'),
       description: 'Manufacturing pipeline steps & progression',
       icon: Layers,
       color: 'bg-indigo-50 text-indigo-800 border-indigo-200',
@@ -87,7 +90,7 @@ export const BottomNav: React.FC = () => {
     },
     {
       to: '/analytics',
-      label: 'Business Analytics',
+      label: t('nav.analytics', 'Analytics'),
       description: 'Revenue graphs, margins & branch performance',
       icon: BarChart3,
       color: 'bg-sky-50 text-sky-800 border-sky-200',
@@ -95,7 +98,7 @@ export const BottomNav: React.FC = () => {
     },
     {
       to: '/system-health',
-      label: 'System & Sync Health',
+      label: t('nav.health', 'System Health'),
       description: 'Offline database, cloud sync & healthcheck',
       icon: ShieldCheck,
       color: 'bg-purple-50 text-purple-800 border-purple-200',
@@ -181,7 +184,7 @@ export const BottomNav: React.FC = () => {
               }`}
             />
             <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none">
-              More
+              {t('nav.more', 'More')}
             </span>
           </button>
         </div>
@@ -207,7 +210,7 @@ export const BottomNav: React.FC = () => {
                     <span>{user?.branch?.name || (isOwner ? 'Central Operations' : 'Branch Staff')}</span>
                     <span>•</span>
                     <Badge variant="wood" className="text-[9px] px-1.5 py-0">
-                      {isOwner ? 'Owner' : user?.role || 'Staff'}
+                      {isOwner ? t('common.owner', 'Owner') : user?.role || 'Staff'}
                     </Badge>
                   </DialogDescription>
                 </div>
@@ -226,10 +229,18 @@ export const BottomNav: React.FC = () => {
                     isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
                   }`}
                 />
-                <span>{isOnline ? 'Cloud Synced' : 'Offline'}</span>
+                <span>{isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}</span>
               </div>
             </div>
           </DialogHeader>
+
+          {/* Language Selection Bar inside Mobile Drawer */}
+          <div className="pt-2">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1 mb-1.5">
+              {t('nav.switchLanguage', 'Language')} / ቋንቋ / Afaan
+            </p>
+            <LanguageSwitcher variant="pills" className="w-full justify-around" />
+          </div>
 
           {/* Module Navigation Grid */}
           <div className="space-y-1.5 pt-2">
@@ -263,7 +274,7 @@ export const BottomNav: React.FC = () => {
                         </span>
                         {isActive && (
                           <Badge variant="wood" className="text-[9px] px-1 py-0 ml-1">
-                            Active
+                            {t('common.active', 'Active')}
                           </Badge>
                         )}
                       </div>
@@ -286,7 +297,7 @@ export const BottomNav: React.FC = () => {
               className="text-xs text-rose-700 border-rose-200 hover:bg-rose-50 hover:border-rose-300 space-x-1.5 flex-1"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Log Out</span>
+              <span>{t('nav.logout', 'Log Out')}</span>
             </Button>
 
             <Button
@@ -295,7 +306,7 @@ export const BottomNav: React.FC = () => {
               onClick={() => setIsMoreOpen(false)}
               className="text-xs text-stone-600 hover:bg-stone-100"
             >
-              Dismiss
+              {t('common.close', 'Dismiss')}
             </Button>
           </div>
         </DialogContent>

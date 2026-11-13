@@ -26,6 +26,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Boxes,
   Plus,
@@ -47,6 +48,7 @@ import {
 export const InventoryPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { user, isOwner } = useAuth();
+  const { t } = useLanguage();
   const isBranchAdmin = user?.role === 'BRANCH_ADMIN';
   const isBranchStock = isOwner || !isBranchAdmin || user?.branch?.stockMode === 'BRANCH_STOCK';
 
@@ -194,10 +196,10 @@ export const InventoryPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Inventory & Raw Materials"
+        title={t('inventory.title', 'Inventory & Raw Materials')}
         description={
           isOwner
-            ? "Monitor central and branch stock levels, record replenishments, and view authoritative stock valuations."
+            ? t('inventory.subtitle', 'Monitor central and branch stock levels, record replenishments, and view authoritative stock valuations.')
             : `Showing physical stock and material balances allocated to ${user?.branch?.name || 'this branch'}.`
         }
         action={
@@ -213,7 +215,7 @@ export const InventoryPage: React.FC = () => {
                   }}
                   className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-none cursor-pointer"
                 >
-                  <option value="ALL">All Branches & Central Pool</option>
+                  <option value="ALL">{t('dashboard.allBranches', 'All Branches & Central Pool')}</option>
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name} ({b.stockMode})
@@ -226,7 +228,7 @@ export const InventoryPage: React.FC = () => {
             {isBranchAdmin && (
               <Badge variant="wood" className="text-xs h-8 sm:h-9 px-2.5 flex items-center space-x-1">
                 <MapPin className="h-3.5 w-3.5" />
-                <span>{user?.branch?.name || 'Branch'} Stock</span>
+                <span>{user?.branch?.name || t('common.branch', 'Branch')} {t('nav.stock', 'Stock')}</span>
               </Badge>
             )}
 
@@ -235,7 +237,7 @@ export const InventoryPage: React.FC = () => {
               className="flex-1 sm:flex-none bg-wood-700 hover:bg-wood-800 text-white space-x-1 sm:space-x-1.5 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
             >
               <ArrowDownToLine className="h-3.5 w-3.5 shrink-0" />
-              <span>Stock In</span>
+              <span>{t('inventory.addStockBtn', 'Stock In')}</span>
             </Button>
             {isOwner && (
               <Button
@@ -244,8 +246,8 @@ export const InventoryPage: React.FC = () => {
                 className="flex-1 sm:flex-none space-x-1 sm:space-x-1.5 border-wood-300 text-wood-900 text-xs px-2.5 sm:px-3 h-8 sm:h-9"
               >
                 <Plus className="h-3.5 w-3.5 shrink-0" />
-                <span className="hidden sm:inline">New Material</span>
-                <span className="sm:hidden">Material</span>
+                <span className="hidden sm:inline">{t('inventory.stockInModalTitle', 'New Material')}</span>
+                <span className="sm:hidden">{t('inventory.materialName', 'Material')}</span>
               </Button>
             )}
           </div>
@@ -256,11 +258,11 @@ export const InventoryPage: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3 text-red-800 text-sm">
           <AlertTriangle className="w-5 h-5 flex-shrink-0 text-red-500 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium">Inventory Alert</p>
+            <p className="font-medium">{t('common.warning', 'Inventory Alert')}</p>
             <p>{actionError}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setActionError(null)}>
-            Dismiss
+            {t('common.close', 'Dismiss')}
           </Button>
         </div>
       )}
@@ -271,14 +273,14 @@ export const InventoryPage: React.FC = () => {
           <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
             <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
               <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-                Total Stock Valuation
+                {t('inventory.totalStockCost', 'Total Stock Valuation')}
               </CardDescription>
               <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-wood-900 font-mono tracking-tight leading-snug sm:leading-normal">
                 {formatCurrency(valuation?.totalStockValue || 0)}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-              Weighted average cost valuation across all active materials
+              {t('inventory.subtitle', 'Weighted average cost valuation across all active materials')}
             </CardContent>
           </Card>
         )}
@@ -286,14 +288,14 @@ export const InventoryPage: React.FC = () => {
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Active Materials
+              {t('inventory.totalItemsInStock', 'Active Materials')}
             </CardDescription>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-charcoal-900 font-mono tracking-tight leading-snug sm:leading-normal">
               {valuation?.totalItemsInStock || 0}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Catalog materials with positive on-hand quantity
+            {t('inventory.materialsTab', 'Catalog materials with positive on-hand quantity')}
           </CardContent>
         </Card>
 
@@ -302,7 +304,7 @@ export const InventoryPage: React.FC = () => {
         }`}>
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500 flex items-center justify-between">
-              <span>Reorder Alerts</span>
+              <span>{t('inventory.lowStockAlert', 'Reorder Alerts')}</span>
               {(valuation?.lowStockCount || 0) > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               )}
@@ -314,21 +316,21 @@ export const InventoryPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Materials at or below minimum threshold
+            {t('inventory.minThreshold', 'Materials at or below minimum threshold')}
           </CardContent>
         </Card>
 
         <Card className="border-wood-200/80 bg-gradient-to-br from-white to-wood-50/40">
           <CardHeader className="p-3.5 sm:p-5 pb-1 sm:pb-2">
             <CardDescription className="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-charcoal-500">
-              Stock Location
+              {t('inventory.stockLocation', 'Stock Location')}
             </CardDescription>
             <CardTitle className="text-xs sm:text-sm font-bold text-wood-900 truncate">
               {valuation?.stockLocation || 'Central Main Warehouse'}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0 text-[11px] sm:text-xs text-charcoal-600">
-            Authoritative warehouse pool
+            {t('branches.stockMode', 'Authoritative warehouse pool')}
           </CardContent>
         </Card>
       </div>
@@ -338,7 +340,7 @@ export const InventoryPage: React.FC = () => {
         <Card className="border-wood-200 bg-wood-50/50 p-6 text-center space-y-3">
           <Boxes className="h-10 w-10 text-wood-600 mx-auto" />
           <h3 className="text-base font-semibold text-charcoal-900">
-            Central Main Stock Allocation
+            {t('branches.mainStock', 'Central Main Stock Allocation')}
           </h3>
           <p className="text-sm text-charcoal-600 max-w-md mx-auto">
             Your branch (<strong>{user?.branch?.name}</strong>) operates under the <strong>Main Central Stock</strong> model. Raw materials, timber replenishment, and inventory accounting are managed centrally by the workshop.
@@ -352,7 +354,7 @@ export const InventoryPage: React.FC = () => {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by material code or name..."
+              placeholder={t('inventory.searchPlaceholder', 'Search by material code or name...')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -375,7 +377,19 @@ export const InventoryPage: React.FC = () => {
                 }}
                 className="text-xs h-8 px-3"
               >
-                {cat}
+                {cat === 'ALL'
+                  ? t('inventory.allCategories', 'ALL')
+                  : cat === 'Timber'
+                  ? t('inventory.timber', 'Timber')
+                  : cat === 'Fabric'
+                  ? t('inventory.fabric', 'Fabric')
+                  : cat === 'Foam'
+                  ? t('inventory.foam', 'Foam')
+                  : cat === 'Hardware'
+                  ? t('inventory.hardware', 'Hardware')
+                  : cat === 'Finishing'
+                  ? t('inventory.finishes', 'Finishing')
+                  : cat}
               </Button>
             ))}
 
@@ -390,7 +404,7 @@ export const InventoryPage: React.FC = () => {
               className="text-xs h-8 px-2.5 space-x-1"
             >
               <AlertTriangle className="h-3.5 w-3.5" />
-              <span>Low Stock</span>
+              <span>{t('inventory.lowStockFilter', 'Low Stock')}</span>
             </Button>
           </div>
         </CardContent>

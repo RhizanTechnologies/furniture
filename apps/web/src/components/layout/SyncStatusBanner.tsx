@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useSync } from '../../context/SyncContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Wifi, WifiOff, RefreshCw, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { ConflictResolutionModal } from './ConflictResolutionModal';
 
 export const SyncStatusBanner: React.FC = () => {
+  const { t } = useLanguage();
   const {
     isOnline,
     isSyncing,

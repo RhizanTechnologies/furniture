@@ -19,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useSync } from '@/context/SyncContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { UserRole } from '@furniture/shared';
 
 export const TopNav: React.FC = () => {
@@ -26,6 +28,7 @@ export const TopNav: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isOwner, logout } = useAuth();
   const { isOnline } = useSync();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     await logout();
@@ -35,18 +38,18 @@ export const TopNav: React.FC = () => {
   const canAccessStock = isOwner || user?.branch?.stockMode === 'BRANCH_STOCK';
 
   const navLinks = [
-    { to: '/', label: 'Dashboard', icon: Activity, show: true },
-    { to: '/orders', label: 'Orders', icon: ShoppingBag, show: true },
-    { to: '/customers', label: 'Customers', icon: Users, show: true },
-    { to: '/inventory', label: 'Inventory', icon: Boxes, show: canAccessStock },
-    { to: '/finance', label: 'Finance', icon: DollarSign, show: isOwner },
-    { to: '/analytics', label: 'Analytics', icon: BarChart3, show: isOwner },
-    { to: '/order-stages', label: 'Stages', icon: Layers, show: isOwner },
-    { to: '/showroom', label: 'Showroom', icon: Store, show: true },
-    { to: '/catalog', label: 'Catalog', icon: Armchair, show: isOwner },
-    { to: '/branches', label: 'Branches', icon: Building2, show: isOwner },
-    { to: '/my-branch', label: 'My Branch', icon: MapPin, show: !isOwner && isAuthenticated },
-    { to: '/system-health', label: 'Health', icon: Building2, show: isOwner },
+    { to: '/', label: t('nav.dashboard', 'Dashboard'), icon: Activity, show: true },
+    { to: '/orders', label: t('nav.orders', 'Orders'), icon: ShoppingBag, show: true },
+    { to: '/customers', label: t('nav.customers', 'Customers'), icon: Users, show: true },
+    { to: '/inventory', label: t('nav.inventory', 'Inventory'), icon: Boxes, show: canAccessStock },
+    { to: '/finance', label: t('nav.finance', 'Finance'), icon: DollarSign, show: isOwner },
+    { to: '/analytics', label: t('nav.analytics', 'Analytics'), icon: BarChart3, show: isOwner },
+    { to: '/order-stages', label: t('nav.stages', 'Stages'), icon: Layers, show: isOwner },
+    { to: '/showroom', label: t('nav.showroom', 'Showroom'), icon: Store, show: true },
+    { to: '/catalog', label: t('nav.catalog', 'Catalog'), icon: Armchair, show: isOwner },
+    { to: '/branches', label: t('nav.branches', 'Branches'), icon: Building2, show: isOwner },
+    { to: '/my-branch', label: t('nav.myBranch', 'My Branch'), icon: MapPin, show: !isOwner && isAuthenticated },
+    { to: '/system-health', label: t('nav.health', 'Health'), icon: Building2, show: isOwner },
   ].filter((l) => l.show);
 
   return (
@@ -58,7 +61,7 @@ export const TopNav: React.FC = () => {
           </div>
           <span className="hidden sm:inline-block text-base font-semibold">Furniture ERP</span>
           <Badge variant="wood" className="ml-1 text-[10px] uppercase tracking-wider">
-            {isOwner ? 'Owner Console' : 'Branch Console'}
+            {isOwner ? t('nav.ownerConsole', 'Owner Console') : t('nav.branchConsole', 'Branch Console')}
           </Badge>
         </Link>
 
@@ -82,22 +85,27 @@ export const TopNav: React.FC = () => {
           })}
         </nav>
 
-        {/* User profile & Online status: compact dot indicator */}
+        {/* User profile, Language Switcher & Online status */}
         <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+
           <div
             className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${
               isOnline
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : 'bg-amber-50 text-amber-800 border-amber-200'
             }`}
-            title={isOnline ? 'Online (Connected to ERP Cloud)' : 'Offline Mode (Local Storage)'}
+            title={isOnline ? 'Online' : 'Offline'}
           >
             <span
               className={`h-2 w-2 rounded-full inline-block ${
                 isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
               }`}
             />
-            <span className="text-[10px] sm:text-xs font-semibold">{isOnline ? 'Online' : 'Offline'}</span>
+            <span className="text-[10px] sm:text-xs font-semibold">
+              {isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}
+            </span>
           </div>
 
           {isAuthenticated && user ? (
@@ -110,7 +118,7 @@ export const TopNav: React.FC = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
-                title="Log Out"
+                title={t('nav.logout', 'Log Out')}
                 className="h-8 w-8 text-charcoal-600 hover:text-red-700 hover:bg-red-50"
               >
                 <LogOut className="h-4 w-4" />
@@ -119,7 +127,7 @@ export const TopNav: React.FC = () => {
           ) : (
             <Link to="/login">
               <Button size="sm" variant="outline" className="text-xs h-8">
-                Sign In
+                {t('nav.login', 'Sign In')}
               </Button>
             </Link>
           )}

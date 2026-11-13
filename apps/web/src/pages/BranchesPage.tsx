@@ -19,10 +19,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { apiClient } from '@/lib/api-client';
+import { useLanguage } from '@/context/LanguageContext';
 import { Building2, Plus, UserPlus, Phone, MapPin, Layers, Edit } from 'lucide-react';
 
 export const BranchesPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [assignAdminBranch, setAssignAdminBranch] = useState<BranchDto | null>(null);
 
@@ -92,12 +94,12 @@ export const BranchesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Business Branches"
-        description="Configure workshop & showroom locations, dedicated or central stock models, and assigned branch administrators."
+        title={t('branches.title', 'Business Branches')}
+        description={t('branches.subtitle', 'Configure workshop & showroom locations, dedicated or central stock models, and assigned branch administrators.')}
         action={
           <Button size="sm" onClick={() => setIsCreateOpen(true)} className="space-x-1.5 shadow">
             <Plus className="h-4 w-4" />
-            <span>Create Branch</span>
+            <span>{t('branches.addBranchBtn', 'Create Branch')}</span>
           </Button>
         }
       />

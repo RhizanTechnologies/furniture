@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { apiClient } from '@/lib/api-client';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Layers,
   Plus,
@@ -32,6 +33,7 @@ import {
 
 export const OrderStagesPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t, translateStage } = useLanguage();
   const [includeInactive, setIncludeInactive] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<OrderStageDto | null>(null);
@@ -146,8 +148,8 @@ export const OrderStagesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Custom Order Stages"
-        description="Design the production and delivery pipeline. Define stage names, colors, and sequence order. Branch staff move orders through these exact stages."
+        title={t('stages.title', 'Custom Order Stages')}
+        description={t('stages.reorderHint', 'Design the production and delivery pipeline. Define stage names, colors, and sequence order. Branch staff move orders through these exact stages.')}
         action={
           <div className="flex items-center space-x-2">
             <Button
@@ -157,16 +159,16 @@ export const OrderStagesPage: React.FC = () => {
             >
               {includeInactive ? (
                 <>
-                  <EyeOff className="w-4 h-4 mr-1 text-stone-500" /> Hide Inactive
+                  <EyeOff className="w-4 h-4 mr-1 text-stone-500" /> {t('common.filter', 'Hide Inactive')}
                 </>
               ) : (
                 <>
-                  <Eye className="w-4 h-4 mr-1 text-stone-500" /> Show Inactive
+                  <Eye className="w-4 h-4 mr-1 text-stone-500" /> {t('common.all', 'Show Inactive')}
                 </>
               )}
             </Button>
             <Button onClick={() => setIsCreateOpen(true)} className="bg-wood-600 hover:bg-wood-700">
-              <Plus className="w-4 h-4 mr-2" /> Add Stage
+              <Plus className="w-4 h-4 mr-2" /> {t('stages.addStageBtn', 'Add Stage')}
             </Button>
           </div>
         }
@@ -176,11 +178,11 @@ export const OrderStagesPage: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3 text-red-800 text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium">Action Alert</p>
+            <p className="font-medium">{t('common.warning', 'Action Alert')}</p>
             <p>{actionError}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setActionError(null)}>
-            Dismiss
+            {t('common.close', 'Dismiss')}
           </Button>
         </div>
       )}
@@ -191,14 +193,14 @@ export const OrderStagesPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <ShieldCheck className="w-5 h-5 text-wood-700 flex-shrink-0" />
             <div>
-              <p className="font-medium text-wood-900">Owner-Managed Order Stages</p>
+              <p className="font-medium text-wood-900">{t('stages.subtitle', 'Owner-Managed Order Stages')}</p>
               <p className="text-wood-600 text-xs">
-                No stages are hardcoded. Stages with active or historical orders cannot be hard-deleted to preserve audit integrity; deactivate them instead.
+                {t('stages.reorderHint', 'No stages are hardcoded. Stages with active or historical orders cannot be hard-deleted to preserve audit integrity; deactivate them instead.')}
               </p>
             </div>
           </div>
           <Badge variant="outline" className="border-wood-300 text-wood-800 font-mono">
-            {stages.length} Configured Stage{stages.length !== 1 ? 's' : ''}
+            {stages.length} {t('stages.title', 'Configured Stages')}
           </Badge>
         </CardContent>
       </Card>
@@ -266,15 +268,15 @@ export const OrderStagesPage: React.FC = () => {
 
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h4 className="font-semibold text-stone-900 text-base">{stage.name}</h4>
+                      <h4 className="font-semibold text-stone-900 text-base">{translateStage(stage.name)}</h4>
                       {stage.isFinalStage && (
                         <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          <CheckCircle className="w-3 h-3 mr-1" /> Final Stage
+                          <CheckCircle className="w-3 h-3 mr-1" /> {t('stages.isFinalStage', 'Final Stage')}
                         </Badge>
                       )}
                       {!stage.isActive && (
                         <Badge variant="outline" className="text-stone-400 border-stone-300">
-                          Inactive
+                          {t('common.inactive', 'Inactive')}
                         </Badge>
                       )}
                     </div>
@@ -287,7 +289,7 @@ export const OrderStagesPage: React.FC = () => {
                         {stage.color}
                       </span>
                       <span>•</span>
-                      <span>Sequence: {stage.sequenceOrder}</span>
+                      <span>{t('stages.sequence', 'Sequence')}: {stage.sequenceOrder}</span>
                     </div>
                   </div>
                 </div>

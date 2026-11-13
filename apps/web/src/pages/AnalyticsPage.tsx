@@ -16,6 +16,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   BarChart3,
   TrendingUp,
@@ -35,6 +36,7 @@ import {
 
 export const AnalyticsPage: React.FC = () => {
   const { isOwner } = useAuth();
+  const { t } = useLanguage();
 
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('monthly');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
@@ -72,8 +74,8 @@ export const AnalyticsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Business Analytics & Intelligence"
-        description="Comprehensive operational reporting, product profitability analysis, customer preferences, and comparative branch performance."
+        title={t('analytics.title', 'Business Analytics & Intelligence')}
+        description={t('analytics.subtitle', 'Comprehensive operational reporting, product profitability analysis, customer preferences, and comparative branch performance.')}
         action={
           <div className="flex flex-wrap items-center gap-2">
             {/* Period selector */}
@@ -92,7 +94,13 @@ export const AnalyticsPage: React.FC = () => {
                       : 'text-charcoal-600 hover:text-wood-900'
                   }`}
                 >
-                  {p === 'daily' ? '24h' : p === 'weekly' ? '7 Days' : p === 'monthly' ? '30 Days' : 'All Time'}
+                  {p === 'daily'
+                    ? t('analytics.period24h', '24h')
+                    : p === 'weekly'
+                    ? t('analytics.period7d', '7 Days')
+                    : p === 'monthly'
+                    ? t('analytics.period30d', '30 Days')
+                    : t('analytics.periodAll', 'All Time')}
                 </button>
               ))}
             </div>
@@ -104,7 +112,7 @@ export const AnalyticsPage: React.FC = () => {
                 onChange={(e) => setSelectedBranchId(e.target.value)}
                 className="h-8 px-2.5 rounded-lg border border-wood-300 bg-background text-xs font-medium text-wood-900"
               >
-                <option value="">All Branches (Enterprise)</option>
+                <option value="">{t('dashboard.allBranches', 'All Branches (Enterprise)')}</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -122,10 +130,10 @@ export const AnalyticsPage: React.FC = () => {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-1.5 text-xs font-semibold text-stone-800">
               <Calendar className="w-4 h-4 text-wood-700 shrink-0" />
-              <span>Custom Date Range:</span>
+              <span>{t('analytics.customDateRange', 'Custom Date Range:')}</span>
             </div>
             <div className="text-[11px] sm:text-xs text-stone-500 font-medium">
-              Active: <span className="font-bold text-wood-950 capitalize">{analytics?.period || period}</span>
+              {t('common.status', 'Active')}: <span className="font-bold text-wood-950 capitalize">{analytics?.period || period}</span>
             </div>
           </div>
 

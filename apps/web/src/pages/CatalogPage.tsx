@@ -24,6 +24,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { ImageUploader } from '@/components/products/ImageUploader';
 import { apiClient } from '@/lib/api-client';
 import { formatCurrency } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   Plus,
   Search,
@@ -37,6 +38,7 @@ import {
 
 export const CatalogPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t, translateCategory } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -137,12 +139,12 @@ export const CatalogPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Furniture Catalog Management"
-        description="Maintain the enterprise product models, specifications, baseline prices, and showroom photo galleries."
+        title={t('catalog.title', 'Furniture Catalog Management')}
+        description={t('catalog.subtitle', 'Maintain the enterprise product models, specifications, baseline prices, and showroom photo galleries.')}
         action={
           <Button size="sm" onClick={() => setIsCreateOpen(true)} className="space-x-1.5 shadow">
             <Plus className="h-4 w-4" />
-            <span>Add Product</span>
+            <span>{t('catalog.addProductBtn', 'Add Product')}</span>
           </Button>
         }
       />
@@ -153,7 +155,7 @@ export const CatalogPage: React.FC = () => {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products by SKU, name..."
+              placeholder={t('catalog.searchPlaceholder', 'Search products by SKU, name...')}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -176,7 +178,7 @@ export const CatalogPage: React.FC = () => {
                 }}
                 className="text-xs h-8 px-3 shrink-0"
               >
-                {cat}
+                {cat === 'ALL' ? t('showroom.allCategories', 'ALL') : translateCategory(cat)}
               </Button>
             ))}
           </div>
