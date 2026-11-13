@@ -36,7 +36,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   if (variant === 'pills') {
     return (
-      <div className={cn('flex items-center gap-1.5 p-1 bg-wood-100/80 rounded-xl border border-wood-200/80', className)}>
+      <div className={cn('grid grid-cols-3 gap-1.5 p-1 bg-wood-100/80 rounded-xl border border-wood-200/80 w-full', className)}>
         {SUPPORTED_LANGUAGES.map((opt) => {
           const isSelected = opt.code === language;
           return (
@@ -45,14 +45,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               type="button"
               onClick={() => setLanguage(opt.code)}
               className={cn(
-                'px-2.5 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5',
+                'px-2 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 truncate',
                 isSelected
                   ? 'bg-wood-800 text-white shadow-xs'
                   : 'text-charcoal-700 hover:text-wood-950 hover:bg-white/60'
               )}
             >
-              <span>{opt.flag}</span>
-              <span>{opt.nativeLabel}</span>
+              <span className="shrink-0">{opt.flag}</span>
+              <span className="truncate">{opt.nativeLabel}</span>
             </button>
           );
         })}
@@ -62,16 +62,20 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   // Compact dropdown variant (ideal for TopNav & headers)
   return (
-    <div className={cn('relative inline-block text-left', className)} ref={dropdownRef}>
+    <div className={cn('relative inline-block text-left shrink-0', className)} ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-wood-200 bg-white hover:bg-wood-50 text-wood-950 transition-colors shadow-2xs"
+        className="flex items-center justify-between w-20 px-2 py-1.5 rounded-lg text-xs font-medium border border-wood-200 bg-white hover:bg-wood-50 text-wood-950 transition-colors shadow-2xs shrink-0 select-none"
         title="Switch Language / ቋንቋ ቀይር / Afaan Jijjiiri"
       >
-        <Globe className="h-3.5 w-3.5 text-wood-700" />
-        <span className="font-semibold">{currentOption.nativeLabel}</span>
-        <span className="text-[10px] text-muted-foreground ml-0.5">▼</span>
+        <span className="flex items-center space-x-1.5 shrink-0">
+          <span className="text-sm leading-none shrink-0">{currentOption.flag}</span>
+          <span className="font-bold text-xs uppercase tracking-wide">
+            {currentOption.code === 'am' ? 'አማ' : currentOption.code.toUpperCase()}
+          </span>
+        </span>
+        <span className="text-[9px] text-muted-foreground shrink-0 ml-1">▼</span>
       </button>
 
       {isOpen && (

@@ -135,7 +135,7 @@ export const BottomNav: React.FC = () => {
       {/* Floating Modern Pill Dock */}
       <nav
         aria-label="Mobile Navigation Dock"
-        className="md:hidden fixed bottom-3 inset-x-3 z-40 max-w-md mx-auto pointer-events-auto"
+        className="lg:hidden fixed bottom-3 inset-x-3 z-40 max-w-md mx-auto pointer-events-auto"
         style={{
           bottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))',
         }}

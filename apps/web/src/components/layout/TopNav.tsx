@@ -127,11 +127,11 @@ export const TopNav: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-wood-200/80 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md shadow-[0_1px_3px_rgba(44,30,15,0.03)] transition-colors">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 w-full max-w-full overflow-hidden border-b border-wood-200/80 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md shadow-[0_1px_3px_rgba(44,30,15,0.03)] transition-colors">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 flex h-16 items-center justify-between gap-2 sm:gap-4 max-w-7xl">
         {/* Left: Brand Identity */}
-        <Link to="/" className="flex items-center space-x-2.5 font-bold tracking-tight text-wood-950 group shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-wood-800 via-wood-900 to-wood-950 text-wood-50 shadow-xs ring-1 ring-wood-700/50 group-hover:scale-105 transition-transform duration-200">
+        <Link to="/" className="flex items-center space-x-2.5 font-bold tracking-tight text-wood-950 group shrink-0 select-none">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-wood-800 via-wood-900 to-wood-950 text-wood-50 shadow-xs ring-1 ring-wood-700/50 group-hover:scale-105 transition-transform duration-200 shrink-0">
             <Armchair className="h-5 w-5 text-amber-200 stroke-[1.8]" />
           </div>
           <div className="flex flex-col">
@@ -143,14 +143,14 @@ export const TopNav: React.FC = () => {
                 ERP
               </span>
             </div>
-            <span className="text-[10px] font-medium text-stone-500 uppercase tracking-widest hidden lg:block -mt-0.5">
+            <span className="text-[10px] font-medium text-stone-500 uppercase tracking-widest hidden xl:block -mt-0.5">
               Furniture Studio
             </span>
           </div>
         </Link>
 
         {/* Center: Desktop Navigation Bar */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5 text-xs font-medium">
+        <nav className="hidden lg:flex items-center space-x-1 xl:space-x-1.5 text-xs font-medium shrink min-w-0">
           {primaryLinks.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.to;
@@ -158,34 +158,34 @@ export const TopNav: React.FC = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                className={`flex items-center space-x-1 xl:space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-150 ${
                   isActive
                     ? 'bg-wood-800 text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-950 hover:bg-wood-100/70'
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-amber-200' : 'text-stone-500'}`} />
-                <span>{link.label}</span>
+                <Icon className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-amber-200' : 'text-stone-500'}`} />
+                <span className="truncate max-w-[105px] xl:max-w-none">{link.label}</span>
               </Link>
             );
           })}
 
           {/* Operations Dropdown */}
           {operationsLinks.length > 0 && (
-            <div className="relative" ref={operationsRef}>
+            <div className="relative shrink-0" ref={operationsRef}>
               <button
                 type="button"
                 onClick={() => setIsOperationsOpen(!isOperationsOpen)}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                className={`flex items-center space-x-1 xl:space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-150 ${
                   isOperationsActive
                     ? 'bg-wood-800 text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-950 hover:bg-wood-100/70'
                 }`}
               >
-                <Layers className={`h-3.5 w-3.5 ${isOperationsActive ? 'text-amber-200' : 'text-stone-500'}`} />
-                <span>{t('common.centralOperations', 'Operations')}</span>
+                <Layers className={`h-3.5 w-3.5 shrink-0 ${isOperationsActive ? 'text-amber-200' : 'text-stone-500'}`} />
+                <span className="truncate max-w-[95px] xl:max-w-none">{t('common.centralOperations', 'Operations')}</span>
                 <ChevronDown
-                  className={`h-3 w-3 ml-0.5 transition-transform duration-200 ${
+                  className={`h-3 w-3 ml-0.5 shrink-0 transition-transform duration-200 ${
                     isOperationsOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -234,43 +234,41 @@ export const TopNav: React.FC = () => {
           )}
         </nav>
 
-        {/* Right: Language Switcher, Online Indicator, User Profile */}
-        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+        {/* Right: Language Switcher, Minimal Green Dot, User Profile */}
+        <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
           {/* Language Switcher */}
           <LanguageSwitcher />
 
-          {/* Connection Status: Minimal Green Dot Pill */}
+          {/* Connection Status: Minimal Green Dot (fixed size, never pushes layout) */}
           <div
-            className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full border border-wood-200/90 bg-wood-50/70 text-[11px] font-medium text-stone-700 shadow-2xs"
+            className="flex items-center justify-center h-8 w-8 rounded-full border border-wood-200/90 bg-wood-50/70 shadow-2xs shrink-0 transition-colors"
             title={isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}
+            aria-label={isOnline ? 'Online' : 'Offline'}
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-2.5 w-2.5">
               {isOnline && (
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               )}
               <span
-                className={`relative inline-flex rounded-full h-2 w-2 ${
+                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
                   isOnline
                     ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'
                     : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]'
                 }`}
               />
             </span>
-            <span className="hidden sm:inline font-semibold text-[10.5px]">
-              {isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}
-            </span>
           </div>
 
           {/* User Profile / Logout */}
           {isAuthenticated && user ? (
-            <div className="flex items-center space-x-2 pl-1 border-l border-wood-200/80">
+            <div className="flex items-center space-x-1.5 sm:space-x-2 pl-1 sm:pl-2 border-l border-wood-200/80 shrink-0">
               <div
-                className="h-8 w-8 rounded-full bg-wood-800 text-white flex items-center justify-center font-bold text-xs shadow-xs ring-2 ring-wood-200"
+                className="h-8 w-8 rounded-full bg-wood-800 text-white flex items-center justify-center font-bold text-xs shadow-xs ring-2 ring-wood-200 shrink-0 select-none"
                 title={`${user.fullName} (${user.role})`}
               >
                 {getInitials(user.fullName)}
               </div>
-              <div className="hidden lg:flex flex-col text-left">
+              <div className="hidden xl:flex flex-col text-left shrink-0">
                 <span className="text-xs font-bold text-stone-900 leading-none truncate max-w-[120px]">
                   {user.fullName}
                 </span>
@@ -283,13 +281,13 @@ export const TopNav: React.FC = () => {
                 size="icon"
                 onClick={handleLogout}
                 title={t('nav.logout', 'Log Out')}
-                className="h-8 w-8 text-stone-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                className="h-8 w-8 text-stone-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors shrink-0"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <Link to="/login">
+            <Link to="/login" className="shrink-0">
               <Button size="sm" variant="outline" className="text-xs h-8">
                 {t('nav.login', 'Sign In')}
               </Button>
