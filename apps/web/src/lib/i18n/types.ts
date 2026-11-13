@@ -386,6 +386,12 @@ export interface TranslationDictionary {
     productionConsumptions: string;
     noConsumptions: string;
     allocatedCostContribution: string;
+    inStock: string;
+    lowStock: string;
+    availableStock: string;
+    unitWacCost: string;
+    noMaterialsMatch: string;
+    defineMaterialsPrompt: string;
   };
   showroom: {
     title: string;
@@ -570,6 +576,13 @@ export interface TranslationDictionary {
     adminPasswordHint: string;
     confirmAssignAdmin: string;
     assigningAdmin: string;
+    stockPolicyTitle: string;
+    stockPolicyDesc: string;
+    centralStockTitle: string;
+    centralStockDesc: string;
+    branchStockTitle: string;
+    branchStockDesc: string;
+    stockModeHelp: string;
   };
   myBranch: {
     title: string;

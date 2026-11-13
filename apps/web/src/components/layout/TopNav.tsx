@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { useSync } from '@/context/SyncContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -127,26 +128,19 @@ export const TopNav: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full max-w-full overflow-hidden border-b border-wood-200/80 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md shadow-[0_1px_3px_rgba(44,30,15,0.03)] transition-colors">
+    <header className="sticky top-0 z-50 w-full border-b border-wood-200/80 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md shadow-[0_1px_3px_rgba(44,30,15,0.03)] transition-colors">
       <div className="container mx-auto px-3 sm:px-6 lg:px-8 flex h-16 items-center justify-between gap-2 sm:gap-4 max-w-7xl">
         {/* Left: Brand Identity */}
-        <Link to="/" className="flex items-center space-x-2.5 font-bold tracking-tight text-wood-950 group shrink-0 select-none">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-wood-800 via-wood-900 to-wood-950 text-wood-50 shadow-xs ring-1 ring-wood-700/50 group-hover:scale-105 transition-transform duration-200 shrink-0">
-            <Armchair className="h-5 w-5 text-amber-200 stroke-[1.8]" />
+        <Link to="/" className="flex items-center space-x-2 font-bold tracking-tight text-wood-900 group shrink-0 select-none">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-wood-700 text-wood-50 shadow-xs ring-1 ring-wood-600/50">
+            <Armchair className="h-4 w-4 text-amber-200 stroke-[2]" />
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center space-x-1.5">
-              <span className="text-base sm:text-lg font-extrabold tracking-tight text-wood-950 leading-tight">
-                Noorcent
-              </span>
-              <span className="hidden sm:inline-block text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-wood-100 text-wood-900 border border-wood-200/80">
-                ERP
-              </span>
-            </div>
-            <span className="text-[10px] font-medium text-stone-500 uppercase tracking-widest hidden xl:block -mt-0.5">
-              Furniture Studio
-            </span>
-          </div>
+          <span className="text-base sm:text-lg font-bold tracking-tight text-wood-950 leading-tight">
+            Furniture ERP
+          </span>
+          <Badge variant="wood" className="ml-1 text-[10px] uppercase tracking-wider hidden sm:inline-flex">
+            {isOwner ? t('nav.ownerConsole', 'Owner Console') : t('nav.branchConsole', 'Branch Console')}
+          </Badge>
         </Link>
 
         {/* Center: Desktop Navigation Bar */}

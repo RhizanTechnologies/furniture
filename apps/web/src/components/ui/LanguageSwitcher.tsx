@@ -79,7 +79,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1.5 w-44 rounded-xl bg-white border border-wood-200 shadow-lg py-1.5 z-50 animate-in fade-in-0 zoom-in-95">
+        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-wood-200/90 shadow-2xl py-1.5 z-50 animate-in fade-in-0 zoom-in-95">
           <div className="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-muted-foreground border-b border-wood-100">
             Select Language / ቋንቋ
           </div>

@@ -59,7 +59,7 @@ export const MyBranchPage: React.FC = () => {
                   <CardDescription className="font-mono text-xs">{branch.code}</CardDescription>
                 </div>
                 <Badge variant={branch.stockMode === StockMode.MAIN_STOCK ? 'secondary' : 'wood'}>
-                  {branch.stockMode === StockMode.MAIN_STOCK ? 'Main Stock Mode' : 'Branch Stock Mode'}
+                  {branch.stockMode === StockMode.MAIN_STOCK ? t('branches.mainStock', 'Main Stock') : t('branches.branchStock', 'Branch Stock')}
                 </Badge>
               </div>
             </CardHeader>
@@ -77,7 +77,7 @@ export const MyBranchPage: React.FC = () => {
                 )}
                 <div className="flex items-center space-x-2.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>Branch Status: <strong className="text-emerald-700">Active</strong></span>
+                  <span>{t('branches.activeStatus', 'Branch Status')}: <strong className="text-emerald-700">{t('common.active', 'Active')}</strong></span>
                 </div>
               </div>
             </CardContent>
@@ -87,30 +87,30 @@ export const MyBranchPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="text-base flex items-center space-x-2">
                 <Layers className="h-5 w-5 text-wood-700" />
-                <span>Inventory & Operations Policy</span>
+                <span>{t('branches.stockPolicyTitle', 'Inventory & Operations Policy')}</span>
               </CardTitle>
-              <CardDescription>Stock allocation and consumption rules</CardDescription>
+              <CardDescription>{t('branches.stockPolicyDesc', 'Stock allocation and consumption rules')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-2 text-sm text-charcoal-700">
               {branch.stockMode === StockMode.MAIN_STOCK ? (
                 <div className="p-3.5 rounded-lg bg-wood-50 border border-wood-200 space-y-2">
-                  <div className="font-semibold text-wood-950">Centralized Warehouse Stock</div>
+                  <div className="font-semibold text-wood-950">{t('branches.centralStockTitle', 'Centralized Warehouse Stock')}</div>
                   <p className="text-xs text-charcoal-600 leading-relaxed">
-                    This branch directly draws raw materials (timber, foam, fabric) from the central business inventory pool. When recording material consumption for orders, stock deductions are made authoritatively against main stock.
+                    {t('branches.centralStockDesc', 'This branch directly draws raw materials (timber, foam, fabric) from the central business inventory pool. When recording material consumption for orders, stock deductions are made authoritatively against main stock.')}
                   </p>
                 </div>
               ) : (
                 <div className="p-3.5 rounded-lg bg-wood-50 border border-wood-200 space-y-2">
-                  <div className="font-semibold text-wood-950">Dedicated Branch Inventory</div>
+                  <div className="font-semibold text-wood-950">{t('branches.branchStockTitle', 'Dedicated Branch Inventory')}</div>
                   <p className="text-xs text-charcoal-600 leading-relaxed">
-                    This branch maintains an independent, physical stock room. Stock-in replenishments and order consumption are strictly isolated to this branch's warehouse inventory.
+                    {t('branches.branchStockDesc', "This branch maintains an independent, physical stock room. Stock-in replenishments and order consumption are strictly isolated to this branch's warehouse inventory.")}
                   </p>
                 </div>
               )}
 
               <div className="flex items-center space-x-2 pt-2 text-xs text-muted-foreground">
                 <UserCheck className="h-4 w-4 text-wood-600" />
-                <span>Assigned Administrator: <strong>{user.fullName}</strong> ({user.email})</span>
+                <span>{t('branches.assignedAdmin', 'Assigned Administrator')}: <strong>{user.fullName}</strong> ({user.email})</span>
               </div>
             </CardContent>
           </Card>

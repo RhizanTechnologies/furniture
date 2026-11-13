@@ -423,15 +423,15 @@ export const InventoryPage: React.FC = () => {
         <Card className="text-center py-12">
           <CardContent>
             <Boxes className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-stone-800">No Raw Materials Found</h3>
+            <h3 className="text-base font-semibold text-stone-800">{t('inventory.noMaterials', 'No Raw Materials Found')}</h3>
             <p className="text-sm text-stone-500 mt-1 mb-4">
               {searchTerm || selectedCategory !== 'ALL' || onlyLowStock
-                ? 'No materials match the active filters.'
-                : 'Define raw materials to start tracking workshop inventory and production costing.'}
+                ? t('inventory.noMaterialsMatch', 'No materials match the active filters.')
+                : t('inventory.defineMaterialsPrompt', 'Define raw materials to start tracking workshop inventory and production costing.')}
             </p>
             {isOwner && (
               <Button onClick={() => setIsAddMaterialOpen(true)} className="bg-wood-600 hover:bg-wood-700">
-                <Plus className="w-4 h-4 mr-2" /> Add First Material
+                <Plus className="w-4 h-4 mr-2" /> {t('inventory.addMaterialTitle', 'Add First Material')}
               </Button>
             )}
           </CardContent>
@@ -456,16 +456,16 @@ export const InventoryPage: React.FC = () => {
                     </Badge>
                     {mat.currentStockQuantity <= 0 ? (
                       <Badge variant="destructive" className="text-[10px]">
-                        Out of Stock
+                        {t('inventory.outOfStock', 'Out of Stock')}
                       </Badge>
                     ) : mat.isLowStock ? (
                       <Badge className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] space-x-1">
                         <AlertTriangle className="w-2.5 h-2.5 text-amber-600 inline mr-0.5" />
-                        <span>Low Stock</span>
+                        <span>{t('inventory.lowStock', 'Low Stock')}</span>
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                        In Stock
+                        {t('inventory.inStock', 'In Stock')}
                       </Badge>
                     )}
                   </div>
@@ -473,7 +473,7 @@ export const InventoryPage: React.FC = () => {
 
                 <div className={`p-2.5 rounded-lg bg-stone-50 text-xs ${isOwner ? 'grid grid-cols-2 gap-2' : ''}`}>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">Available Stock</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('inventory.availableStock', 'Available Stock')}</span>
                     <span className="font-mono font-bold text-stone-900 text-sm">
                       {mat.currentStockQuantity.toLocaleString()}
                     </span>{' '}
@@ -482,13 +482,13 @@ export const InventoryPage: React.FC = () => {
                   {isOwner && (
                     <>
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">Stock Valuation</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('inventory.stockValue', 'Stock Valuation')}</span>
                         <span className="font-mono font-bold text-wood-950 text-sm">
                           {formatCurrency(mat.stockValue)}
                         </span>
                       </div>
                       <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px]">
-                        <span className="text-stone-500">Unit WAC Cost:</span>
+                        <span className="text-stone-500">{t('inventory.unitWacCost', 'Unit WAC Cost')}:</span>
                         <span className="font-mono font-medium text-stone-800">
                           {formatCurrency(mat.currentUnitCost)} / {mat.unitOfMeasurement}
                         </span>
@@ -505,7 +505,7 @@ export const InventoryPage: React.FC = () => {
                     className="h-8 text-xs text-stone-600 space-x-1"
                   >
                     <History className="w-3.5 h-3.5" />
-                    <span>Audit Log</span>
+                    <span>{t('inventory.auditLogTab', 'Audit Log')}</span>
                   </Button>
                   <Button
                     size="sm"
@@ -513,7 +513,7 @@ export const InventoryPage: React.FC = () => {
                     className="h-8 text-xs bg-wood-700 hover:bg-wood-800 text-white space-x-1"
                   >
                     <ArrowDownToLine className="w-3.5 h-3.5" />
-                    <span>Stock In</span>
+                    <span>{t('inventory.addStockBtn', 'Stock In')}</span>
                   </Button>
                 </div>
               </div>
@@ -525,17 +525,17 @@ export const InventoryPage: React.FC = () => {
             <Table>
               <TableHeader className="bg-wood-50/50">
                 <TableRow>
-                  <TableHead>Material</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Available Qty</TableHead>
+                  <TableHead>{t('inventory.materialName', 'Material')}</TableHead>
+                  <TableHead>{t('inventory.category', 'Category')}</TableHead>
+                  <TableHead className="text-right">{t('inventory.currentStock', 'Available Qty')}</TableHead>
                   {isOwner && (
                     <>
-                      <TableHead className="text-right">Unit Cost (WAC)</TableHead>
-                      <TableHead className="text-right">Stock Value</TableHead>
+                      <TableHead className="text-right">{t('inventory.unitCost', 'Unit Cost (WAC)')}</TableHead>
+                      <TableHead className="text-right">{t('inventory.stockValue', 'Stock Value')}</TableHead>
                     </>
                   )}
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-center">{t('common.status', 'Status')}</TableHead>
+                  <TableHead className="text-right">{t('common.actions', 'Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -569,16 +569,16 @@ export const InventoryPage: React.FC = () => {
                     <TableCell className="text-center">
                       {mat.currentStockQuantity <= 0 ? (
                         <Badge variant="destructive" className="text-[10px]">
-                          Out of Stock
+                          {t('inventory.outOfStock', 'Out of Stock')}
                         </Badge>
                       ) : mat.isLowStock ? (
                         <Badge className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] space-x-1">
                           <AlertTriangle className="w-2.5 h-2.5 text-amber-600 inline mr-0.5" />
-                          <span>Low Stock</span>
+                          <span>{t('inventory.lowStock', 'Low Stock')}</span>
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px]">
-                          In Stock
+                          {t('inventory.inStock', 'In Stock')}
                         </Badge>
                       )}
                     </TableCell>
@@ -590,14 +590,14 @@ export const InventoryPage: React.FC = () => {
                         className="h-8 text-xs text-wood-800 hover:bg-wood-50"
                       >
                         <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
-                        Stock In
+                        {t('inventory.addStockBtn', 'Stock In')}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedMaterialHistoryId(mat.id)}
                         className="h-8 text-xs text-stone-600"
-                        title="View replenishment and consumption history"
+                        title={t('inventory.materialHistory', 'View replenishment and consumption history')}
                       >
                         <History className="w-3.5 h-3.5" />
                       </Button>

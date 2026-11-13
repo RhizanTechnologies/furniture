@@ -237,7 +237,7 @@ export const BranchesPage: React.FC = () => {
                   </option>
                 </select>
                 <p className="text-xs text-muted-foreground">
-                  Select carefully. Stock mode dictates how material consumption and valuation operate for this branch.
+                  {t('branches.stockModeHelp', 'Select carefully. Stock mode dictates how material consumption and valuation operate for this branch.')}
                 </p>
               </div>
 
