@@ -90,21 +90,23 @@ export const TopNav: React.FC = () => {
           {/* Language Switcher */}
           <LanguageSwitcher />
 
+          {/* Online status indicator: Minimal green dot */}
           <div
-            className={`flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${
-              isOnline
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-amber-50 text-amber-800 border-amber-200'
-            }`}
-            title={isOnline ? 'Online' : 'Offline'}
+            className="flex items-center justify-center p-1.5"
+            title={isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}
+            aria-label={isOnline ? 'Online' : 'Offline'}
           >
-            <span
-              className={`h-2 w-2 rounded-full inline-block ${
-                isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-              }`}
-            />
-            <span className="text-[10px] sm:text-xs font-semibold">
-              {isOnline ? t('common.online', 'Online') : t('common.offline', 'Offline')}
+            <span className="relative flex h-2.5 w-2.5">
+              {isOnline && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              )}
+              <span
+                className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                  isOnline
+                    ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'
+                    : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]'
+                }`}
+              />
             </span>
           </div>
 

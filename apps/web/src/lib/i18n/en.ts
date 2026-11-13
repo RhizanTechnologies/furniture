@@ -90,6 +90,7 @@ export const en: TranslationDictionary = {
     signInBtn: 'Sign In',
     signingIn: 'Signing in...',
     invalidCredentials: 'Invalid email or password. Please try again.',
+    offlineNotice: 'Offline Mode: You can sign in and work without internet. Changes sync automatically when reconnected.',
     quickDemoAccounts: 'Quick Demo Logins',
     ownerRole: 'Owner',
     boleBranchAdmin: 'Bole Branch Admin',

@@ -103,6 +103,7 @@ export interface TranslationDictionary {
     signInBtn: string;
     signingIn: string;
     invalidCredentials: string;
+    offlineNotice: string;
     quickDemoAccounts: string;
     ownerRole: string;
     boleBranchAdmin: string;

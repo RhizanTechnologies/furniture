@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/forms/FormInput';
-import { Armchair, Lock, AlertCircle } from 'lucide-react';
+import { Armchair, Lock, AlertCircle, WifiOff } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -18,6 +18,17 @@ export const LoginPage: React.FC = () => {
   const location = useLocation();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  React.useEffect(() => {
+    const handleStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleStatus);
+    window.addEventListener('offline', handleStatus);
+    return () => {
+      window.removeEventListener('online', handleStatus);
+      window.removeEventListener('offline', handleStatus);
+    };
+  }, []);
 
   const from = (location.state as any)?.from?.pathname || '/';
 
@@ -77,6 +88,15 @@ export const LoginPage: React.FC = () => {
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)}>
               <CardContent className="space-y-4">
+                {!isOnline && (
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs flex items-center space-x-2">
+                    <WifiOff className="h-4 w-4 shrink-0 text-amber-600 animate-pulse" />
+                    <span>
+                      {t('auth.offlineNotice', 'Offline Mode: You can sign in and work without internet. Changes sync automatically when reconnected.')}
+                    </span>
+                  </div>
+                )}
+
                 {authError && (
                   <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">
                     <AlertCircle className="h-4 w-4 shrink-0" />

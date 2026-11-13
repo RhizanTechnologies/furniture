@@ -90,6 +90,7 @@ export const am: TranslationDictionary = {
     signInBtn: 'ግባ',
     signingIn: 'በመግባት ላይ...',
     invalidCredentials: 'የተሳሳተ ኢሜይል ወይም የይለፍ ቃል! እባክዎ እንደገና ይሞክሩ።',
+    offlineNotice: 'ከመስመር ውጭ: ያለ ኢንተርኔት መግባትና መሥራት ይችላሉ። ስልክዎ ኢንተርኔት ሲያገኝ በራሱ ይሰምራል (sync ይደረጋል)።',
     quickDemoAccounts: 'የሙከራ መለያዎች',
     ownerRole: 'ባለቤት (Owner)',
     boleBranchAdmin: 'የቦሌ ቅርንጫፍ አስተዳዳሪ',

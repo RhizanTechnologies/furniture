@@ -156,8 +156,8 @@ export const BottomNav: React.FC = () => {
                 }`}
               >
                 <Icon
-                  className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                    isActive ? 'stroke-[2.4px] text-wood-900 scale-105' : 'stroke-2'
+                  className={`h-[18px] w-[18px] transition-transform duration-200 ${
+                    isActive ? 'stroke-[2.2px] text-wood-900 scale-105' : 'stroke-[1.8px]'
                   }`}
                 />
                 <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none truncate max-w-full">
@@ -179,8 +179,8 @@ export const BottomNav: React.FC = () => {
             }`}
           >
             <MoreHorizontal
-              className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                isMoreOpen || isSecondaryActive ? 'stroke-[2.4px] text-wood-900 scale-105' : 'stroke-2'
+              className={`h-[18px] w-[18px] transition-transform duration-200 ${
+                isMoreOpen || isSecondaryActive ? 'stroke-[2.2px] text-wood-900 scale-105' : 'stroke-[1.8px]'
               }`}
             />
             <span className="text-[9.5px] tracking-tight leading-none mt-1 select-none">

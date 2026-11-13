@@ -90,6 +90,7 @@ export const om: TranslationDictionary = {
     signInBtn: "Seeni",
     signingIn: "Seenaa jira...",
     invalidCredentials: "Imeeyilii ykn jechi darbiinsaa dogoggora! Mee irra deebi'aa yaalaa.",
+    offlineNotice: "Haala Sararaa Ala: Intarneetii malee galuu fi hojjechuu dandeessu. Yeroo bilbilli intarneetiitti deebi’u ofumaan wal-simata.",
     quickDemoAccounts: "Herregawwan Yaalii",
     ownerRole: "Abbaa Qabeenyaa (Owner)",
     boleBranchAdmin: "Bulchaa Damee Boolee",
