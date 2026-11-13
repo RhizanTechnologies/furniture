@@ -305,7 +305,17 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               >
                 {paymentMethods.map((m) => (
                   <option key={m} value={m}>
-                    {m === 'Cash' ? t('paymentModal.cash', 'Cash') : m === 'Telebirr' ? t('paymentModal.telebirr', 'Telebirr') : m === 'CBE Birr' ? t('paymentModal.cbeBank', 'CBE Birr') : m}
+                    {m === 'Cash'
+                      ? t('common.cash', 'Cash')
+                      : m === 'Telebirr'
+                      ? t('common.telebirr', 'Telebirr')
+                      : m === 'CBE Birr'
+                      ? t('common.cbeBirr', 'CBE Birr')
+                      : m === 'Bank Transfer'
+                      ? t('common.bankTransfer', 'Bank Transfer')
+                      : m === 'Check'
+                      ? t('common.check', 'Check')
+                      : m}
                   </option>
                 ))}
               </select>

@@ -59,7 +59,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/customers',
       label: t('nav.customers', 'Customers'),
-      description: 'Customer contact records & purchase history',
+      description: t('customers.subtitle', 'Customer contact records & purchase history'),
       icon: Users,
       color: 'bg-blue-50 text-blue-800 border-blue-200',
       show: isOwner,
@@ -67,7 +67,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/showroom',
       label: t('nav.showroom', 'Showroom'),
-      description: 'High-res gallery for client consultations',
+      description: t('showroom.subtitle', 'High-res gallery for client consultations'),
       icon: Store,
       color: 'bg-wood-50 text-wood-800 border-wood-200',
       show: true,
@@ -75,7 +75,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/catalog',
       label: t('nav.catalog', 'Catalog'),
-      description: 'Furniture models, dimensions & base prices',
+      description: t('catalog.subtitle', 'Furniture models, dimensions & base prices'),
       icon: Armchair,
       color: 'bg-amber-50 text-amber-900 border-amber-200',
       show: isOwner,
@@ -83,7 +83,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/order-stages',
       label: t('nav.stages', 'Stages'),
-      description: 'Manufacturing pipeline steps & progression',
+      description: t('stages.subtitle', 'Manufacturing pipeline steps & progression'),
       icon: Layers,
       color: 'bg-indigo-50 text-indigo-800 border-indigo-200',
       show: isOwner,
@@ -91,7 +91,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/analytics',
       label: t('nav.analytics', 'Analytics'),
-      description: 'Revenue graphs, margins & branch performance',
+      description: t('analytics.subtitle', 'Revenue graphs, margins & branch performance'),
       icon: BarChart3,
       color: 'bg-sky-50 text-sky-800 border-sky-200',
       show: isOwner,
@@ -99,7 +99,7 @@ export const BottomNav: React.FC = () => {
     {
       to: '/system-health',
       label: t('nav.health', 'System Health'),
-      description: 'Offline database, cloud sync & healthcheck',
+      description: t('nav.health', 'Offline database, cloud sync & healthcheck'),
       icon: ShieldCheck,
       color: 'bg-purple-50 text-purple-800 border-purple-200',
       show: isOwner,
@@ -204,13 +204,13 @@ export const BottomNav: React.FC = () => {
                 </div>
                 <div>
                   <DialogTitle className="text-sm font-bold text-stone-900 leading-snug">
-                    {user?.fullName || 'Business Console'}
+                    {user?.fullName || t('common.businessConsole', 'Business Console')}
                   </DialogTitle>
                   <DialogDescription className="text-[11px] text-stone-500 flex items-center gap-1.5">
-                    <span>{user?.branch?.name || (isOwner ? 'Central Operations' : 'Branch Staff')}</span>
+                    <span>{user?.branch?.name || (isOwner ? t('common.centralOperations', 'Central Operations') : t('common.branchStaff', 'Branch Staff'))}</span>
                     <span>•</span>
                     <Badge variant="wood" className="text-[9px] px-1.5 py-0">
-                      {isOwner ? t('common.owner', 'Owner') : user?.role || 'Staff'}
+                      {isOwner ? t('common.owner', 'Owner') : user?.role || t('common.branchStaff', 'Staff')}
                     </Badge>
                   </DialogDescription>
                 </div>
@@ -245,7 +245,7 @@ export const BottomNav: React.FC = () => {
           {/* Module Navigation Grid */}
           <div className="space-y-1.5 pt-2">
             <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
-              Enterprise Tools & Extensions
+              {t('common.enterpriseExtensions', 'Enterprise Tools & Extensions')}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -45,19 +45,19 @@ export const SyncStatusBanner: React.FC = () => {
             {!isOnline ? (
               <span className="flex items-center gap-1.5 font-semibold">
                 <WifiOff className="w-4 h-4 text-amber-600 animate-pulse" />
-                <span>Offline Mode — Working Locally</span>
+                <span>{t('common.offlineMode', 'Offline Mode — Working Locally')}</span>
               </span>
             ) : (
               <span className="flex items-center gap-1.5 font-medium">
                 <Wifi className="w-4 h-4 text-emerald-600" />
-                <span>Connected</span>
+                <span>{t('common.connected', 'Connected')}</span>
               </span>
             )}
 
             {/* Pending count badge */}
             {pendingCount > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-[11px] font-semibold">
-                {pendingCount} change{pendingCount > 1 ? 's' : ''} pending sync
+                {pendingCount} {pendingCount === 1 ? t('common.pendingSyncChange', 'change pending sync') : t('common.pendingSyncChanges', 'changes pending sync')}
               </span>
             )}
 
@@ -65,7 +65,7 @@ export const SyncStatusBanner: React.FC = () => {
             {imageCount > 0 && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-[11px] font-semibold">
                 <ImageIcon className="w-3 h-3" />
-                {imageCount} photo{imageCount > 1 ? 's' : ''} pending
+                {imageCount} {t('common.pendingPhotos', 'photo(s) pending')}
               </span>
             )}
 
@@ -73,7 +73,7 @@ export const SyncStatusBanner: React.FC = () => {
             {isSyncing && (
               <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold animate-pulse">
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                Synchronizing...
+                {t('common.synchronizing', 'Synchronizing...')}
               </span>
             )}
           </div>
@@ -86,7 +86,7 @@ export const SyncStatusBanner: React.FC = () => {
                 className="flex items-center gap-1 px-2.5 py-1 rounded bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs font-bold animate-pulse shadow-sm"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Resolve Conflicts ({conflictCount})</span>
+                <span>{t('common.resolveConflicts', 'Resolve Conflicts')} ({conflictCount})</span>
               </button>
             )}
 
@@ -96,7 +96,7 @@ export const SyncStatusBanner: React.FC = () => {
                 className="flex items-center gap-1 px-3 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium shadow-sm transition-transform active:scale-95"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Sync Now</span>
+                <span>{t('common.syncNow', 'Sync Now')}</span>
               </button>
             )}
           </div>

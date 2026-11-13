@@ -304,11 +304,11 @@ export const OrderStagesPage: React.FC = () => {
                   >
                     {stage.isActive ? (
                       <>
-                        <EyeOff className="w-3.5 h-3.5 mr-1" /> Deactivate
+                        <EyeOff className="w-3.5 h-3.5 mr-1" /> {t('common.inactive', 'Deactivate')}
                       </>
                     ) : (
                       <>
-                        <Eye className="w-3.5 h-3.5 mr-1" /> Activate
+                        <Eye className="w-3.5 h-3.5 mr-1" /> {t('common.active', 'Activate')}
                       </>
                     )}
                   </Button>
@@ -318,7 +318,7 @@ export const OrderStagesPage: React.FC = () => {
                     size="sm"
                     onClick={() => setEditingStage(stage)}
                   >
-                    <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
+                    <Edit2 className="w-3.5 h-3.5 mr-1" /> {t('common.edit', 'Edit')}
                   </Button>
 
                   <Button
@@ -344,9 +344,9 @@ export const OrderStagesPage: React.FC = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Custom Order Stage</DialogTitle>
+            <DialogTitle>{t('stages.addStageTitle', 'Add Custom Order Stage')}</DialogTitle>
             <DialogDescription>
-              Create a new workflow stage for tracking order progression across branches.
+              {t('stages.addStageDesc', 'Create a new workflow stage for tracking order progression across branches.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -356,10 +356,10 @@ export const OrderStagesPage: React.FC = () => {
           >
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Stage Name <span className="text-red-500">*</span>
+                {t('stages.stageNameLabel', 'Stage Name')} <span className="text-red-500">*</span>
               </label>
               <Input
-                placeholder="e.g. Carpentry Assembly, Finishing, Ready"
+                placeholder={t('stages.stageNamePlaceholder', 'e.g. Carpentry Assembly, Finishing, Ready')}
                 {...createForm.register('name')}
               />
               {createForm.formState.errors.name && (
@@ -372,7 +372,7 @@ export const OrderStagesPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Badge Color
+                  {t('stages.stageColorLabel', 'Badge Color')}
                 </label>
                 <div className="flex items-center space-x-2">
                   <input
@@ -400,7 +400,7 @@ export const OrderStagesPage: React.FC = () => {
                   htmlFor="create-isFinal"
                   className="text-sm font-medium text-stone-700 cursor-pointer"
                 >
-                  Marks order complete
+                  {t('stages.finalStageHint', 'Marks order complete')}
                 </label>
               </div>
             </div>
@@ -411,14 +411,14 @@ export const OrderStagesPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsCreateOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-wood-600 hover:bg-wood-700"
                 disabled={createMutation.isPending}
               >
-                {createMutation.isPending ? 'Creating...' : 'Create Stage'}
+                {createMutation.isPending ? t('stages.savingStage', 'Creating...') : t('stages.saveStageBtn', 'Create Stage')}
               </Button>
             </DialogFooter>
           </form>
@@ -430,9 +430,9 @@ export const OrderStagesPage: React.FC = () => {
         <Dialog open={!!editingStage} onOpenChange={(open) => !open && setEditingStage(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Edit Stage: {editingStage.name}</DialogTitle>
+              <DialogTitle>{t('stages.editStageTitle', 'Edit Stage')}: {translateStage(editingStage.name)}</DialogTitle>
               <DialogDescription>
-                Update the stage name, color badge, or completion status.
+                {t('stages.addStageDesc', 'Update the stage name, color badge, or completion status.')}
               </DialogDescription>
             </DialogHeader>
 
@@ -453,7 +453,7 @@ export const OrderStagesPage: React.FC = () => {
             >
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Stage Name <span className="text-red-500">*</span>
+                  {t('stages.stageNameLabel', 'Stage Name')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="edit-name"
@@ -466,7 +466,7 @@ export const OrderStagesPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">
-                    Badge Color
+                    {t('stages.stageColorLabel', 'Badge Color')}
                   </label>
                   <div className="flex items-center space-x-2">
                     <input
@@ -491,7 +491,7 @@ export const OrderStagesPage: React.FC = () => {
                     htmlFor="edit-isFinal"
                     className="text-sm font-medium text-stone-700 cursor-pointer"
                   >
-                    Marks order complete
+                    {t('stages.finalStageHint', 'Marks order complete')}
                   </label>
                 </div>
               </div>
@@ -502,14 +502,14 @@ export const OrderStagesPage: React.FC = () => {
                   variant="outline"
                   onClick={() => setEditingStage(null)}
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button
                   type="submit"
                   className="bg-wood-600 hover:bg-wood-700"
                   disabled={updateMutation.isPending}
                 >
-                  {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  {updateMutation.isPending ? t('stages.savingStage', 'Saving...') : t('stages.updateStageBtn', 'Save Changes')}
                 </Button>
               </DialogFooter>
             </form>

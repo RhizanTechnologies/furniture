@@ -520,7 +520,7 @@ export const FinancialPage: React.FC = () => {
               <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by order #, customer or ref..."
+                  placeholder={t('orders.searchPlaceholder', 'Search orders, customers, items...')}
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -531,23 +531,23 @@ export const FinancialPage: React.FC = () => {
               </div>
 
               <div className="text-xs text-muted-foreground font-medium">
-                Showing {filteredPayments.length} recorded payments
+                {t('common.showing', 'Showing')} {filteredPayments.length} {t('common.items', 'items')}
               </div>
             </CardContent>
           </Card>
 
           {isPaymentsLoading ? (
-            <LoadingState message="Loading payment ledger..." />
+            <LoadingState message={t('common.loading', 'Loading payment ledger...')} />
           ) : filteredPayments.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <CreditCard className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-stone-800">No Payments Recorded</h3>
+                <h3 className="text-base font-semibold text-stone-800">{t('finance.noPayments', 'No Payments Recorded')}</h3>
                 <p className="text-sm text-stone-500 mt-1 mb-4">
-                  {searchTerm ? 'No payments match your search.' : 'Record order prepayments or progress payments.'}
+                  {searchTerm ? t('common.noResultsFound', 'No payments match your search.') : t('finance.recordPaymentDesc', 'Record order prepayments or progress payments.')}
                 </p>
                 <Button onClick={() => setIsPaymentOpen(true)} className="bg-wood-600 hover:bg-wood-700">
-                  <Plus className="w-4 h-4 mr-2" /> Record First Payment
+                  <Plus className="w-4 h-4 mr-2" /> {t('finance.recordPaymentBtn', 'Record Payment')}
                 </Button>
               </CardContent>
             </Card>
@@ -587,7 +587,7 @@ export const FinancialPage: React.FC = () => {
                         <div className="text-[11px] text-muted-foreground">{new Date(p.paymentDate).toLocaleDateString()}</div>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Amount Paid</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('orderDetail.amountPaid', 'Amount Paid')}</span>
                         <span className="font-mono font-bold text-sm text-emerald-800">
                           {formatCurrency(p.amount)}
                         </span>
@@ -595,12 +595,12 @@ export const FinancialPage: React.FC = () => {
                     </div>
 
                     <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-[11px] text-stone-600">
-                      <span>Method: <strong className="font-medium text-stone-800">{p.paymentMethod}</strong></span>
-                      {p.referenceNumber && <span className="font-mono">Ref: {p.referenceNumber}</span>}
+                      <span>{t('finance.method', 'Method')}: <strong className="font-medium text-stone-800">{p.paymentMethod}</strong></span>
+                      {p.referenceNumber && <span className="font-mono">{t('orderDetail.ref', 'Ref')}: {p.referenceNumber}</span>}
                     </div>
 
                     <div className="text-[10px] text-muted-foreground flex justify-between">
-                      <span>Recorded by: {p.recordedByUserName || 'Staff'}</span>
+                      <span>{t('orderDetail.loggedBy', 'Recorded by')}: {p.recordedByUserName || 'Staff'}</span>
                     </div>
                   </div>
                 ))}
@@ -611,15 +611,15 @@ export const FinancialPage: React.FC = () => {
                 <Table>
                   <TableHeader className="bg-wood-50/50">
                     <TableRow>
-                      <TableHead>Payment Date</TableHead>
-                      <TableHead>Order #</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Amount (ETB)</TableHead>
-                      <TableHead className="text-center">Type</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Reference / Txn #</TableHead>
-                      <TableHead>Logged By</TableHead>
+                      <TableHead>{t('orderDetail.paymentDate', 'Payment Date')}</TableHead>
+                      <TableHead>{t('orders.orderNumber', 'Order #')}</TableHead>
+                      <TableHead>{t('common.customer', 'Customer')}</TableHead>
+                      <TableHead>{t('common.status', 'Status')}</TableHead>
+                      <TableHead className="text-right">{t('finance.amount', 'Amount (ETB)')}</TableHead>
+                      <TableHead className="text-center">{t('finance.paymentType', 'Type')}</TableHead>
+                      <TableHead>{t('finance.method', 'Method')}</TableHead>
+                      <TableHead>{t('finance.reference', 'Reference / Txn #')}</TableHead>
+                      <TableHead>{t('orderDetail.loggedBy', 'Logged By')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -718,19 +718,19 @@ export const FinancialPage: React.FC = () => {
           </Card>
 
           {isExpensesLoading ? (
-            <LoadingState message="Loading expense ledger..." />
+            <LoadingState message={t('common.loading', 'Loading expense ledger...')} />
           ) : filteredExpenses.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <Receipt className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-stone-800">No Expenses Recorded</h3>
+                <h3 className="text-base font-semibold text-stone-800">{t('finance.noExpenses', 'No Expenses Recorded')}</h3>
                 <p className="text-sm text-stone-500 mt-1 mb-4">
                   {searchTerm || selectedCategory !== 'ALL'
-                    ? 'No expenses match your search.'
-                    : 'Log workshop operational overhead, rent or utility bills.'}
+                    ? t('common.noResultsFound', 'No expenses match your search.')
+                    : t('finance.recordExpenseDesc', 'Log business operating overhead, workshop supplies, or utility bills.')}
                 </p>
                 <Button onClick={() => setIsExpenseOpen(true)} className="bg-wood-600 hover:bg-wood-700">
-                  <Plus className="w-4 h-4 mr-2" /> Log First Expense
+                  <Plus className="w-4 h-4 mr-2" /> {t('finance.recordExpenseBtn', 'Record Expense')}
                 </Button>
               </CardContent>
             </Card>
@@ -746,7 +746,7 @@ export const FinancialPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <span className="font-semibold text-stone-900 text-xs">
-                          {e.branchName || 'Central'}
+                          {e.branchName || t('finance.centralOverhead', 'Central')}
                         </span>
                         <RecordSyncBadge isPendingSync={e.isPendingSync} />
                       </div>
@@ -760,7 +760,7 @@ export const FinancialPage: React.FC = () => {
                         {e.description}
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">Expense</span>
+                        <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('finance.expenseCategory', 'Expense')}</span>
                         <span className="font-mono font-bold text-sm text-rose-800">
                           {formatCurrency(e.amount)}
                         </span>
@@ -768,12 +768,12 @@ export const FinancialPage: React.FC = () => {
                     </div>
 
                     <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-[11px] text-stone-500">
-                      <span>Date: {new Date(e.expenseDate).toLocaleDateString()}</span>
-                      {e.receiptRef && <span className="font-mono">Ref: {e.receiptRef}</span>}
+                      <span>{t('common.date', 'Date')}: {new Date(e.expenseDate).toLocaleDateString()}</span>
+                      {e.receiptRef && <span className="font-mono">{t('orderDetail.ref', 'Ref')}: {e.receiptRef}</span>}
                     </div>
 
                     <div className="text-[10px] text-muted-foreground flex justify-between">
-                      <span>Logged by: {e.recordedByUserName || 'Staff'}</span>
+                      <span>{t('orderDetail.loggedBy', 'Logged by')}: {e.recordedByUserName || 'Staff'}</span>
                     </div>
                   </div>
                 ))}
@@ -784,14 +784,14 @@ export const FinancialPage: React.FC = () => {
                 <Table>
                   <TableHeader className="bg-wood-50/50">
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Location / Branch</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Amount (ETB)</TableHead>
-                      <TableHead>Receipt / Voucher Ref</TableHead>
-                      <TableHead>Logged By</TableHead>
+                      <TableHead>{t('common.date', 'Date')}</TableHead>
+                      <TableHead>{t('finance.expenseLocation', 'Location / Branch')}</TableHead>
+                      <TableHead>{t('finance.expenseCategory', 'Category')}</TableHead>
+                      <TableHead>{t('common.status', 'Status')}</TableHead>
+                      <TableHead>{t('common.description', 'Description')}</TableHead>
+                      <TableHead className="text-right">{t('finance.expenseAmount', 'Amount (ETB)')}</TableHead>
+                      <TableHead>{t('finance.receiptVoucherRef', 'Receipt / Voucher Ref')}</TableHead>
+                      <TableHead>{t('orderDetail.loggedBy', 'Logged By')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -847,10 +847,10 @@ export const FinancialPage: React.FC = () => {
           <Card className="border-wood-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold text-stone-900">
-                Branch Financial Performance Comparison
+                {t('finance.branchesTab', 'Branch Performance Comparison')}
               </CardTitle>
               <CardDescription className="text-xs">
-                Authoritative breakdown of money collected versus operating expenses per location.
+                {t('finance.subtitle', 'Authoritative breakdown of money collected versus operating expenses per location.')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -866,21 +866,21 @@ export const FinancialPage: React.FC = () => {
                       <span className={`font-mono font-bold ${
                         b.netContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
                       }`}>
-                        Net: {formatCurrency(b.netContribution)}
+                        {t('finance.netBalance', 'Net')}: {formatCurrency(b.netContribution)}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-stone-50 font-mono">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">Cash Inflow</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">{t('finance.cashInflow', 'Cash Inflow')}</span>
                         <span className="text-emerald-800 font-bold">{formatCurrency(b.totalCashCollected)}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">Branch Expenses</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-sans">{t('finance.branchExpenses', 'Branch Expenses')}</span>
                         <span className="text-rose-800 font-bold">{formatCurrency(b.totalExpenses)}</span>
                       </div>
                       <div className="col-span-2 pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] font-sans">
-                        <span className="text-stone-500">Contracted Orders:</span>
+                        <span className="text-stone-500">{t('finance.contractedValue', 'Contracted Orders')}:</span>
                         <span className="font-mono text-stone-900 font-medium">{formatCurrency(b.totalOrdersValue)}</span>
                       </div>
                     </div>
@@ -893,11 +893,11 @@ export const FinancialPage: React.FC = () => {
                 <Table>
                   <TableHeader className="bg-wood-50/50">
                     <TableRow>
-                      <TableHead>Branch Name</TableHead>
-                      <TableHead className="text-right">Contracted Orders Value</TableHead>
-                      <TableHead className="text-right">Cash Inflow Collected</TableHead>
-                      <TableHead className="text-right">Branch Expenses</TableHead>
-                      <TableHead className="text-right">Net Operating Contribution</TableHead>
+                      <TableHead>{t('branches.branchName', 'Branch Name')}</TableHead>
+                      <TableHead className="text-right">{t('finance.contractedValue', 'Contracted Orders Value')}</TableHead>
+                      <TableHead className="text-right">{t('finance.cashInflow', 'Cash Inflow Collected')}</TableHead>
+                      <TableHead className="text-right">{t('finance.branchExpenses', 'Branch Expenses')}</TableHead>
+                      <TableHead className="text-right">{t('finance.netOperatingContribution', 'Net Operating Contribution')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -934,9 +934,9 @@ export const FinancialPage: React.FC = () => {
       <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Record Order Payment</DialogTitle>
+            <DialogTitle>{t('finance.recordPaymentTitle', 'Record Order Payment')}</DialogTitle>
             <DialogDescription>
-              Record customer progress payment or final settlement against an outstanding order.
+              {t('finance.recordPaymentDesc', 'Record customer progress payment or final settlement against an outstanding order.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -946,7 +946,7 @@ export const FinancialPage: React.FC = () => {
           >
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Select Order <span className="text-red-500">*</span>
+                {t('orders.selectOrder', 'Select Order')} <span className="text-red-500">*</span>
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
@@ -959,10 +959,10 @@ export const FinancialPage: React.FC = () => {
                   }
                 }}
               >
-                <option value="">-- Choose Order with Balance --</option>
+                <option value="">-- {t('orders.selectOrder', 'Choose Order with Balance')} --</option>
                 {ordersWithBalance.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.orderNumber} — {o.customer?.fullName} (Balance: {formatCurrency(o.outstandingBalance)})
+                    {o.orderNumber} — {o.customer?.fullName} ({t('orders.remainingBalance', 'Balance')}: {formatCurrency(o.outstandingBalance)})
                   </option>
                 ))}
               </select>
@@ -976,15 +976,15 @@ export const FinancialPage: React.FC = () => {
             {selectedOrderObj && (
               <div className="p-3 bg-wood-50 rounded-lg border border-wood-200 text-xs space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Contract Value:</span>
+                  <span className="text-muted-foreground">{t('orders.agreedPrice', 'Contract Value')}:</span>
                   <span className="font-mono font-medium">{formatCurrency(selectedOrderObj.totalAgreedPrice)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Already Paid:</span>
+                  <span className="text-muted-foreground">{t('orders.paidAmount', 'Already Paid')}:</span>
                   <span className="font-mono text-emerald-700 font-medium">{formatCurrency(selectedOrderObj.totalPaid)}</span>
                 </div>
                 <div className="flex justify-between font-bold pt-1 border-t border-wood-200">
-                  <span className="text-wood-950">Current Outstanding:</span>
+                  <span className="text-wood-950">{t('orders.remainingBalance', 'Current Outstanding')}:</span>
                   <span className="font-mono text-amber-900">{formatCurrency(selectedOrderObj.outstandingBalance)}</span>
                 </div>
               </div>
@@ -993,7 +993,7 @@ export const FinancialPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Payment Amount (ETB) <span className="text-red-500">*</span>
+                  {t('finance.amount', 'Payment Amount (ETB)')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
@@ -1012,24 +1012,24 @@ export const FinancialPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Payment Method <span className="text-red-500">*</span>
+                  {t('finance.method', 'Payment Method')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                   {...paymentForm.register('paymentMethod')}
                 >
-                  <option value="Cash">Cash</option>
-                  <option value="Bank Transfer">Bank Transfer (CBE / Awash)</option>
-                  <option value="Telebirr">Telebirr</option>
-                  <option value="CBE Birr">CBE Birr</option>
-                  <option value="Cheque">Cheque</option>
+                  <option value="Cash">{t('orderDetail.cash', 'Cash')}</option>
+                  <option value="Bank Transfer">{t('orderDetail.bankTransfer', 'Bank Transfer (CBE / Awash)')}</option>
+                  <option value="Telebirr">{t('orderDetail.telebirr', 'Telebirr')}</option>
+                  <option value="CBE Birr">{t('orderDetail.cbeBirr', 'CBE Birr')}</option>
+                  <option value="Cheque">{t('orderDetail.check', 'Cheque')}</option>
                 </select>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Reference / Transaction #
+                {t('finance.reference', 'Reference / Transaction #')}
               </label>
               <Input
                 placeholder="e.g. TXN-998811 or Cash Voucher #12"
@@ -1043,14 +1043,14 @@ export const FinancialPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsPaymentOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-wood-700 hover:bg-wood-800"
                 disabled={paymentMutation.isPending}
               >
-                {paymentMutation.isPending ? 'Recording Payment...' : 'Confirm Payment'}
+                {paymentMutation.isPending ? t('common.saving', 'Recording Payment...') : t('finance.savePayment', 'Confirm Payment')}
               </Button>
             </DialogFooter>
           </form>
@@ -1061,9 +1061,9 @@ export const FinancialPage: React.FC = () => {
       <Dialog open={isExpenseOpen} onOpenChange={setIsExpenseOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Record Operating Expense</DialogTitle>
+            <DialogTitle>{t('finance.recordExpenseTitle', 'Record Operating Expense')}</DialogTitle>
             <DialogDescription>
-              Log business operating overhead, workshop supplies, or utility bills.
+              {t('finance.recordExpenseDesc', 'Log business operating overhead, workshop supplies, or utility bills.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -1074,13 +1074,13 @@ export const FinancialPage: React.FC = () => {
             {isOwner && (
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Expense Location / Branch
+                  {t('finance.expenseLocation', 'Expense Location / Branch')}
                 </label>
                 <select
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   {...expenseForm.register('branchId')}
                 >
-                  <option value="">Central Enterprise Overhead (Global)</option>
+                  <option value="">{t('finance.centralOverhead', 'Central Enterprise Overhead (Global)')}</option>
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name} ({b.code})
@@ -1093,25 +1093,25 @@ export const FinancialPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Category <span className="text-red-500">*</span>
+                  {t('finance.expenseCategory', 'Category')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   {...expenseForm.register('category')}
                 >
-                  <option value="Workshop Supplies">Workshop Supplies</option>
-                  <option value="Utilities">Utilities (Electricity/Water)</option>
-                  <option value="Rent">Rent</option>
-                  <option value="Transportation & Delivery">Transportation & Delivery</option>
-                  <option value="Maintenance">Maintenance & Repairs</option>
-                  <option value="Marketing">Marketing & Advertising</option>
-                  <option value="Other">Other Operating Expense</option>
+                  <option value="Workshop Supplies">{t('finance.workshopSupplies', 'Workshop Supplies')}</option>
+                  <option value="Utilities">{t('finance.utilities', 'Utilities (Electricity/Water)')}</option>
+                  <option value="Rent">{t('finance.rent', 'Rent')}</option>
+                  <option value="Transportation & Delivery">{t('finance.transportDelivery', 'Transportation & Delivery')}</option>
+                  <option value="Maintenance">{t('finance.maintenanceRepairs', 'Maintenance & Repairs')}</option>
+                  <option value="Marketing">{t('finance.marketingAdvertising', 'Marketing & Advertising')}</option>
+                  <option value="Other">{t('finance.otherExpense', 'Other Operating Expense')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Amount (ETB) <span className="text-red-500">*</span>
+                  {t('finance.expenseAmount', 'Amount (ETB)')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="number"
@@ -1130,10 +1130,10 @@ export const FinancialPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Description <span className="text-red-500">*</span>
+                {t('finance.expenseDesc', 'Description')} <span className="text-red-500">*</span>
               </label>
               <Input
-                placeholder="e.g. Monthly electricity bill for Kality workshop"
+                placeholder={t('finance.expenseDescPlaceholder', 'e.g. Monthly electricity bill for Kality workshop')}
                 {...expenseForm.register('description')}
               />
               {expenseForm.formState.errors.description && (
@@ -1145,10 +1145,10 @@ export const FinancialPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Receipt / Voucher Ref
+                {t('finance.receiptVoucherRef', 'Receipt / Voucher Ref')}
               </label>
               <Input
-                placeholder="e.g. EEU-BILL-2026-90 or Petty Cash #88"
+                placeholder={t('finance.receiptRefPlaceholder', 'e.g. EEU-BILL-2026-90 or Petty Cash #88')}
                 {...expenseForm.register('receiptRef')}
               />
             </div>
@@ -1159,14 +1159,14 @@ export const FinancialPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsExpenseOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-wood-700 hover:bg-wood-800"
                 disabled={expenseMutation.isPending}
               >
-                {expenseMutation.isPending ? 'Logging Expense...' : 'Record Expense'}
+                {expenseMutation.isPending ? t('finance.recordingExpense', 'Logging Expense...') : t('finance.confirmExpense', 'Record Expense')}
               </Button>
             </DialogFooter>
           </form>

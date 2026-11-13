@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { db, OutboxMutation } from '../../lib/db';
 import { useSync } from '../../context/SyncContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { AlertTriangle, RefreshCw, Trash2, X } from 'lucide-react';
 
 interface ConflictModalProps {
@@ -10,6 +11,7 @@ interface ConflictModalProps {
 
 export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, onClose }) => {
   const { retryMutation, discardMutation } = useSync();
+  const { t } = useLanguage();
   const [conflicts, setConflicts] = useState<OutboxMutation[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -33,12 +35,12 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
         <div className="flex items-center justify-between p-4 border-b border-border bg-amber-500/10">
           <div className="flex items-center gap-2 text-amber-600 font-semibold">
             <AlertTriangle className="w-5 h-5" />
-            <span>Synchronization Conflicts ({conflicts.length})</span>
+            <span>{t('common.resolveConflicts', 'Synchronization Conflicts')} ({conflicts.length})</span>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded-md text-muted-foreground hover:bg-muted"
-            title="Close"
+            title={t('common.close', 'Close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -48,7 +50,7 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
           {conflicts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
-              No active synchronization conflicts. All local records are in sync.
+              {t('common.noConflicts', 'No active synchronization conflicts. All local records are in sync.')}
             </p>
           ) : (
             conflicts.map((item) => (
@@ -67,21 +69,21 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
 
                 <div className="text-sm">
                   <p className="font-medium text-destructive mb-1">
-                    Conflict: {item.lastError || 'Server rejected due to concurrent changes'}
+                    {t('common.conflict', 'Conflict')}: {item.lastError || 'Server rejected due to concurrent changes'}
                   </p>
                   {item.conflictDetails && (
                     <div className="bg-background/80 rounded p-2 text-xs font-mono space-y-1 border border-border">
                       {item.conflictDetails.availableStock !== undefined && (
-                        <p>Available on Server: {item.conflictDetails.availableStock} {item.conflictDetails.unitOfMeasurement || 'units'}</p>
+                        <p>{t('orderDetail.availableInventory', 'Available on Server')}: {item.conflictDetails.availableStock} {item.conflictDetails.unitOfMeasurement || t('common.items', 'units')}</p>
                       )}
                       {item.conflictDetails.requestedQuantity !== undefined && (
-                        <p>Offline Attempted Quantity: {item.conflictDetails.requestedQuantity} {item.conflictDetails.unitOfMeasurement || 'units'}</p>
+                        <p>{t('orderDetail.qtyConsumed', 'Offline Attempted Quantity')}: {item.conflictDetails.requestedQuantity} {item.conflictDetails.unitOfMeasurement || t('common.items', 'units')}</p>
                       )}
                       {item.conflictDetails.outstandingBalance !== undefined && (
-                        <p>Remaining Balance: ETB {item.conflictDetails.outstandingBalance}</p>
+                        <p>{t('orders.balanceDue', 'Remaining Balance')}: ETB {item.conflictDetails.outstandingBalance}</p>
                       )}
                       {item.conflictDetails.attemptedAmount !== undefined && (
-                        <p>Attempted Payment: ETB {item.conflictDetails.attemptedAmount}</p>
+                        <p>{t('paymentModal.paymentAmount', 'Attempted Payment')}: ETB {item.conflictDetails.attemptedAmount}</p>
                       )}
                     </div>
                   )}
@@ -99,7 +101,7 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 font-medium"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    Discard Local Change
+                    <span>{t('common.delete', 'Discard Local')}</span>
                   </button>
                   <button
                     disabled={loading}
@@ -112,22 +114,12 @@ export const ConflictResolutionModal: React.FC<ConflictModalProps> = ({ isOpen, 
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
-                    Retry Sync
+                    <span>{t('common.tryAgain', 'Force Retry')}</span>
                   </button>
                 </div>
               </div>
             ))
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-border flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>

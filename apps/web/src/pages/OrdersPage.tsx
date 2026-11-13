@@ -472,17 +472,17 @@ export const OrdersPage: React.FC = () => {
 
       {/* Orders List: Mobile Cards + Desktop Table */}
       {isLoading ? (
-        <LoadingState message="Loading custom production orders..." />
+        <LoadingState message={t('common.loading', 'Loading custom production orders...')} />
       ) : error ? (
         <ErrorState
-          title="Could not load orders"
-          message="Failed to fetch orders from server or local offline store."
+          title={t('common.somethingWentWrong', 'Could not load orders')}
+          message={t('common.unexpectedError', 'Failed to fetch orders from server or local offline store.')}
           onRetry={() => refetch()}
         />
       ) : filteredOrders.length === 0 ? (
         <Card className="border-wood-200 text-center py-12">
           <CardContent>
-            <p className="text-muted-foreground text-sm">No orders found matching the filter.</p>
+            <p className="text-muted-foreground text-sm">{t('orders.noOrdersDesc', 'No orders found matching the filter.')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -782,7 +782,7 @@ export const OrdersPage: React.FC = () => {
                     className="p-3 rounded-md border border-wood-200 bg-wood-50/50 space-y-2.5"
                   >
                     <div className="flex items-center justify-between text-xs font-semibold text-charcoal-700">
-                      <span>Item #{idx + 1}</span>
+                      <span>{t('common.details', 'Item')} #{idx + 1}</span>
                       {fields.length > 1 && (
                         <button
                           type="button"
@@ -882,7 +882,7 @@ export const OrdersPage: React.FC = () => {
                   >
                     <option value="Cash">{t('paymentModal.cash', 'Cash')}</option>
                     <option value="Bank Transfer">{t('paymentModal.telebirr', 'Telebirr')} / {t('paymentModal.cbeBank', 'CBE')}</option>
-                    <option value="Check">Business Check</option>
+                    <option value="Check">{t('common.check', 'Business Check')}</option>
                   </select>
                 </div>
               </div>

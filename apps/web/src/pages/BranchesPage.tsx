@@ -126,7 +126,7 @@ export const BranchesPage: React.FC = () => {
                       <CardDescription className="text-xs font-mono">{branch.code}</CardDescription>
                     </div>
                     <Badge variant={branch.stockMode === StockMode.MAIN_STOCK ? 'secondary' : 'wood'}>
-                      {branch.stockMode === StockMode.MAIN_STOCK ? 'Main Stock' : 'Branch Stock'}
+                      {branch.stockMode === StockMode.MAIN_STOCK ? t('branches.mainStock', 'Main Stock') : t('branches.branchStock', 'Branch Stock')}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -148,7 +148,7 @@ export const BranchesPage: React.FC = () => {
                   {/* Administrator Card */}
                   <div className="p-3 rounded-md bg-wood-50/70 border border-wood-200">
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-charcoal-600 mb-1">
-                      Branch Administrator
+                      {t('branches.assignedAdmin', 'Branch Administrator')}
                     </div>
                     {branch.admin ? (
                       <div className="space-y-0.5">
@@ -170,7 +170,7 @@ export const BranchesPage: React.FC = () => {
                             assignAdminForm.reset();
                           }}
                         >
-                          Assign Now
+                          {t('branches.assignAdminTitle', 'Assign Now')}
                         </Button>
                       </div>
                     )}
@@ -180,7 +180,7 @@ export const BranchesPage: React.FC = () => {
 
               <CardFooter className="pt-2 border-t border-wood-100 bg-wood-50/30 flex justify-between">
                 <span className="text-xs text-muted-foreground">
-                  Status: {branch.isActive ? 'Active' : 'Inactive'}
+                  {t('common.status', 'Status')}: {branch.isActive ? 'Active' : 'Inactive'}
                 </span>
                 <Button
                   size="sm"
@@ -196,7 +196,7 @@ export const BranchesPage: React.FC = () => {
                   className="space-x-1"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  <span>{branch.admin ? 'Reassign Admin' : 'Assign Admin'}</span>
+                  <span>{branch.admin ? t('branches.assignAdminTitle', 'Reassign Admin') : t('branches.assignAdminTitle', 'Assign Admin')}</span>
                 </Button>
               </CardFooter>
             </Card>
@@ -208,32 +208,32 @@ export const BranchesPage: React.FC = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Branch</DialogTitle>
+            <DialogTitle>{t('branches.createBranchTitle', 'Create New Branch')}</DialogTitle>
             <DialogDescription>
-              Register a new workshop or showroom branch and designate its inventory stock model.
+              {t('branches.createBranchDesc', 'Register a new workshop or showroom branch and designate its inventory stock model.')}
             </DialogDescription>
           </DialogHeader>
 
           <FormProvider {...createBranchForm}>
             <form onSubmit={createBranchForm.handleSubmit(handleCreateSubmit)} className="space-y-4 py-2">
-              <FormInput name="name" label="Branch Name" placeholder="e.g. Megenagna Workshop" />
-              <FormInput name="code" label="Branch Code" placeholder="e.g. BR-MEGENAGNA" />
-              <FormInput name="address" label="Physical Address / Subcity" placeholder="e.g. Megenagna, Next to Zefmesh Mall" />
-              <FormInput name="phone" label="Contact Phone" placeholder="e.g. +251116630000" />
+              <FormInput name="name" label={t('branches.branchNameLabel', 'Branch Name')} placeholder={t('branches.branchNamePlaceholder', 'e.g. Megenagna Workshop')} />
+              <FormInput name="code" label={t('branches.branchCodeLabel', 'Branch Code')} placeholder={t('branches.branchCodePlaceholder', 'e.g. BR-MEGENAGNA')} />
+              <FormInput name="address" label={t('branches.branchAddressLabel', 'Physical Address / Subcity')} placeholder={t('branches.branchAddressPlaceholder', 'e.g. Megenagna, Next to Zefmesh Mall')} />
+              <FormInput name="phone" label={t('branches.branchPhoneLabel', 'Contact Phone')} placeholder={t('branches.branchPhonePlaceholder', 'e.g. +251116630000')} />
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                  Stock Configuration Mode
+                  {t('branches.stockModeLabel', 'Stock Configuration Mode')}
                 </label>
                 <select
                   {...createBranchForm.register('stockMode')}
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value={StockMode.MAIN_STOCK}>
-                    Main Stock (Draws materials directly from central warehouse)
+                    {t('branches.mainStock', 'Main Stock')} ({t('branches.stockModeMainHint', 'Draws materials directly from central warehouse')})
                   </option>
                   <option value={StockMode.BRANCH_STOCK}>
-                    Branch Stock (Maintains independent dedicated physical inventory)
+                    {t('branches.branchStock', 'Branch Stock')} ({t('branches.stockModeBranchHint', 'Maintains independent dedicated physical inventory')})
                   </option>
                 </select>
                 <p className="text-xs text-muted-foreground">
@@ -249,10 +249,10 @@ export const BranchesPage: React.FC = () => {
 
               <DialogFooter className="pt-2">
                 <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Creating...' : 'Save Branch'}
+                  {createMutation.isPending ? t('branches.savingBranch', 'Creating...') : t('branches.saveBranchBtn', 'Save Branch')}
                 </Button>
               </DialogFooter>
             </form>
@@ -265,22 +265,22 @@ export const BranchesPage: React.FC = () => {
         {assignAdminBranch && (
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Assign Branch Administrator</DialogTitle>
+              <DialogTitle>{t('branches.assignAdminTitle', 'Assign Branch Administrator')}</DialogTitle>
               <DialogDescription>
-                Assign exactly one administrator to {assignAdminBranch.name} ({assignAdminBranch.code}).
+                {t('branches.assignAdminDesc', 'Assign exactly one administrator to')} {assignAdminBranch.name} ({assignAdminBranch.code}).
               </DialogDescription>
             </DialogHeader>
 
             <FormProvider {...assignAdminForm}>
               <form onSubmit={assignAdminForm.handleSubmit(handleAssignSubmit)} className="space-y-4 py-2">
-                <FormInput name="fullName" label="Administrator Full Name" placeholder="e.g. Dawit Haile" />
-                <FormInput name="email" label="Administrator Email" type="email" placeholder="e.g. admin.megenagna@furniture.com" />
-                <FormInput name="phone" label="Phone Number" placeholder="e.g. +251911445566" />
+                <FormInput name="fullName" label={t('branches.adminFullName', 'Administrator Full Name')} placeholder="e.g. Dawit Haile" />
+                <FormInput name="email" label={t('branches.adminEmail', 'Administrator Email')} type="email" placeholder="e.g. admin.megenagna@furniture.com" />
+                <FormInput name="phone" label={t('branches.adminPhone', 'Phone Number')} placeholder="e.g. +251911445566" />
                 <FormInput
                   name="password"
-                  label="Password"
+                  label={t('branches.adminPassword', 'Password')}
                   type="password"
-                  placeholder="Required if creating a new user"
+                  placeholder={t('branches.adminPasswordHint', 'Required if creating a new user')}
                   description="Leave empty if user already exists to keep their existing password."
                 />
 
@@ -292,10 +292,10 @@ export const BranchesPage: React.FC = () => {
 
                 <DialogFooter className="pt-2">
                   <Button type="button" variant="secondary" onClick={() => setAssignAdminBranch(null)}>
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </Button>
                   <Button type="submit" disabled={assignAdminMutation.isPending}>
-                    {assignAdminMutation.isPending ? 'Saving Assignment...' : 'Confirm Administrator'}
+                    {assignAdminMutation.isPending ? t('branches.assigningAdmin', 'Saving Assignment...') : t('branches.confirmAssignAdmin', 'Confirm Administrator')}
                   </Button>
                 </DialogFooter>
               </form>

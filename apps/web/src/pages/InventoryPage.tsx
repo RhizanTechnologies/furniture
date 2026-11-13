@@ -622,9 +622,9 @@ export const InventoryPage: React.FC = () => {
       <Dialog open={isStockInOpen} onOpenChange={setIsStockInOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Record Material Replenishment (Stock-In)</DialogTitle>
+            <DialogTitle>{t('inventory.stockInTitle', 'Record Material Replenishment (Stock-In)')}</DialogTitle>
             <DialogDescription>
-              Add newly purchased materials. The Weighted Average Cost (WAC) will automatically recalculate.
+              {t('inventory.stockInDesc', 'Add newly purchased materials. The Weighted Average Cost (WAC) will automatically recalculate.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -634,7 +634,7 @@ export const InventoryPage: React.FC = () => {
           >
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Select Raw Material <span className="text-red-500">*</span>
+                {t('inventory.selectMaterial', 'Select Raw Material')} <span className="text-red-500">*</span>
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
@@ -650,7 +650,7 @@ export const InventoryPage: React.FC = () => {
               >
                 {materials.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name} ({m.code}) — {m.currentStockQuantity} {m.unitOfMeasurement} on hand
+                    {m.name} ({m.code}) — {m.currentStockQuantity} {m.unitOfMeasurement}
                   </option>
                 ))}
               </select>
@@ -664,13 +664,13 @@ export const InventoryPage: React.FC = () => {
             {isOwner && branches.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Target Destination Location
+                  {t('inventory.targetLocation', 'Target Destination Location')}
                 </label>
                 <select
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                   {...stockInForm.register('branchId')}
                 >
-                  <option value="">Central Main Warehouse (Global Pool)</option>
+                  <option value="">{t('inventory.centralMainWarehouse', 'Central Main Warehouse (Global Pool)')}</option>
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name} ({b.code}) — {b.stockMode}
@@ -678,7 +678,7 @@ export const InventoryPage: React.FC = () => {
                   ))}
                 </select>
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  Select a dedicated branch to allocate this batch directly to that location's inventory.
+                  {t('inventory.targetLocationHint', "Select a dedicated branch to allocate this batch directly to that location's inventory.")}
                 </p>
               </div>
             )}
@@ -686,7 +686,7 @@ export const InventoryPage: React.FC = () => {
             <div className={`grid ${isOwner ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Quantity Received ({selectedMaterialForStockIn?.unitOfMeasurement || 'Units'}) <span className="text-red-500">*</span>
+                  {t('inventory.qtyReceived', 'Quantity Received')} ({selectedMaterialForStockIn?.unitOfMeasurement || t('common.items', 'Units')}) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Input
@@ -713,7 +713,7 @@ export const InventoryPage: React.FC = () => {
               {isOwner && (
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">
-                    Unit Cost per {selectedMaterialForStockIn?.unitOfMeasurement || 'Unit'} (ETB) <span className="text-red-500">*</span>
+                    {t('inventory.batchUnitCost', 'Purchase Unit Cost (ETB)')} <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="number"
@@ -734,15 +734,15 @@ export const InventoryPage: React.FC = () => {
 
             {selectedMaterialForStockIn && (
               <p className="text-xs text-stone-600 bg-stone-50 border border-stone-200 p-2.5 rounded-lg flex items-center justify-between">
-                <span>Preset Measurement Unit: <strong className="text-wood-950 font-semibold">{selectedMaterialForStockIn.unitOfMeasurement}</strong></span>
-                <span className="text-stone-500 text-[11px]">Current: {selectedMaterialForStockIn.currentStockQuantity} {selectedMaterialForStockIn.unitOfMeasurement} on hand</span>
+                <span>{t('inventory.presetUnit', 'Preset Unit')}: <strong className="text-wood-950 font-semibold">{selectedMaterialForStockIn.unitOfMeasurement}</strong></span>
+                <span className="text-stone-500 text-[11px]">{selectedMaterialForStockIn.currentStockQuantity} {selectedMaterialForStockIn.unitOfMeasurement}</span>
               </p>
             )}
 
             {/* Total Batch Cost Preview (Executive Owner Only) */}
             {isOwner && (
               <div className="p-3 bg-wood-50 rounded-lg border border-wood-200 flex justify-between items-center text-sm">
-                <span className="text-wood-800 font-medium">Batch Purchase Value:</span>
+                <span className="text-wood-800 font-medium">{t('inventory.batchTotalCost', 'Total Batch Cost (ETB)')}:</span>
                 <span className="font-mono font-bold text-wood-950 text-base">
                   {formatCurrency(computedStockInTotal)}
                 </span>
@@ -751,10 +751,10 @@ export const InventoryPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Supplier Invoice / Receipt Ref
+                {t('inventory.invoiceRef', 'Supplier Invoice / Receipt Ref')}
               </label>
               <Input
-                placeholder="e.g. INV-2026-092 or Cash Voucher #44"
+                placeholder={t('inventory.invoicePlaceholder', 'e.g. INV-2026-092 or Cash Voucher #44')}
                 {...stockInForm.register('supplierInvoiceRef')}
               />
             </div>
@@ -765,14 +765,14 @@ export const InventoryPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsStockInOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-wood-700 hover:bg-wood-800"
                 disabled={stockInMutation.isPending}
               >
-                {stockInMutation.isPending ? 'Recording Batch...' : 'Confirm Stock-In'}
+                {stockInMutation.isPending ? t('inventory.recordingStockIn', 'Recording Stock-In...') : t('inventory.confirmStockIn', 'Confirm Stock-In')}
               </Button>
             </DialogFooter>
           </form>
@@ -783,9 +783,9 @@ export const InventoryPage: React.FC = () => {
       <Dialog open={isAddMaterialOpen} onOpenChange={setIsAddMaterialOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Define New Raw Material</DialogTitle>
+            <DialogTitle>{t('inventory.addMaterialTitle', 'Define New Raw Material')}</DialogTitle>
             <DialogDescription>
-              Register a workshop material with base measurement units and optional opening inventory.
+              {t('inventory.addMaterialDesc', 'Register a workshop material with base measurement units and optional opening inventory.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -796,7 +796,7 @@ export const InventoryPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Material Code <span className="text-red-500">*</span>
+                  {t('inventory.materialCode', 'Material Code')} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   placeholder="e.g. MAT-TIM-005"
@@ -811,24 +811,24 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Category <span className="text-red-500">*</span>
+                  {t('inventory.materialCategory', 'Category')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                   {...materialForm.register('category')}
                 >
-                  <option value="Timber">Timber / Wood</option>
-                  <option value="Fabric">Fabric / Upholstery</option>
-                  <option value="Foam">Foam / Padding</option>
-                  <option value="Hardware">Hardware / Fasteners</option>
-                  <option value="Finishing">Finishing / Varnishes</option>
+                  <option value="Timber">{t('inventory.timber', 'Timber / Wood')}</option>
+                  <option value="Fabric">{t('inventory.fabric', 'Fabric / Upholstery')}</option>
+                  <option value="Foam">{t('inventory.foam', 'Foam / Padding')}</option>
+                  <option value="Hardware">{t('inventory.hardware', 'Hardware / Fasteners')}</option>
+                  <option value="Finishing">{t('inventory.finishes', 'Finishing / Varnishes')}</option>
                 </select>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">
-                Material Name <span className="text-red-500">*</span>
+                {t('inventory.materialName', 'Material Name')} <span className="text-red-500">*</span>
               </label>
               <Input
                 placeholder="e.g. Solid Zigba Wood Plank 2.5m"
@@ -844,7 +844,7 @@ export const InventoryPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Preset Unit of Measure <span className="text-red-500">*</span>
+                  {t('inventory.presetUnit', 'Preset Unit of Measure')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   list="preset-material-units"
@@ -885,7 +885,7 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Reorder Alert Threshold ({watchMaterialUnit})
+                  {t('inventory.reorderThreshold', 'Reorder Alert Threshold')} ({watchMaterialUnit})
                 </label>
                 <Input
                   type="number"
@@ -894,7 +894,7 @@ export const InventoryPage: React.FC = () => {
                   {...materialForm.register('reorderAlertQuantity', { valueAsNumber: true })}
                 />
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Triggers alert when balance falls below this level.
+                  {t('inventory.reorderHint', 'Triggers alert when balance falls below this level.')}
                 </p>
               </div>
             </div>
@@ -902,7 +902,7 @@ export const InventoryPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 pt-2 border-t">
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1 uppercase tracking-wider">
-                  Opening Quantity ({watchMaterialUnit})
+                  {t('inventory.openingQuantity', 'Opening Quantity')} ({watchMaterialUnit})
                 </label>
                 <Input
                   type="number"
@@ -915,7 +915,7 @@ export const InventoryPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-stone-600 mb-1 uppercase tracking-wider">
-                  Initial Cost per {watchMaterialUnit} (ETB)
+                  {t('inventory.openingUnitCost', 'Initial Cost per Unit (ETB)')}
                 </label>
                 <Input
                   type="number"
@@ -933,14 +933,14 @@ export const InventoryPage: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsAddMaterialOpen(false)}
               >
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <Button
                 type="submit"
                 className="bg-wood-700 hover:bg-wood-800"
                 disabled={createMaterialMutation.isPending}
               >
-                {createMaterialMutation.isPending ? 'Saving Material...' : 'Create Material'}
+                {createMaterialMutation.isPending ? t('inventory.creatingMaterial', 'Saving Material...') : t('inventory.createMaterialBtn', 'Create Material')}
               </Button>
             </DialogFooter>
           </form>
@@ -958,7 +958,7 @@ export const InventoryPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <DialogTitle className="text-xl font-bold">
-                    {materialHistory?.name || 'Material History'}
+                    {materialHistory?.name || t('inventory.materialHistory', 'Material History')}
                   </DialogTitle>
                   <DialogDescription className="font-mono text-xs text-wood-700">
                     {materialHistory?.code} • {materialHistory?.category} •{' '}
@@ -967,7 +967,7 @@ export const InventoryPage: React.FC = () => {
                 </div>
                 {materialHistory && isOwner && (
                   <Badge variant="wood" className="text-xs">
-                    Current WAC: {formatCurrency(materialHistory.currentUnitCost)} /{' '}
+                    {t('inventory.currentWAC', 'Current WAC')}: {formatCurrency(materialHistory.currentUnitCost)} /{' '}
                     {materialHistory.unitOfMeasurement}
                   </Badge>
                 )}
@@ -975,19 +975,19 @@ export const InventoryPage: React.FC = () => {
             </DialogHeader>
 
             {isHistoryLoading ? (
-              <LoadingState message="Loading historical batches and consumptions..." />
+              <LoadingState message={t('common.loading', 'Loading historical batches and consumptions...')} />
             ) : !materialHistory ? (
-              <p className="text-stone-500 py-4">No historical records available.</p>
+              <p className="text-stone-500 py-4">{t('inventory.noReplenishments', 'No historical records available.')}</p>
             ) : (
               <div className="space-y-6 pt-2">
                 {/* Stock-In Batches */}
                 <div>
                   <h4 className="text-sm font-semibold text-stone-900 mb-2 flex items-center">
                     <ArrowDownToLine className="w-4 h-4 mr-1.5 text-wood-700" />
-                    Recent Replenishment Batches (Stock-Ins)
+                    {t('inventory.replenishmentBatches', 'Recent Replenishment Batches (Stock-Ins)')}
                   </h4>
                   {materialHistory.stockIns.length === 0 ? (
-                    <p className="text-xs text-stone-500 italic">No replenishment records.</p>
+                    <p className="text-xs text-stone-500 italic">{t('inventory.noReplenishments', 'No replenishment records.')}</p>
                   ) : (
                     <>
                       {/* Mobile & Tablet Card View */}
@@ -998,17 +998,17 @@ export const InventoryPage: React.FC = () => {
                             className="p-3 rounded-lg border border-wood-100 bg-stone-50/60 text-xs space-y-1.5"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-semibold text-stone-900">{s.branchName || 'Central'}</span>
+                              <span className="font-semibold text-stone-900">{s.branchName || t('common.centralOperations', 'Central')}</span>
                               <span className="text-[11px] text-muted-foreground">{new Date(s.receivedDate).toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center justify-between font-mono">
-                              <span className="text-stone-700">Received: <strong>{s.receivedQuantity} {s.unitOfMeasurement}</strong></span>
+                              <span className="text-stone-700">{t('inventory.qtyReceived', 'Received')}: <strong>{s.receivedQuantity} {s.unitOfMeasurement}</strong></span>
                               {isOwner && <span className="text-wood-900 font-bold">{formatCurrency(s.totalCost)}</span>}
                             </div>
                             {(isOwner || s.supplierInvoiceRef) && (
                               <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
-                                {isOwner && <span>Unit Cost: {formatCurrency(s.unitCost)} / {s.unitOfMeasurement}</span>}
-                                {s.supplierInvoiceRef && <span>Inv: {s.supplierInvoiceRef}</span>}
+                                {isOwner && <span>{t('common.unitCost', 'Unit Cost')}: {formatCurrency(s.unitCost)} / {s.unitOfMeasurement}</span>}
+                                {s.supplierInvoiceRef && <span>{t('inventory.invoiceRef', 'Inv')}: {s.supplierInvoiceRef}</span>}
                               </div>
                             )}
                           </div>
@@ -1020,23 +1020,23 @@ export const InventoryPage: React.FC = () => {
                         <Table>
                           <TableHeader className="bg-stone-50">
                             <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Location</TableHead>
-                              <TableHead className="text-right">Qty Received</TableHead>
+                              <TableHead>{t('common.date', 'Date')}</TableHead>
+                              <TableHead>{t('common.branch', 'Location')}</TableHead>
+                              <TableHead className="text-right">{t('inventory.qtyReceived', 'Qty Received')}</TableHead>
                               {isOwner && (
                                 <>
-                                  <TableHead className="text-right">Unit Cost</TableHead>
-                                  <TableHead className="text-right">Total Batch Cost</TableHead>
+                                  <TableHead className="text-right">{t('common.unitCost', 'Unit Cost')}</TableHead>
+                                  <TableHead className="text-right">{t('inventory.batchTotalCost', 'Total Batch Cost')}</TableHead>
                                 </>
                               )}
-                              <TableHead>Invoice Ref</TableHead>
+                              <TableHead>{t('inventory.invoiceRef', 'Invoice Ref')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {materialHistory.stockIns.map((s) => (
                               <TableRow key={s.id}>
                                 <TableCell>{new Date(s.receivedDate).toLocaleDateString()}</TableCell>
-                                <TableCell>{s.branchName}</TableCell>
+                                <TableCell>{s.branchName || t('common.centralOperations', 'Central')}</TableCell>
                                 <TableCell className="text-right font-mono font-medium">
                                   {s.receivedQuantity} {s.unitOfMeasurement}
                                 </TableCell>
@@ -1066,10 +1066,10 @@ export const InventoryPage: React.FC = () => {
                 <div>
                   <h4 className="text-sm font-semibold text-stone-900 mb-2 flex items-center">
                     <History className="w-4 h-4 mr-1.5 text-wood-700" />
-                    Recent Production Consumptions
+                    {t('inventory.productionConsumptions', 'Recent Production Consumptions')}
                   </h4>
                   {materialHistory.consumptions.length === 0 ? (
-                    <p className="text-xs text-stone-500 italic">No order consumption records.</p>
+                    <p className="text-xs text-stone-500 italic">{t('inventory.noConsumptions', 'No order consumption records.')}</p>
                   ) : (
                     <>
                       {/* Mobile & Tablet Card View */}
@@ -1084,12 +1084,12 @@ export const InventoryPage: React.FC = () => {
                               <span className="text-[11px] text-muted-foreground">{new Date(c.consumedAt).toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center justify-between font-mono">
-                              <span className="text-stone-700">Consumed: <strong>{c.consumedQuantity} {c.unitOfMeasurement}</strong></span>
+                              <span className="text-stone-700">{t('orderDetail.qtyConsumed', 'Consumed')}: <strong>{c.consumedQuantity} {c.unitOfMeasurement}</strong></span>
                               {isOwner && <span className="text-wood-900 font-bold">{formatCurrency(c.totalMaterialCost)}</span>}
                             </div>
                             <div className="pt-1 border-t border-dashed border-stone-200 flex justify-between text-[11px] text-muted-foreground">
-                              {isOwner && <span>Allocated WAC: {formatCurrency(c.unitCostAllocated)} / {c.unitOfMeasurement}</span>}
-                              <span>{c.branchName || 'Central'}</span>
+                              {isOwner && <span>{t('orderDetail.allocatedWACUnitCost', 'Allocated WAC')}: {formatCurrency(c.unitCostAllocated)} / {c.unitOfMeasurement}</span>}
+                              <span>{c.branchName || t('common.centralOperations', 'Central')}</span>
                             </div>
                           </div>
                         ))}
@@ -1100,14 +1100,14 @@ export const InventoryPage: React.FC = () => {
                         <Table>
                           <TableHeader className="bg-stone-50">
                             <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Order #</TableHead>
-                              <TableHead>Workshop</TableHead>
-                              <TableHead className="text-right">Qty Consumed</TableHead>
+                              <TableHead>{t('common.date', 'Date')}</TableHead>
+                              <TableHead>{t('orders.orderNumber', 'Order #')}</TableHead>
+                              <TableHead>{t('common.branch', 'Workshop')}</TableHead>
+                              <TableHead className="text-right">{t('orderDetail.qtyConsumed', 'Qty Consumed')}</TableHead>
                               {isOwner && (
                                 <>
-                                  <TableHead className="text-right">Allocated WAC Cost</TableHead>
-                                  <TableHead className="text-right">Total Cost Contribution</TableHead>
+                                  <TableHead className="text-right">{t('orderDetail.allocatedWACUnitCost', 'Allocated WAC Cost')}</TableHead>
+                                  <TableHead className="text-right">{t('inventory.allocatedCostContribution', 'Total Cost Contribution')}</TableHead>
                                 </>
                               )}
                             </TableRow>
@@ -1119,7 +1119,7 @@ export const InventoryPage: React.FC = () => {
                                 <TableCell className="font-mono font-bold text-wood-800">
                                   {c.orderNumber}
                                 </TableCell>
-                                <TableCell>{c.branchName}</TableCell>
+                                <TableCell>{c.branchName || t('common.centralOperations', 'Central')}</TableCell>
                                 <TableCell className="text-right font-mono font-medium">
                                   {c.consumedQuantity} {c.unitOfMeasurement}
                                 </TableCell>

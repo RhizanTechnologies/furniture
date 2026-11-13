@@ -343,22 +343,35 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                           variant="outline"
                           className="text-[9px] py-0 bg-white border-wood-200 text-wood-900"
                         >
-                          {p.paymentType}
+                          {p.paymentType === 'FINAL_SETTLEMENT'
+                            ? t('orderDetail.finalSettlement', 'Final Settlement')
+                            : p.paymentType === 'PROGRESS_PAYMENT'
+                            ? t('orderDetail.progressPayment', 'Progress Payment')
+                            : p.paymentType === 'PREPAYMENT'
+                            ? t('orderDetail.depositPrepayment', 'Deposit')
+                            : p.paymentType}
                         </Badge>
                         <span className="text-[11px] text-stone-500 font-medium">
-                          via {p.paymentMethod}
+                          {t('orderDetail.via', 'via')}{' '}
+                          {p.paymentMethod === 'Cash'
+                            ? t('common.cash', 'Cash')
+                            : p.paymentMethod === 'Telebirr'
+                            ? t('common.telebirr', 'Telebirr')
+                            : p.paymentMethod === 'CBE Birr'
+                            ? t('common.cbeBirr', 'CBE Birr')
+                            : p.paymentMethod}
                         </span>
                       </div>
                       {p.referenceNumber && (
                         <div className="font-mono text-[11px] text-stone-600">
-                          Ref: {p.referenceNumber}
+                          {t('orderDetail.ref', 'Ref')}: {p.referenceNumber}
                         </div>
                       )}
                     </div>
 
                     <div className="text-[11px] text-muted-foreground sm:text-right">
                       <div>{new Date(p.paymentDate).toLocaleDateString()}</div>
-                      <div className="text-[10px]">{t('common.createdBy', 'Logged by')} {p.recordedByUserName || 'Staff'}</div>
+                      <div className="text-[10px]">{t('common.loggedBy', 'Logged by')} {p.recordedByUserName || t('common.branchStaff', 'Staff')}</div>
                     </div>
                   </div>
                 ))}
@@ -412,7 +425,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   </span>
                 </div>
                 <div className="p-2 rounded-lg bg-wood-50/80 border border-wood-200 text-center">
-                  <span className="text-[10px] text-wood-800 uppercase font-semibold block">Gross Margin</span>
+                  <span className="text-[10px] text-wood-800 uppercase font-semibold block">{t('common.grossMargin', 'Gross Margin')}</span>
                   <span className="font-mono font-bold text-wood-900 text-xs sm:text-sm">
                     {costing?.grossMarginPercentage || 100}%
                   </span>
@@ -450,16 +463,16 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     {isOwner && (
                       <div className="pt-2 border-t border-dashed border-stone-200 flex flex-wrap items-center justify-between gap-2 text-[11px]">
                         <div className="text-muted-foreground">
-                          Unit WAC Cost: <span className="font-mono text-stone-800">{formatCurrency(c.unitCostAllocated)}</span>
+                          {t('common.unitCost', 'Unit Cost')}: <span className="font-mono text-stone-800">{formatCurrency(c.unitCostAllocated)}</span>
                         </div>
                         <div className="text-stone-800">
-                          Allocated Cost: <span className="font-mono font-bold text-wood-900">{formatCurrency(c.totalMaterialCost)}</span>
+                          {t('common.allocatedCost', 'Allocated Cost')}: <span className="font-mono font-bold text-wood-900">{formatCurrency(c.totalMaterialCost)}</span>
                         </div>
                       </div>
                     )}
 
                     <div className="text-[10px] text-muted-foreground flex justify-between items-center pt-0.5">
-                      <span>{t('common.createdBy', 'Logged by')}: {c.recordedByUserName || 'Staff'}</span>
+                      <span>{t('common.loggedBy', 'Logged by')}: {c.recordedByUserName || t('common.branchStaff', 'Staff')}</span>
                       {c.consumedAt && <span>{new Date(c.consumedAt).toLocaleDateString()}</span>}
                     </div>
                   </div>
@@ -467,7 +480,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </div>
             ) : (
               <p className="text-xs text-muted-foreground italic bg-stone-50 p-2.5 rounded border text-center">
-                {t('inventory.noMaterials', 'No materials logged yet for this order. Click "Log Material Usage" as workshop staff assemble this order.')}
+                {t('orderDetail.noMaterialsLogged', 'No materials logged yet for this order. Click "Log Material Usage" as workshop staff assemble this order.')}
               </p>
             )}
           </div>
@@ -646,16 +659,16 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         <Dialog open={isConsumeOpen} onOpenChange={setIsConsumeOpen}>
           <DialogContent className="w-[94vw] sm:w-full max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-base sm:text-lg">Log Material Consumption</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg">{t('orderDetail.logMaterialTitle', 'Log Material Consumption')}</DialogTitle>
               <DialogDescription className="text-xs">
-                Deduct raw materials consumed from inventory and allocate frozen historical cost to Order {order.orderNumber}.
+                {t('orderDetail.logMaterialDesc', 'Deduct raw materials consumed from inventory and allocate frozen historical cost to Order')} {order.orderNumber}.
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleRecordConsumption} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Raw Material <span className="text-red-500">*</span>
+                  {t('orderDetail.selectRawMaterial', 'Raw Material')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedMaterialId}
@@ -663,10 +676,10 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   required
                 >
-                  <option value="">-- Choose Raw Material --</option>
+                  <option value="">{t('orderDetail.chooseRawMaterial', '-- Choose Raw Material --')}</option>
                   {materials.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.name} ({m.code}) — {m.currentStockQuantity} {m.unitOfMeasurement} available
+                      {m.name} ({m.code}) — {m.currentStockQuantity} {m.unitOfMeasurement}
                     </option>
                   ))}
                 </select>
@@ -675,11 +688,11 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-sm font-medium text-stone-700">
-                    Quantity Consumed <span className="text-red-500">*</span>
+                    {t('orderDetail.qtyConsumed', 'Quantity Consumed')} <span className="text-red-500">*</span>
                   </label>
                   {selectedMaterial && (
                     <Badge variant="outline" className="text-xs font-mono bg-wood-50 text-wood-900 border-wood-300">
-                      Preset Unit: {selectedMaterial.unitOfMeasurement}
+                      {t('orderDetail.presetUnitOfMeasure', 'Preset Unit')}: {selectedMaterial.unitOfMeasurement}
                     </Badge>
                   )}
                 </div>
@@ -708,31 +721,31 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 {selectedMaterial ? (
                   <div className="mt-2 p-2.5 rounded-lg bg-stone-50 border border-stone-200 text-xs space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-600">Preset Unit of Measure:</span>
+                      <span className="text-stone-600">{t('orderDetail.presetUnitOfMeasure', 'Preset Unit of Measure')}:</span>
                       <strong className="text-wood-950 font-semibold">{selectedMaterial.unitOfMeasurement}</strong>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-stone-600">Available Inventory:</span>
+                      <span className="text-stone-600">{t('orderDetail.availableInventory', 'Available Inventory')}:</span>
                       <span className="font-mono font-medium text-stone-900">{selectedMaterial.currentStockQuantity} {selectedMaterial.unitOfMeasurement}</span>
                     </div>
                     <div className="flex items-center justify-between pt-1 border-t border-dashed border-stone-200">
-                      <span className="text-stone-600">Allocated WAC Unit Cost:</span>
+                      <span className="text-stone-600">{t('orderDetail.allocatedWACUnitCost', 'Allocated WAC Unit Cost')}:</span>
                       <span className="font-mono text-wood-900 font-bold">{formatCurrency(selectedMaterial.currentUnitCost)} / {selectedMaterial.unitOfMeasurement}</span>
                     </div>
                   </div>
                 ) : (
                   <p className="text-[11px] text-muted-foreground mt-1 italic">
-                    Select a raw material above to display its fixed measurement unit and available workshop inventory.
+                    {t('orderDetail.selectMaterialHint', 'Select a raw material above to display its fixed measurement unit and available workshop inventory.')}
                   </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">
-                  Workshop Usage Notes
+                  {t('orderDetail.usageNotes', 'Workshop Usage Notes')}
                 </label>
                 <Input
-                  placeholder="e.g. Table frame assembly and joinery"
+                  placeholder={t('orderDetail.usageNotesPlaceholder', 'e.g. Table frame assembly and joinery')}
                   value={consumeNotes}
                   onChange={(e) => setConsumeNotes(e.target.value)}
                 />
@@ -748,14 +761,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   variant="outline"
                   onClick={() => setIsConsumeOpen(false)}
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button
                   type="submit"
                   className="bg-wood-700 hover:bg-wood-800"
                   disabled={consumptionMutation.isPending}
                 >
-                  {consumptionMutation.isPending ? 'Logging Usage...' : 'Confirm Consumption'}
+                  {consumptionMutation.isPending ? t('orderDetail.loggingUsage', 'Logging Usage...') : t('orderDetail.confirmConsumption', 'Confirm Consumption')}
                 </Button>
               </DialogFooter>
             </form>

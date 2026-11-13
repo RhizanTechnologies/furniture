@@ -36,7 +36,7 @@ import {
 
 export const AnalyticsPage: React.FC = () => {
   const { isOwner } = useAuth();
-  const { t } = useLanguage();
+  const { t, translateCategory } = useLanguage();
 
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'all'>('monthly');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
@@ -486,19 +486,19 @@ export const AnalyticsPage: React.FC = () => {
                               </span>
                             </div>
                             <div>
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">COGS</span>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.allocatedCOGSCol', 'COGS')}</span>
                               <span className="font-mono text-stone-600 text-xs">
                                 {formatCurrency(p.estimatedMaterialCost)}
                               </span>
                             </div>
                             <div>
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Gross Profit</span>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.grossProfitCol', 'Gross Profit')}</span>
                               <span className="font-mono font-bold text-emerald-800 text-xs">
                                 {formatCurrency(p.grossProfit)}
                               </span>
                             </div>
                             <div>
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Margin</span>
+                              <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.grossMarginCol', 'Margin')}</span>
                               <span className="font-mono font-bold text-wood-900 text-xs">
                                 {p.grossMarginPercentage}%
                               </span>
@@ -513,14 +513,14 @@ export const AnalyticsPage: React.FC = () => {
                       <Table>
                         <TableHeader className="bg-wood-50/50">
                           <TableRow>
-                            <TableHead>Rank</TableHead>
-                            <TableHead>Furniture Model</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead className="text-center">Units Sold</TableHead>
-                            <TableHead className="text-right">Total Revenue</TableHead>
-                            <TableHead className="text-right">Allocated COGS</TableHead>
-                            <TableHead className="text-right">Gross Profit</TableHead>
-                            <TableHead className="text-right">Gross Margin</TableHead>
+                            <TableHead>{t('analytics.rankCol', 'Rank')}</TableHead>
+                            <TableHead>{t('analytics.furnitureModelCol', 'Furniture Model')}</TableHead>
+                            <TableHead>{t('catalog.category', 'Category')}</TableHead>
+                            <TableHead className="text-center">{t('analytics.unitsSoldCol', 'Units Sold')}</TableHead>
+                            <TableHead className="text-right">{t('analytics.totalRevenueCol', 'Total Revenue')}</TableHead>
+                            <TableHead className="text-right">{t('analytics.allocatedCOGSCol', 'Allocated COGS')}</TableHead>
+                            <TableHead className="text-right">{t('analytics.grossProfitCol', 'Gross Profit')}</TableHead>
+                            <TableHead className="text-right">{t('analytics.grossMarginCol', 'Gross Margin')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -535,7 +535,7 @@ export const AnalyticsPage: React.FC = () => {
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="text-[10px]">
-                                  {p.category}
+                                  {translateCategory(p.category)}
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-center font-mono text-xs">
@@ -590,25 +590,25 @@ export const AnalyticsPage: React.FC = () => {
                           {b.branchName}
                         </span>
                         <Badge variant="wood" className="text-[10px]">
-                          {b.ordersCount} Orders
+                          {b.ordersCount} {t('nav.orders', 'Orders')}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 pt-2 border-t border-dashed border-stone-200 text-xs">
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Sales</span>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.salesRevenueCol', 'Sales')}</span>
                           <span className="font-mono font-bold text-stone-900 text-[11px]">
                             {formatCurrency(b.totalRevenue)}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Expenses</span>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.expensesCol', 'Expenses')}</span>
                           <span className="font-mono text-rose-800 text-[11px]">
                             {formatCurrency(b.expenses)}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">Net Profit</span>
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground block">{t('analytics.netContributionCol', 'Net Profit')}</span>
                           <span
                             className={`font-mono font-bold text-[11px] ${
                               b.netProfitContribution >= 0 ? 'text-emerald-900' : 'text-rose-900'
@@ -627,11 +627,11 @@ export const AnalyticsPage: React.FC = () => {
                   <Table>
                     <TableHeader className="bg-wood-50/50">
                       <TableRow>
-                        <TableHead>Branch</TableHead>
-                        <TableHead className="text-center">Orders</TableHead>
-                        <TableHead className="text-right">Sales Revenue</TableHead>
-                        <TableHead className="text-right">Expenses</TableHead>
-                        <TableHead className="text-right">Net Contribution</TableHead>
+                        <TableHead>{t('analytics.branchCol', 'Branch')}</TableHead>
+                        <TableHead className="text-center">{t('analytics.ordersCol', 'Orders')}</TableHead>
+                        <TableHead className="text-right">{t('analytics.salesRevenueCol', 'Sales Revenue')}</TableHead>
+                        <TableHead className="text-right">{t('analytics.expensesCol', 'Expenses')}</TableHead>
+                        <TableHead className="text-right">{t('analytics.netContributionCol', 'Net Contribution')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -693,13 +693,13 @@ export const AnalyticsPage: React.FC = () => {
                               </div>
                             </div>
                             <Badge variant="wood" className="text-[10px]">
-                              {c.ordersCount} Orders
+                              {c.ordersCount} {t('nav.orders', 'Orders')}
                             </Badge>
                           </div>
 
                           <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between text-xs">
                             <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                              Lifetime Value
+                              {t('analytics.lifetimeValueCol', 'Lifetime Value')}
                             </span>
                             <span className="font-mono font-bold text-emerald-800 text-sm">
                               {formatCurrency(c.totalSpent)}
@@ -714,10 +714,10 @@ export const AnalyticsPage: React.FC = () => {
                       <Table>
                         <TableHeader className="bg-wood-50/50">
                           <TableRow>
-                            <TableHead>Client Name</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead className="text-center">Orders Placed</TableHead>
-                            <TableHead className="text-right">Lifetime Value (ETB)</TableHead>
+                            <TableHead>{t('analytics.clientNameCol', 'Client Name')}</TableHead>
+                            <TableHead>{t('common.phone', 'Phone')}</TableHead>
+                            <TableHead className="text-center">{t('analytics.ordersPlacedCol', 'Orders Placed')}</TableHead>
+                            <TableHead className="text-right">{t('analytics.lifetimeValueCol', 'Lifetime Value (ETB)')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>

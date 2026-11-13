@@ -251,15 +251,15 @@ export const CatalogPage: React.FC = () => {
 
                 <div className="pt-2 border-t border-dashed border-stone-200 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">Base Price</span>
+                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('catalog.basePrice', 'Base Price')}</span>
                     <span className="font-semibold text-charcoal-900 font-mono text-sm">
                       {formatCurrency(prod.basePrice)}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">Lead Time</span>
+                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">{t('catalog.leadTimeDays', 'Lead Time')}</span>
                     <span className="font-mono text-stone-700">
-                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} days` : '—'}
+                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} ${t('orders.days', 'days')}` : '—'}
                     </span>
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export const CatalogPage: React.FC = () => {
                     className="h-7 text-xs space-x-1 border-wood-300 flex-1"
                   >
                     <ImageIcon className="h-3 w-3 text-wood-700" />
-                    <span>{prod.images.length} Photos</span>
+                    <span>{prod.images.length} {t('catalog.galleryCol', 'Photos')}</span>
                   </Button>
                   <Button
                     size="sm"
@@ -281,14 +281,14 @@ export const CatalogPage: React.FC = () => {
                     className="h-7 text-xs space-x-1 border-wood-300"
                   >
                     <Edit2 className="h-3.5 w-3.5" />
-                    <span>Edit</span>
+                    <span>{t('catalog.editProduct', 'Edit')}</span>
                   </Button>
                 </div>
               </div>
             ))}
             {filteredProducts.length === 0 && (
               <p className="text-center py-6 text-muted-foreground">
-                No products found matching your search and category filter.
+                {t('common.noResultsFound', 'No products found matching your search and category filter.')}
               </p>
             )}
           </div>
@@ -298,14 +298,14 @@ export const CatalogPage: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Product Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="hidden md:table-cell">Dimensions</TableHead>
-                  <TableHead>Base Price</TableHead>
-                  <TableHead className="hidden sm:table-cell">Lead Days</TableHead>
-                  <TableHead>Gallery</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('catalog.sku', 'SKU')}</TableHead>
+                  <TableHead>{t('catalog.productNameCol', 'Product Name')}</TableHead>
+                  <TableHead>{t('catalog.category', 'Category')}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t('catalog.dimensions', 'Dimensions')}</TableHead>
+                  <TableHead>{t('catalog.basePrice', 'Base Price')}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t('catalog.leadDaysCol', 'Lead Days')}</TableHead>
+                  <TableHead>{t('catalog.galleryCol', 'Gallery')}</TableHead>
+                  <TableHead className="text-right">{t('catalog.actions', 'Actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -317,7 +317,7 @@ export const CatalogPage: React.FC = () => {
                     <TableCell className="font-medium text-charcoal-900">
                       <div>{prod.name}</div>
                       <div className="text-[11px] text-muted-foreground sm:hidden">
-                        {prod.category} • {prod.dimensions}
+                        {translateCategory(prod.category)} • {prod.dimensions}
                       </div>
                       <div className="flex flex-wrap items-center gap-1 mt-1">
                         {prod.branches && prod.branches.length > 0 ? (
@@ -333,14 +333,14 @@ export const CatalogPage: React.FC = () => {
                         ) : (
                           <span className="inline-flex items-center text-[10px] bg-stone-50 border border-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
                             <Building2 className="h-2.5 w-2.5 mr-0.5 text-stone-400" />
-                            All Showrooms
+                            {t('showroom.allShowrooms', 'All Showrooms')}
                           </span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="wood" className="text-[11px]">
-                        {prod.category}
+                        {translateCategory(prod.category)}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-xs text-charcoal-600">
@@ -350,7 +350,7 @@ export const CatalogPage: React.FC = () => {
                       {formatCurrency(prod.basePrice)}
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-xs text-charcoal-600">
-                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} days` : '—'}
+                      {prod.estimatedProductionDays ? `${prod.estimatedProductionDays} ${t('orders.days', 'days')}` : '—'}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -360,7 +360,7 @@ export const CatalogPage: React.FC = () => {
                         className="h-7 text-xs space-x-1 border-wood-300"
                       >
                         <ImageIcon className="h-3 w-3 text-wood-700" />
-                        <span>{prod.images.length} Photos</span>
+                        <span>{prod.images.length} {t('catalog.galleryCol', 'Photos')}</span>
                       </Button>
                     </TableCell>
                     <TableCell className="text-right">
@@ -378,7 +378,7 @@ export const CatalogPage: React.FC = () => {
                 {filteredProducts.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No products found matching your search and category filter.
+                      {t('common.noResultsFound', 'No products found matching your search and category filter.')}
                     </TableCell>
                   </TableRow>
                 )}
@@ -402,51 +402,51 @@ export const CatalogPage: React.FC = () => {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add New Furniture Model</DialogTitle>
+            <DialogTitle>{t('catalog.addModelTitle', 'Add New Furniture Model')}</DialogTitle>
             <DialogDescription>
-              Register a new product with dimensions and base pricing in Ethiopian Birr.
+              {t('catalog.addModelDesc', 'Register a new product with dimensions and base pricing in Ethiopian Birr.')}
             </DialogDescription>
           </DialogHeader>
 
           <FormProvider {...createForm}>
             <form onSubmit={createForm.handleSubmit((data) => createMutation.mutate(data))} className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-3">
-                <FormInput name="sku" label="Product SKU" placeholder="e.g. SKU-DIN-002" />
+                <FormInput name="sku" label={t('catalog.skuLabel', 'Product SKU')} placeholder={t('catalog.skuPlaceholder', 'e.g. SKU-DIN-002')} />
                 <div className="space-y-1.5 w-full">
                   <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                    Category
+                    {t('catalog.category', 'Category')}
                   </label>
                   <select
                     {...createForm.register('category')}
                     className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="Living Room">Living Room</option>
-                    <option value="Dining Room">Dining Room</option>
-                    <option value="Bedroom">Bedroom</option>
-                    <option value="Office">Office</option>
+                    <option value="Living Room">{translateCategory('Living Room')}</option>
+                    <option value="Dining Room">{translateCategory('Dining Room')}</option>
+                    <option value="Bedroom">{translateCategory('Bedroom')}</option>
+                    <option value="Office">{translateCategory('Office')}</option>
                   </select>
                 </div>
               </div>
 
-              <FormInput name="name" label="Product Name" placeholder="e.g. 6-Seater Walnut Dining Table" />
-              <FormInput name="dimensions" label="Dimensions (W x D x H)" placeholder="e.g. 180cm x 90cm x 75cm" />
+              <FormInput name="name" label={t('catalog.productNameCol', 'Product Name')} placeholder="e.g. 6-Seater Walnut Dining Table" />
+              <FormInput name="dimensions" label={t('catalog.dimensionsLabel', 'Dimensions (W x D x H)')} placeholder={t('catalog.dimensionsPlaceholder', 'e.g. 180cm x 90cm x 75cm')} />
 
               <div className="grid grid-cols-2 gap-3">
-                <FormInput name="basePrice" label="Base Selling Price (ETB)" type="number" step="0.01" />
-                <FormInput name="estimatedProductionDays" label="Est. Lead Days" type="number" />
+                <FormInput name="basePrice" label={t('catalog.basePrice', 'Base Selling Price (ETB)')} type="number" step="0.01" />
+                <FormInput name="estimatedProductionDays" label={t('catalog.estimatedDaysLabel', 'Est. Lead Days')} type="number" />
               </div>
 
-              <FormInput name="description" label="Detailed Specifications & Materials" placeholder="Wood type, foam density, upholstery fabric..." />
+              <FormInput name="description" label={t('catalog.specificationsLabel', 'Detailed Specifications & Materials')} placeholder={t('catalog.specificationsPlaceholder', 'Wood type, foam density, upholstery fabric...')} />
 
               {/* Showroom Branch Selection */}
               {branches.length > 0 && (
                 <div className="space-y-1.5 pt-2 border-t border-wood-100">
                   <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center gap-1.5">
                     <Building2 className="h-3.5 w-3.5 text-wood-700" />
-                    Assigned Showroom Branches (Optional)
+                    {t('catalog.displayBranchesLabel', 'Assigned Showroom Branches (Optional)')}
                   </label>
                   <p className="text-[11px] text-stone-500">
-                    Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.
+                    {t('catalog.displayBranchesHint', 'Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.')}
                   </p>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {branches.map((branch) => {
@@ -492,10 +492,10 @@ export const CatalogPage: React.FC = () => {
 
               <DialogFooter className="pt-2">
                 <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Saving...' : 'Create Product'}
+                  {createMutation.isPending ? t('catalog.savingProduct', 'Saving...') : t('catalog.saveProductBtn', 'Create Product')}
                 </Button>
               </DialogFooter>
             </form>
@@ -508,49 +508,49 @@ export const CatalogPage: React.FC = () => {
         {editingProduct && (
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Edit Product: {editingProduct.sku}</DialogTitle>
+              <DialogTitle>{t('catalog.editProductTitle', 'Edit Product')}: {editingProduct.sku}</DialogTitle>
               <DialogDescription>
-                Update specifications, base price guidelines, and lead times.
+                {t('catalog.addModelDesc', 'Update specifications, base price guidelines, and lead times.')}
               </DialogDescription>
             </DialogHeader>
 
             <FormProvider {...editForm}>
               <form onSubmit={editForm.handleSubmit((data) => editMutation.mutate(data))} className="space-y-4 py-2">
-                <FormInput name="name" label="Product Name" />
+                <FormInput name="name" label={t('catalog.productNameCol', 'Product Name')} />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5 w-full">
                     <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700">
-                      Category
+                      {t('catalog.category', 'Category')}
                     </label>
                     <select
                       {...editForm.register('category')}
                       className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="Living Room">Living Room</option>
-                      <option value="Dining Room">Dining Room</option>
-                      <option value="Bedroom">Bedroom</option>
-                      <option value="Office">Office</option>
+                      <option value="Living Room">{translateCategory('Living Room')}</option>
+                      <option value="Dining Room">{translateCategory('Dining Room')}</option>
+                      <option value="Bedroom">{translateCategory('Bedroom')}</option>
+                      <option value="Office">{translateCategory('Office')}</option>
                     </select>
                   </div>
-                  <FormInput name="dimensions" label="Dimensions" />
+                  <FormInput name="dimensions" label={t('catalog.dimensions', 'Dimensions')} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput name="basePrice" label="Base Price (ETB)" type="number" step="0.01" />
-                  <FormInput name="estimatedProductionDays" label="Lead Days" type="number" />
+                  <FormInput name="basePrice" label={t('catalog.basePrice', 'Base Price (ETB)')} type="number" step="0.01" />
+                  <FormInput name="estimatedProductionDays" label={t('catalog.leadDaysCol', 'Lead Days')} type="number" />
                 </div>
 
-                <FormInput name="description" label="Specifications & Details" />
+                <FormInput name="description" label={t('catalog.specificationsLabel', 'Specifications & Details')} />
 
                 {/* Showroom Branch Selection */}
                 {branches.length > 0 && (
                   <div className="space-y-1.5 pt-2 border-t border-wood-100">
                     <label className="text-xs font-semibold uppercase tracking-wider text-charcoal-700 flex items-center gap-1.5">
                       <Building2 className="h-3.5 w-3.5 text-wood-700" />
-                      Assigned Showroom Branches (Optional)
+                      {t('catalog.displayBranchesLabel', 'Assigned Showroom Branches (Optional)')}
                     </label>
                     <p className="text-[11px] text-stone-500">
-                      Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.
+                      {t('catalog.displayBranchesHint', 'Select which branches display this model in their showroom. Leave all unchecked to display across all showrooms.')}
                     </p>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {branches.map((branch) => {
@@ -596,10 +596,10 @@ export const CatalogPage: React.FC = () => {
 
                 <DialogFooter className="pt-2">
                   <Button type="button" variant="secondary" onClick={() => setEditingProduct(null)}>
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </Button>
                   <Button type="submit" disabled={editMutation.isPending}>
-                    {editMutation.isPending ? 'Saving...' : 'Save Changes'}
+                    {editMutation.isPending ? t('catalog.savingProduct', 'Saving...') : t('catalog.updateProductBtn', 'Save Changes')}
                   </Button>
                 </DialogFooter>
               </form>
@@ -613,16 +613,16 @@ export const CatalogPage: React.FC = () => {
         {imageManagingProduct && (
           <DialogContent className="max-w-xl">
             <DialogHeader>
-              <DialogTitle>Manage Photos: {imageManagingProduct.name}</DialogTitle>
+              <DialogTitle>{t('catalog.managePhotosTitle', 'Manage Photos')}: {imageManagingProduct.name}</DialogTitle>
               <DialogDescription>
-                Upload, replace, and designate primary cover photographs for showroom presentation.
+                {t('catalog.uploadPhotosDesc', 'Upload, replace, and designate primary cover photographs for showroom presentation.')}
               </DialogDescription>
             </DialogHeader>
 
             <ImageUploader product={imageManagingProduct} />
 
             <DialogFooter className="pt-3">
-              <Button onClick={() => setImageManagingProduct(null)}>Done</Button>
+              <Button onClick={() => setImageManagingProduct(null)}>{t('common.close', 'Done')}</Button>
             </DialogFooter>
           </DialogContent>
         )}
