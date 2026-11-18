@@ -2,6 +2,8 @@ import { ApiResponse, ApiErrorResponse } from '@furniture/shared';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1';
 
+export const AUTH_TOKEN_KEY = 'furniture_auth_token';
+
 export class ApiError extends Error {
   public statusCode: number;
   public code: string;
@@ -25,10 +27,18 @@ export async function apiClient<T>(
     headers.set('Content-Type', 'application/json');
   }
 
+  // Attach Bearer token from localStorage (crucial for iOS Safari ITP cross-site cookie blocking)
+  if (!headers.has('Authorization') && typeof window !== 'undefined') {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+  }
+
   const response = await fetch(url, {
     ...options,
     headers,
-    credentials: 'include', // sends cookies
+    credentials: 'include', // sends cookies when supported
   });
 
   const data = await response.json().catch(() => null);

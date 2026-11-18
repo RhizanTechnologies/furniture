@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserDto, UserRole } from '@furniture/shared';
-import { apiClient, ApiError } from '@/lib/api-client';
+import { apiClient, ApiError, AUTH_TOKEN_KEY } from '@/lib/api-client';
 
 export interface AuthContextType {
   user: (UserDto & { branch?: any }) | null;
@@ -169,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Only reset session if server returns explicit 401 Unauthorized
       if (err instanceof ApiError && err.statusCode === 401) {
         if (typeof window !== 'undefined') {
+          localStorage.removeItem(AUTH_TOKEN_KEY);
           setUser(null);
           saveCurrentUser(null);
         }
@@ -197,6 +198,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (err) {
         if (err instanceof ApiError && err.statusCode === 401) {
           if (isMounted) {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem(AUTH_TOKEN_KEY);
+            }
             setUser(null);
             saveCurrentUser(null);
           }
@@ -230,10 +234,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isOnline) {
       try {
-        await apiClient<{ user: UserDto; token: string }>('/auth/login', {
+        const authResult = await apiClient<{ user: UserDto; token: string }>('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ email: normEmail, password }),
         });
+        if (authResult?.token && typeof window !== 'undefined') {
+          localStorage.setItem(AUTH_TOKEN_KEY, authResult.token);
+        }
         const profile = await apiClient<UserDto & { branch?: any }>('/auth/me');
         setUser(profile);
         saveCurrentUser(profile);
@@ -267,12 +274,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         await apiClient('/auth/logout', { method: 'POST' });
       }
     } catch {
       // Ignore network errors during logout
     } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
       setUser(null);
       saveCurrentUser(null);
     }

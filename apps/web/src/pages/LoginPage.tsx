@@ -110,6 +110,9 @@ export const LoginPage: React.FC = () => {
                   type="email"
                   placeholder={t('auth.emailPlaceholder', 'e.g. owner@furniture.com')}
                   autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                 />
 
                 <FormInput
@@ -118,6 +121,9 @@ export const LoginPage: React.FC = () => {
                   type="password"
                   placeholder="••••••••"
                   autoComplete="current-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                 />
               </CardContent>
 
