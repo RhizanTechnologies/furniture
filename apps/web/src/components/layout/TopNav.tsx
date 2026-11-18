@@ -14,7 +14,6 @@ import {
   DollarSign,
   BarChart3,
   ChevronDown,
-  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,12 +96,6 @@ export const TopNav: React.FC = () => {
             label: t('nav.branches', 'Branches'),
             description: t('branches.subtitle', 'Workshops, showrooms & stock modes'),
             icon: Building2,
-          },
-          {
-            to: '/system-health',
-            label: t('nav.health', 'System Health'),
-            description: 'Connectivity, diagnostics & sync',
-            icon: ShieldCheck,
           },
         ]
       : [

@@ -16,7 +16,6 @@ import {
   LogOut,
   X,
   ChevronRight,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -94,14 +93,6 @@ export const BottomNav: React.FC = () => {
       description: t('analytics.subtitle', 'Revenue graphs, margins & branch performance'),
       icon: BarChart3,
       color: 'bg-sky-50 text-sky-800 border-sky-200',
-      show: isOwner,
-    },
-    {
-      to: '/system-health',
-      label: t('nav.health', 'System Health'),
-      description: t('nav.health', 'Offline database, cloud sync & healthcheck'),
-      icon: ShieldCheck,
-      color: 'bg-purple-50 text-purple-800 border-purple-200',
       show: isOwner,
     },
   ].filter((m) => m.show);

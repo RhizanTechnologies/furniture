@@ -13,7 +13,6 @@ import { OrderStagesPage } from '@/pages/OrderStagesPage';
 import { InventoryPage } from '@/pages/InventoryPage';
 import { FinancialPage } from '@/pages/FinancialPage';
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
-import { HealthPage } from '@/pages/HealthPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { UserRole } from '@furniture/shared';
 
@@ -99,10 +98,6 @@ export const router = createBrowserRouter([
       {
         path: 'showroom',
         element: <ShowroomPage />,
-      },
-      {
-        path: 'system-health',
-        element: <HealthPage />,
       },
       {
         path: '*',
